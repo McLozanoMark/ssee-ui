@@ -1,0 +1,5 @@
+@import url("../design-system/app.css");
+
+.sample-form { display: grid; gap: 1rem; }
+.sample-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+@media (max-width: 64rem) { .sample-form-grid { grid-template-columns: 1fr; } }
