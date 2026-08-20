@@ -1,5 +1,12 @@
-import { showToast, enableTooltips } from "../../design-system/interaction.js";
+import { showToast as renderToast, enableTooltips } from "../../design-system/interaction.js";
 export const refs = { listView: document.getElementById("listView"), formView: document.getElementById("formView"), samplesBody: document.getElementById("samplesBody"), emptyState: document.getElementById("emptyState"), pageSummary: document.getElementById("pageSummary"), sampleCount: document.getElementById("sampleCount"), toast: document.getElementById("toast"), filterQuery: document.getElementById("filterQuery"), filterStatus: document.getElementById("filterStatus"), filterPeriod: document.getElementById("filterPeriod"), filterIntervention: document.getElementById("filterIntervention"), sampleName: document.getElementById("sampleName"), sampleDescription: document.getElementById("sampleDescription"), sampleSource: document.getElementById("sampleSource"), sampleInstrument: document.getElementById("sampleInstrument"), sampleIntervention: document.getElementById("sampleIntervention"), samplePeriod: document.getElementById("samplePeriod"), nameError: document.getElementById("nameError"), descriptionError: document.getElementById("descriptionError"), formTitle: document.getElementById("formTitle"), formBreadcrumb: document.getElementById("formBreadcrumb") };
-export { showToast, enableTooltips };
+document.querySelectorAll(".location-card strong").forEach((node) => { node.textContent = "Ubicación"; });
+document.querySelectorAll(".account-copy strong").forEach((node) => { node.textContent = "Administrador"; });
+
+export function showToast(first, second, third) {
+  const hasElement = first && first.nodeType === 1;
+  return renderToast(hasElement ? first : refs.toast, hasElement ? second : first, hasElement ? third : second);
+}
+export { enableTooltips };
 export function showList() { refs.listView.classList.add("is-active"); refs.formView.classList.remove("is-active"); }
 export function showForm(sample = null) { refs.listView.classList.remove("is-active"); refs.formView.classList.add("is-active"); refs.formTitle.textContent = sample ? "Editar muestra" : "Registrar nueva muestra"; refs.formBreadcrumb.textContent = `Gio / Muestras / ${sample ? "Editar muestra" : "Nueva muestra"}`; refs.sampleName.value = sample?.name || ""; refs.sampleDescription.value = sample?.description || ""; refs.sampleSource.value = sample?.source || ""; refs.sampleIntervention.value = sample?.intervention || ""; refs.samplePeriod.value = sample?.period || ""; }

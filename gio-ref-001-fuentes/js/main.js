@@ -1,6 +1,7 @@
 import { state } from "./state.js";
 import { refs, showList, showForm, showToast } from "./ui.js";
 import { applyFilters, renderSources, handleAction, saveSource, confirmStatus } from "./sources.js";
+import { getMessage } from "../../design-system/messages.js";
 document.getElementById("filterForm").addEventListener("submit", (event) => { event.preventDefault(); applyFilters(); showToast(refs.toast, "Filtros aplicados.", "info"); });
 ["filterQuery", "filterOrigin", "filterStatus", "filterPeriod"].forEach((id) => document.getElementById(id).addEventListener("input", applyFilters));
 document.getElementById("filterToggle").addEventListener("click", () => document.getElementById("filterForm").classList.toggle("is-expanded"));
@@ -10,6 +11,6 @@ document.getElementById("cancelBtn").addEventListener("click", () => { state.edi
 document.getElementById("sourceForm").addEventListener("submit", saveSource);
 refs.sourcesBody.addEventListener("click", handleAction);
 document.getElementById("confirmBtn").addEventListener("click", confirmStatus);
-document.getElementById("exportBtn").addEventListener("click", () => showToast(refs.toast, "Exportación Excel generada para el prototipo.", "success"));
+document.getElementById("exportBtn").addEventListener("click", () => showToast(refs.toast, getMessage("M67"), "success"));
 document.addEventListener("click", (event) => { if (!event.target.closest(".action-menu")) document.querySelectorAll("[data-menu-panel]").forEach((panel) => { panel.hidden = true; }); });
 renderSources();

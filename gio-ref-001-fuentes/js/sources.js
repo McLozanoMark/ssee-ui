@@ -2,8 +2,10 @@ import { sources } from "./data.js";
 import { state } from "./state.js";
 import { refs, enableTooltips, showToast, showForm, showList } from "./ui.js";
 import { closeMenus, openConfirmModal, closeConfirmModal } from "../../design-system/interaction.js";
+import { getMessage } from "../../design-system/messages.js";
 
 function statusClass(status) { return status === "Activa" ? "active" : status === "Anulada" ? "expired" : status === "Inactiva" ? "inactive" : status === "En proceso" ? "warning" : ""; }
+refs.emptyState.textContent = getMessage("M9");
 function actionLabel(source) { return source.status === "Activa" ? "Inactivar" : source.status === "Inactiva" ? "Activar" : "Cambiar estado"; }
 export function renderSources() {
   refs.sourcesBody.innerHTML = state.filteredSources.map((source) => {
