@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>S.S.E.E. - Cierre de sesión</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="../design-system/app.css">
+  <link rel="stylesheet" href="../ref-007-auth-passport/styles.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="session-page">
+    <header class="session-header">
+      <a class="public-brand" href="../index.html" aria-label="Volver al índice de demos"><span class="logo-symbol">S</span><span><strong>S.S.E.E.</strong><small>Seguimiento y Evaluación Estratégica</small></span></a>
+      <div class="session-account"><span class="avatar">A</span><div><strong id="accountName">Ana Paredes</strong><span id="authType">Autoregistro</span></div><button class="btn btn-outline-ssee" id="logoutButton" type="button"><i class="fa-solid fa-arrow-right-from-bracket"></i> Cerrar sesión</button></div>
+    </header>
+    <main class="session-main">
+      <section class="session-card" id="activeView"><div class="title-row"><span class="title-icon"><i class="fa-solid fa-house-user"></i></span><div><nav class="breadcrumb">Inicio / Cuenta</nav><h1>Bienvenido a S.S.E.E.</h1><p>La sesión está activa y las funcionalidades autorizadas están disponibles.</p></div></div><div class="session-status"><i class="fa-solid fa-circle-check"></i><div><strong>Sesión activa</strong><span>Usuario autenticado mediante <b id="activeAuthType">Autoregistro</b>.</span></div></div></section>
+      <section class="session-card auth-redirect" id="authView" hidden><span class="auth-icon"><i class="fa-solid fa-right-to-bracket"></i></span><div><h1 id="authTitle">Sesión cerrada</h1><p id="authMessage">La sesión se cerró correctamente. Inicia sesión nuevamente para continuar.</p><a class="btn btn-ssee mt-3" id="authLink" href="../ref-009-auth-autoregistro/index.html"><i class="fa-solid fa-arrow-right"></i> Ir a autenticación</a></div></section>
+    </main>
+    <footer class="footer"><div class="minedu-mark"><span>PERÚ</span><strong>Ministerio de Educación</strong></div><div><p>2026. Todos los derechos reservados.</p><p>Ministerio de Educación - S.S.E.E. - Versión 0.1</p></div></footer>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="confirm-backdrop" id="confirmDialog" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden><div class="confirm-modal"><span class="confirm-icon"><i class="fa-solid fa-arrow-right-from-bracket"></i></span><div><h2 id="confirmTitle">¿Deseas cerrar sesión?</h2><p>Se finalizará la sesión activa y tendrás que volver a autenticarte para ingresar.</p></div><div class="confirm-actions"><button class="btn btn-outline-ssee" id="cancelLogout" type="button">Cancelar</button><button class="btn btn-ssee" id="confirmLogout" type="button">Cerrar sesión</button></div></div></div>
+  <script src="dist/logout.js"></script>
+</body>
+</html>

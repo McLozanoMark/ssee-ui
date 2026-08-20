@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>S.S.E.E. - Bienvenida y módulos</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="../design-system/app.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Navegación principal">
+      <div class="side-brand">
+        <div class="logo-symbol" aria-hidden="true">S</div>
+        <div><strong>S.S.E.E.</strong><span>Seguimiento y Evaluación Estratégica</span></div>
+      </div>
+      <nav class="side-nav" aria-label="Menú lateral">
+        <a href="#welcome" class="nav-item is-active"><i class="fa-solid fa-house me-2" aria-hidden="true"></i>Inicio</a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-button top-menu" type="button" aria-label="Abrir menú"><span></span><span></span><span></span></button>
+        <div class="top-divider" aria-hidden="true"></div>
+        <div class="top-info">
+          <div class="info-card">
+            <span class="info-icon" aria-hidden="true"><i class="fa-regular fa-clock"></i></span>
+            <div><strong>Último acceso</strong><span>5:00 PM - 25/12/2024</span></div>
+          </div>
+          <div class="info-card location-card">
+            <span class="info-icon" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></span>
+            <div><strong>Ubicación</strong><span>Unidad de Seguimiento y Evaluación</span></div>
+            <i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="top-divider" aria-hidden="true"></div>
+        <div class="account">
+          <button class="bell notification-trigger" id="notificationButton" type="button" aria-label="Ver notificaciones" aria-expanded="false">
+            <i class="fa-regular fa-bell" aria-hidden="true"></i><span class="notification-badge" id="notificationCount">0</span>
+          </button>
+          <div class="account-separator" aria-hidden="true"></div>
+          <div class="account-copy"><strong id="accountName">Ana Paredes</strong><span id="accountRole">Administrador USE</span></div>
+          <div class="avatar" id="accountInitial" aria-hidden="true">A</div>
+          <i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>
+        </div>
+      </header>
+
+      <section class="view is-active" id="welcome" aria-labelledby="welcomeTitle">
+        <div class="page-head welcome-head">
+          <div>
+            <nav class="breadcrumb" aria-label="Ruta"><a href="../index.html">Índice de requerimientos</a> / Inicio</nav>
+            <div class="title-row">
+              <div class="title-icon" aria-hidden="true"><i class="fa-solid fa-house"></i></div>
+              <div><h1 id="welcomeTitle">Bienvenido, Ana Paredes</h1><p id="welcomeSubtitle">Consulta los módulos y proyectos disponibles para tu acceso.</p></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="context-strip" id="processContext" hidden>
+          <span class="context-icon" aria-hidden="true"><i class="fa-solid fa-user-plus"></i></span>
+          <div><strong>Proceso asociado</strong><span id="processText">Autoregistro 2026</span></div>
+        </div>
+
+        <div class="welcome-grid">
+          <section class="surface-card modules-card" aria-labelledby="modulesTitle">
+            <div class="section-heading"><div><p class="eyebrow">Acceso según rol y permisos</p><h2 id="modulesTitle">Módulos disponibles</h2></div><span class="count-label" id="moduleCount">0 módulos</span></div>
+            <div class="module-grid" id="moduleGrid"></div>
+          </section>
+
+          <section class="surface-card project-card" aria-labelledby="projectsTitle">
+            <div class="section-heading"><div><p class="eyebrow">Asignaciones vigentes</p><h2 id="projectsTitle">Mis proyectos</h2></div><span class="count-label" id="projectCount">0 proyectos</span></div>
+            <div id="projectList" class="project-list"></div>
+          </section>
+        </div>
+
+        <section class="surface-card summary-card" aria-labelledby="summaryTitle">
+          <div class="section-heading"><div><p class="eyebrow">Información del acceso</p><h2 id="summaryTitle">Resumen de usuario</h2></div><span class="status-chip"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Acceso habilitado</span></div>
+          <div class="user-summary" id="userSummary"></div>
+        </section>
+      </section>
+
+      <footer class="footer"><div class="minedu-mark"><span>PERÚ</span><strong>Ministerio de Educación</strong></div><div><p>2026. Todos los derechos reservados.</p><p>Ministerio de Educación - S.S.E.E. - Versión 0.1</p></div></footer>
+    </main>
+  </div>
+
+  <aside class="notification-panel" id="notificationPanel" aria-labelledby="notificationTitle" hidden>
+    <div class="notification-panel-head"><div><p class="eyebrow">Centro de avisos</p><h2 id="notificationTitle">Notificaciones</h2></div><button class="panel-close" id="closeNotifications" type="button" aria-label="Cerrar notificaciones"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button></div>
+    <div id="notificationList"></div>
+  </aside>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <a class="demo-index-link" href="../index.html"><i class="fa-solid fa-list" aria-hidden="true"></i> Volver al índice</a>
+  <script src="dist/welcome.js"></script>
+</body>
+</html>
