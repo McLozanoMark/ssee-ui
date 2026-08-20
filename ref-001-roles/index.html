@@ -89,16 +89,17 @@
             <i class="fa-solid fa-magnifying-glass icon"></i>
             <input class="form-control" id="filterName" type="search" placeholder="Buscar por nombre, descripción, permiso o estado">
           </label>
-          <button class="filter-toggle" type="button" id="filterToggle" aria-label="Abrir filtros">
+          <button class="filter-toggle" type="button" id="filterToggle" aria-label="Abrir filtros" title="Filtro personalizado">
             <span></span><span></span><span></span>
           </button>
           <div class="advanced-filters" id="advancedFilters">
-            <input class="form-control" id="filterDescription" type="search" placeholder="Descripción">
-            <select class="form-select" id="filterStatus" aria-label="Estado">
+            <label class="filter-field"><span>Descripción</span><input class="form-control" id="filterDescription" type="search" placeholder="Buscar por descripción"></label>
+            <label class="filter-field"><span>Estado</span><select class="form-select" id="filterStatus" aria-label="Estado">
               <option value="Todos">Todos</option>
               <option value="Activo">Activo</option>
               <option value="Inactivo">Inactivo</option>
-            </select>
+            </select></label>
+            <button class="btn btn-ssee button button-primary" type="submit"><i class="fa-solid fa-magnifying-glass icon"></i>Buscar</button>
             <button class="btn btn-outline-ssee button button-secondary" type="button" id="clearBtn">
               <i class="fa-solid fa-rotate-left icon"></i>
               Limpiar
@@ -111,6 +112,7 @@
             <table class="table align-middle mb-0 ssee-table">
               <thead>
                 <tr>
+                  <th>N.°</th>
                   <th>Nombre</th>
                   <th>Descripción</th>
                   <th>Permisos</th>
@@ -160,24 +162,25 @@
           <div class="form-step is-active" id="infoStep">
             <div class="alert" id="formAlert" hidden>
               <strong>No se puede continuar con el registro del rol</strong>
-              <span>Corrige los errores del formulario para continuar.</span>
+              <span>Complete los datos del rol para activar esta sección.</span>
             </div>
+            <p class="form-note">* Campos obligatorios</p>
 
             <label>
               <span>Nombre del rol *</span>
-              <input class="form-control" id="roleName" type="text" value="Editor de contenido" autocomplete="off">
+              <input class="form-control" id="roleName" type="text" placeholder="Ingresa el nombre del rol" autocomplete="off">
               <small class="field-error" id="nameError"></small>
             </label>
 
             <label>
               <span>Descripción *</span>
-              <textarea class="form-control" id="roleDescription" rows="4">Puede crear, editar y publicar contenido.</textarea>
+              <textarea class="form-control" id="roleDescription" rows="4" placeholder="Ingresa la descripción del rol"></textarea>
               <small class="field-error" id="descriptionError"></small>
             </label>
 
             <div class="form-actions">
               <button class="btn btn-outline-ssee button button-secondary" type="button" id="cancelInfoBtn">Cancelar</button>
-              <button class="btn btn-ssee button button-primary" type="button" id="continueBtn">Guardar y continuar</button>
+              <button class="btn btn-ssee button button-primary" type="button" id="continueBtn">Continuar</button>
             </div>
           </div>
 
@@ -216,8 +219,8 @@
             </p>
 
             <div class="form-actions">
-              <button class="btn btn-outline-ssee button button-secondary" type="button" id="backBtn">Volver</button>
-              <button class="btn btn-ssee button button-primary" type="button" id="saveRoleBtn">Guardar rol</button>
+              <button class="btn btn-outline-ssee button button-secondary" type="button" id="backBtn">Atrás</button>
+              <button class="btn btn-ssee button button-primary" type="button" id="saveRoleBtn">Guardar</button>
             </div>
           </div>
         </form>
@@ -234,6 +237,22 @@
         </div>
       </footer>
     </main>
+  </div>
+
+  <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title h5">Confirmar acción</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body"><p data-confirm-message></p></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-ssee button button-secondary" data-bs-dismiss="modal">No, cancelar</button>
+          <button type="button" class="btn btn-ssee button button-primary" id="confirmBtn">Sí, continuar</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>

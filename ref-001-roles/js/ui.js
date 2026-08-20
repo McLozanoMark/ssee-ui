@@ -25,7 +25,8 @@ export const refs = {
   summaryDescription: document.getElementById("summaryDescription"),
   formTitle: document.getElementById("formTitle"),
   formBreadcrumb: document.getElementById("formBreadcrumb"),
-  toast: document.getElementById("toast")
+  toast: document.getElementById("toast"),
+  confirmModal: document.getElementById("confirmModal")
 };
 
 export function showToast(message, type = "info") {

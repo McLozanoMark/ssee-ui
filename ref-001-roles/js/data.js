@@ -47,12 +47,14 @@ export const roles = [
 ];
 
 export const permissionRows = [
-  { level: 1, name: "Seguimiento", checks: [true, true, true, false, true, false] },
-  { level: 2, name: "Gestión de seguimiento", checks: [true, true, true, false, true, false] },
+  { level: 1, name: "Administración", checks: [false, false, false, false, false, false] },
+  { level: 2, name: "Gestión de usuarios", checks: [false, false, false, false, false, false] },
+  { level: 3, name: "Consultar usuarios", checks: [true, false, false, false, false, false] },
+  { level: 3, name: "Editar usuarios", checks: [true, false, true, false, false, false] },
+  { level: 3, name: "Asignar roles", checks: [true, true, true, false, false, false] },
+  { level: 3, name: "Sincronizar Passport", checks: [true, false, true, false, false, false] },
+  { level: 1, name: "Seguimiento", checks: [false, false, false, false, false, false] },
+  { level: 2, name: "Gestión de seguimiento", checks: [false, false, false, false, false, false] },
   { level: 3, name: "Crear seguimiento", checks: [true, true, false, false, false, false] },
-  { level: 3, name: "Editar seguimiento", checks: [true, false, true, false, false, false] },
-  { level: 1, name: "Evaluación", checks: [true, true, true, false, true, true] },
-  { level: 1, name: "Instrumentos", checks: [true, false, true, false, true, false] },
-  { level: 1, name: "Reportes", checks: [true, false, false, false, true, false] },
-  { level: 1, name: "Configuración", checks: [true, false, true, false, false, false] }
+  { level: 3, name: "Editar seguimiento", checks: [true, false, true, false, false, false] }
 ];

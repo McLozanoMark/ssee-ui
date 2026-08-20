@@ -1,4 +1,145 @@
 
+/* source: design-system/messages.js */
+const MESSAGE_CATALOG = Object.freeze({
+  M1: { text: "¿Está seguro que desea guardar esta información?", type: "Confirmación", scope: "General" },
+  M2: { text: "La información se ha guardado correctamente.", type: "Información", scope: "General" },
+  M3: { text: "La información se ha actualizado correctamente.", type: "Información", scope: "General" },
+  M4: { text: "¿Está seguro que desea eliminar la información seleccionada?", type: "Confirmación", scope: "General" },
+  M5: { text: "¿Está seguro que desea activar el registro seleccionado?", type: "Confirmación", scope: "General" },
+  M6: { text: "¿Está seguro que desea inactivar el registro seleccionado?", type: "Confirmación", scope: "General" },
+  M7: { text: "El registro se ha activado correctamente.", type: "Información", scope: "General" },
+  M8: { text: "El registro se ha inactivado correctamente.", type: "Información", scope: "General" },
+  M9: { text: "No se encontraron registros con los criterios de búsqueda seleccionados.", type: "Información", scope: "General" },
+  M10: { text: "Ya existe un registro con los datos ingresados.", type: "Alerta", scope: "General" },
+  M11: { text: "Debe completar los campos obligatorios.", type: "Alerta", scope: "General" },
+  M12: { text: "Verifique la información ingresada.", type: "Alerta", scope: "General" },
+  M13: { text: "Ocurrió un error inesperado al procesar la solicitud. Por favor, intente nuevamente.", type: "Alerta", scope: "General" },
+  M14: { text: "¿Está seguro que desea cancelar?", type: "Confirmación", scope: "General" },
+  M15: { text: "No es posible inactivar un rol que posee usuarios asociados.", type: "Alerta", scope: "General" },
+  M16: { text: "Debe seleccionar al menos un permiso para asignar al rol.", type: "Alerta", scope: "General" },
+  M17: { text: "No es posible realizar la operación porque el rol se encuentra inactivo.", type: "Alerta", scope: "General" },
+  M18: { text: "Los permisos del rol se han actualizado correctamente.", type: "Información", scope: "General" },
+  M19: { text: "Ya existe un usuario registrado con el documento ingresado.", type: "Alerta", scope: "General" },
+  M20: { text: "Ya existe un usuario registrado con el correo electrónico ingresado.", type: "Alerta", scope: "General" },
+  M21: { text: "No fue posible completar la sincronización con Passport.", type: "Alerta", scope: "General" },
+  M22: { text: "La sincronización con Passport se ha realizado correctamente.", type: "Información", scope: "General" },
+  M23: { text: "El periodo de autoregistro no se encuentra habilitado.", type: "Alerta", scope: "General" },
+  M24: { text: "El periodo habilitado para el autoregistro ha finalizado.", type: "Alerta", scope: "General" },
+  M25: { text: "El enlace de registro ha expirado.", type: "Alerta", scope: "General" },
+  M26: { text: "Se ha enviado un mensaje al correo electrónico registrado para completar el registro.", type: "Información", scope: "General" },
+  M27: { text: "Las credenciales ingresadas no son válidas.", type: "Alerta", scope: "General" },
+  M28: { text: "Su sesión ha expirado. Inicie sesión nuevamente.", type: "Alerta", scope: "General" },
+  M29: { text: "Su sesión ha sido cerrada debido al inicio de una nueva sesión.", type: "Información", scope: "General" },
+  M30: { text: "No fue posible iniciar sesión. Intente nuevamente.", type: "Alerta", scope: "General" },
+  M31: { text: "La nueva contraseña no cumple con las políticas de seguridad establecidas.", type: "Alerta", scope: "General" },
+  M32: { text: "La nueva contraseña y su confirmación no coinciden.", type: "Alerta", scope: "General" },
+  M33: { text: "La contraseña se ha actualizado correctamente.", type: "Información", scope: "General" },
+  M34: { text: "El cambio de contraseña no pudo completarse. Intente nuevamente.", type: "Alerta", scope: "General" },
+  M35: { text: "Si existe una cuenta asociada al correo ingresado, recibirá un enlace para recuperar su contraseña.", type: "Información", scope: "General" },
+  M36: { text: "El enlace de recuperación ha expirado. Solicite uno nuevo.", type: "Alerta", scope: "General" },
+  M37: { text: "La contraseña se ha restablecido correctamente.", type: "Información", scope: "General" },
+  M39: { text: "No tiene proyectos asignados para visualizar.", type: "Información", scope: "General" },
+  M40: { text: "No tiene instrumentos pendientes de atención.", type: "Información", scope: "General" },
+  M41: { text: "Tiene %s instrumentos asignados.", type: "Información", scope: "General" },
+  M42: { text: "Tiene %s instrumentos pendientes de atención.", type: "Información", scope: "General" },
+  M43: { text: "Tiene %s instrumentos enviados.", type: "Información", scope: "General" },
+  M44: { text: "Tiene %s notificaciones pendientes.", type: "Información", scope: "General" },
+  M45: { text: "Complete la información requerida para registrar la fuente de datos.", type: "Información", scope: "General" },
+  M46: { text: "No fue posible guardar la estructura.", type: "Información", scope: "General" },
+  M47: { text: "Seleccione el campo o conjunto de campos que identificarán las unidades muestrales.", type: "Información", scope: "General" },
+  M48: { text: "Debe seleccionar al menos un campo válido.", type: "Error", scope: "General" },
+  M49: { text: "Se detectaron registros con observaciones; revise el detalle.", type: "Advertencia", scope: "General" },
+  M50: { text: "Ingrese los datos de las unidades muestrales según la estructura configurada.", type: "Advertencia", scope: "General" },
+  M51: { text: "El archivo contiene observaciones que deberán revisarse.", type: "Advertencia", scope: "General" },
+  M52: { text: "El archivo fue cargado correctamente.", type: "Información", scope: "General" },
+  M53: { text: "El procesamiento finalizó. Procesados: %s. Aceptados: %s. Rechazados: %s. Duplicados: %s. Con errores: %s.", type: "Información", scope: "General" },
+  M54: { text: "Ya existe una fuente con el mismo nombre para el periodo e intervención seleccionados.", type: "Advertencia", scope: "General" },
+  M55: { text: "La fuente ya fue utilizada y su estructura no puede modificarse/eliminarse.", type: "Advertencia", scope: "General" },
+  M56: { text: "El procesamiento finalizó con observaciones; revise los registros rechazados o duplicados.", type: "Advertencia", scope: "General" },
+  M57: { text: "Se detectaron unidades muestrales con observaciones.", type: "Advertencia", scope: "General" },
+  M58: { text: "El archivo fue generado correctamente.", type: "Información", scope: "General" },
+  M59: { text: "La sincronización finalizó correctamente.", type: "Información", scope: "General" },
+  M60: { text: "No fue posible completar la sincronización.", type: "Alerta", scope: "General" },
+  M61: { text: "No fue posible consultar el detalle de la fuente.", type: "Alerta", scope: "General" },
+  M62: { text: "La fuente ya fue utilizada y no puede modificarse.", type: "Alerta", scope: "General" },
+  M63: { text: "No fue posible generar una nueva versión.", type: "Alerta", scope: "General" },
+  M64: { text: "La fuente de datos fue eliminada correctamente.", type: "Información", scope: "General" },
+  M65: { text: "No hay registros disponibles. Haz clic en \"Nuevo\" para empezar.", type: "Información", scope: "General" },
+  M66: { text: "Complete los datos del rol para activar esta sección.", type: "Alerta", scope: "Roles" },
+  M67: { text: "Registros exportados correctamente.", type: "Información", scope: "General" }
+});
+
+function getMessage(code, values = []) {
+  const entry = MESSAGE_CATALOG[code];
+  if (!entry) return "";
+  let index = 0;
+  return entry.text.replace(/%s/g, () => values[index++] ?? "");
+}
+
+
+/* source: design-system/interaction.js */
+
+
+const standardMessages = {
+  "Completa los campos obligatorios.": "M11",
+  "Fuente registrada correctamente.": "M2",
+  "Muestra registrada correctamente.": "M2",
+  "Asignación registrada correctamente.": "M2",
+  "Asignación reasignada correctamente.": "M3",
+  "Fuente activada correctamente.": "M7",
+  "Fuente inactivada correctamente.": "M8",
+  "Muestra clonada como borrador.": "M2",
+};
+
+function showToast(element, message, type = "info") {
+  message = standardMessages[message] ? getMessage(standardMessages[message]) : message;
+  element.classList.remove("is-visible");
+  void element.offsetWidth;
+  const icons = {
+    success: "fa-circle-check",
+    error: "fa-circle-exclamation",
+    warning: "fa-triangle-exclamation",
+    info: "fa-circle-info"
+  };
+  element.className = `toast toast-${type}`;
+  element.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}" aria-hidden="true"></i><span>${message}</span>`;
+  element.classList.add("is-visible");
+  window.clearTimeout(showToast.timeoutId);
+  showToast.timeoutId = window.setTimeout(() => element.classList.remove("is-visible"), 4500);
+}
+
+function enableTooltips() {
+  if (!window.bootstrap) return;
+  document.querySelectorAll("[data-bs-toggle='tooltip']").forEach((element) => {
+    bootstrap.Tooltip.getOrCreateInstance(element);
+  });
+}
+
+function closeMenus(root = document) {
+  root.querySelectorAll("[data-menu-panel]").forEach((panel) => {
+    panel.hidden = true;
+  });
+  root.querySelectorAll("[data-menu-button]").forEach((button) => {
+    button.setAttribute("aria-expanded", "false");
+  });
+}
+
+function openConfirmModal(id, message) {
+  const modal = document.getElementById(id);
+  if (!modal || !window.bootstrap) return null;
+  const messageNode = modal.querySelector("[data-confirm-message]");
+  if (messageNode) messageNode.textContent = message;
+  const instance = bootstrap.Modal.getOrCreateInstance(modal);
+  instance.show();
+  return instance;
+}
+
+function closeConfirmModal(id) {
+  const modal = document.getElementById(id);
+  if (modal && window.bootstrap) bootstrap.Modal.getOrCreateInstance(modal).hide();
+}
+
+
 /* source: ref-001-roles/js/data.js */
 const roles = [
   {
@@ -49,14 +190,16 @@ const roles = [
 ];
 
 const permissionRows = [
-  { level: 1, name: "Seguimiento", checks: [true, true, true, false, true, false] },
-  { level: 2, name: "Gestión de seguimiento", checks: [true, true, true, false, true, false] },
+  { level: 1, name: "Administración", checks: [false, false, false, false, false, false] },
+  { level: 2, name: "Gestión de usuarios", checks: [false, false, false, false, false, false] },
+  { level: 3, name: "Consultar usuarios", checks: [true, false, false, false, false, false] },
+  { level: 3, name: "Editar usuarios", checks: [true, false, true, false, false, false] },
+  { level: 3, name: "Asignar roles", checks: [true, true, true, false, false, false] },
+  { level: 3, name: "Sincronizar Passport", checks: [true, false, true, false, false, false] },
+  { level: 1, name: "Seguimiento", checks: [false, false, false, false, false, false] },
+  { level: 2, name: "Gestión de seguimiento", checks: [false, false, false, false, false, false] },
   { level: 3, name: "Crear seguimiento", checks: [true, true, false, false, false, false] },
-  { level: 3, name: "Editar seguimiento", checks: [true, false, true, false, false, false] },
-  { level: 1, name: "Evaluación", checks: [true, true, true, false, true, true] },
-  { level: 1, name: "Instrumentos", checks: [true, false, true, false, true, false] },
-  { level: 1, name: "Reportes", checks: [true, false, false, false, true, false] },
-  { level: 1, name: "Configuración", checks: [true, false, true, false, false, false] }
+  { level: 3, name: "Editar seguimiento", checks: [true, false, true, false, false, false] }
 ];
 
 
@@ -66,12 +209,14 @@ const permissionRows = [
 const state = {
   filteredRoles: [...roles],
   editingIndex: null,
-  openActionMenu: null
+  openActionMenu: null,
+  pendingStatus: null
 };
 
 function resetEditingState() {
   state.editingIndex = null;
   state.openActionMenu = null;
+  state.pendingStatus = null;
 }
 
 
@@ -103,7 +248,8 @@ const refs = {
   summaryDescription: document.getElementById("summaryDescription"),
   formTitle: document.getElementById("formTitle"),
   formBreadcrumb: document.getElementById("formBreadcrumb"),
-  toast: document.getElementById("toast")
+  toast: document.getElementById("toast"),
+  confirmModal: document.getElementById("confirmModal")
 };
 
 function showToast(message, type = "info") {
@@ -182,7 +328,7 @@ function clearErrors() {
 function renderPermissions() {
   refs.permissionBody.innerHTML = permissionRows.map((row, rowIndex) => {
     const checks = row.checks.map((checked, checkIndex) => `
-      <td><input type="checkbox" data-permission="${rowIndex}-${checkIndex}" ${checked ? "checked" : ""} aria-label="${row.name} permiso ${checkIndex + 1}"></td>
+      <td>${row.level < 3 ? '<span class="permission-scope" aria-label="No aplica">-</span>' : `<input type="checkbox" data-permission="${rowIndex}-${checkIndex}" ${checked ? "checked" : ""} aria-label="${row.name} permiso ${checkIndex + 1}">`}</td>
     `).join("");
     const icon = row.level < 3 ? "fa-folder-open" : "fa-file-lines";
     return `
@@ -213,6 +359,8 @@ function selectedPermissionLabels() {
 
 
 
+
+
 function renderRoles() {
   refs.rolesBody.innerHTML = state.filteredRoles.map((role) => {
     const originalIndex = roles.findIndex((item) => item.name === role.name);
@@ -227,6 +375,7 @@ function renderRoles() {
 
     return `
       <tr>
+        <td>${originalIndex + 1}</td>
         <td><strong>${role.name}</strong></td>
         <td><div class="description">${role.description}</div></td>
         <td><div class="tags">${permissionTags}</div></td>
@@ -235,15 +384,18 @@ function renderRoles() {
         <td>${role.updated}</td>
         <td>
           <div class="row-actions">
-            <div class="action-menu">
-              <button class="menu-btn" type="button" data-menu="${originalIndex}" aria-expanded="false" aria-label="Abrir acciones de ${role.name}">
+            <div class="dropdown action-menu">
+              <button class="menu-btn" type="button" data-menu="${originalIndex}" aria-expanded="false" aria-label="Acciones de ${role.name}" title="Acciones">
                 <i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
               </button>
               <div class="legacy-dropdown" data-dropdown="${originalIndex}" hidden>
-                <button type="button" data-edit="${originalIndex}">
-                  <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
-                  Editar
-                </button>
+                <button type="button" data-edit="${originalIndex}"><i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span></button>
+                <div class="dropdown-switch">
+                  <span><i class="fa-solid fa-power-off" aria-hidden="true"></i>${role.status === "Activo" ? "Inactivar" : "Activar"}</span>
+                  <label class="form-check form-switch switch ${hasUsers ? "is-disabled" : ""}" data-state="${originalIndex}" title="${hasUsers ? "No disponible: el rol tiene usuarios asociados." : ""}">
+                    <input class="form-check-input" type="checkbox" ${role.status === "Activo" ? "checked" : ""} ${hasUsers ? "disabled" : ""} aria-label="${role.status === "Activo" ? "Inactivar" : "Activar"} ${role.name}">
+                  </label>
+                </div>
               </div>
             </div>
             <label class="form-check form-switch switch ${hasUsers ? "is-disabled" : ""}" data-state="${originalIndex}" title="${hasUsers ? "No disponible: el rol tiene usuarios asociados." : ""}">
@@ -255,6 +407,7 @@ function renderRoles() {
     `;
   }).join("");
 
+  refs.emptyState.textContent = getMessage("M9");
   refs.emptyState.hidden = state.filteredRoles.length > 0;
   refs.pageSummary.textContent = state.filteredRoles.length
     ? `Mostrando 1 a ${state.filteredRoles.length} de ${state.filteredRoles.length} registros`
@@ -305,18 +458,28 @@ function handleRoleAction(event, onEdit) {
     const input = stateControl.querySelector("input");
     const role = roles[Number(stateControl.dataset.state)];
     if (input.disabled || (role.status === "Activo" && role.users > 0)) {
-      showToast("No disponible: el rol tiene usuarios asociados.", "warning");
+      showToast(getMessage("M15"), "warning");
       return;
     }
-    role.status = role.status === "Activo" ? "Inactivo" : "Activo";
-    role.updated = "18/08/2026 09:00";
-    applyFilters();
-    showToast(`Rol ${role.status === "Activo" ? "activado" : "inactivado"} correctamente.`, "success");
+    state.pendingStatus = { index: Number(stateControl.dataset.state), next: role.status === "Activo" ? "Inactivo" : "Activo" };
+    openConfirmModal("confirmModal", getMessage(state.pendingStatus.next === "Activo" ? "M5" : "M6"));
   }
+}
+
+function confirmStatus() {
+  if (!state.pendingStatus) return;
+  const { index, next } = state.pendingStatus;
+  roles[index].status = next;
+  roles[index].updated = "18/08/2026 09:00";
+  state.pendingStatus = null;
+  closeConfirmModal("confirmModal");
+  applyFilters();
+  showToast(getMessage(next === "Activo" ? "M7" : "M8"), "success");
 }
 
 
 /* source: ref-001-roles/js/main.js */
+
 
 
 
@@ -334,13 +497,14 @@ function validateInfo() {
     refs.nameError.textContent = "Ingresa el nombre del rol.";
     valid = false;
   } else if (duplicate) {
-    refs.nameError.textContent = "Ya existe un rol con ese nombre.";
+    refs.nameError.textContent = getMessage("M10");
     valid = false;
   }
   if (!description) {
     refs.descriptionError.textContent = "Ingresa la descripción del rol.";
     valid = false;
   }
+  refs.formAlert.querySelector("span").textContent = getMessage("M66");
   refs.formAlert.hidden = valid;
   return valid;
 }
@@ -353,7 +517,7 @@ function openRoleForm(role = null, index = null) {
 function saveRole() {
   if (!hasSelectedPermission()) {
     refs.permissionHint.classList.add("is-error");
-    showToast("Selecciona al menos un permiso para guardar el rol.", "warning");
+    showToast(getMessage("M16"), "warning");
     return;
   }
 
@@ -369,8 +533,8 @@ function saveRole() {
   };
   const wasEditing = state.editingIndex !== null;
   if (wasEditing) roles[state.editingIndex] = savedRole;
-  else roles.unshift(savedRole);
-  const message = wasEditing ? "Rol actualizado correctamente." : "Rol registrado correctamente.";
+  else roles.push(savedRole);
+  const message = getMessage(wasEditing ? "M3" : "M2");
   applyFilters();
   showList();
   resetEditingState();
@@ -394,13 +558,14 @@ document.getElementById("clearBtn").addEventListener("click", () => {
   showToast("Filtros limpiados.", "info");
 });
 document.getElementById("newRoleBtn").addEventListener("click", () => openRoleForm());
-document.getElementById("exportBtn").addEventListener("click", () => showToast("Exportación Excel generada para el prototipo."));
+document.getElementById("exportBtn").addEventListener("click", () => showToast(getMessage("M67"), "success"));
 refs.rolesBody.addEventListener("click", (event) => handleRoleAction(event, openRoleForm));
 document.addEventListener("click", (event) => { if (!event.target.closest(".action-menu")) closeActionMenus(); });
 document.getElementById("continueBtn").addEventListener("click", () => { if (validateInfo()) setFormStep("permissions"); });
 document.getElementById("backBtn").addEventListener("click", () => setFormStep("info"));
 document.getElementById("cancelInfoBtn").addEventListener("click", () => { showList(); resetEditingState(); });
 document.getElementById("saveRoleBtn").addEventListener("click", saveRole);
+document.getElementById("confirmBtn").addEventListener("click", confirmStatus);
 
 renderPermissions();
 renderRoles();

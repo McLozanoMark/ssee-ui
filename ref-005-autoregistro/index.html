@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>S.S.E.E. - Autoregistro</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="../design-system/app.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="registration-page">
+    <header class="public-header">
+      <a class="public-brand" href="../index.html" aria-label="Volver al índice de demos">
+        <span class="logo-symbol">S</span>
+        <span><strong>S.S.E.E.</strong><small>Seguimiento y Evaluación Estratégica</small></span>
+      </a>
+      <div class="public-context"><i class="fa-solid fa-user-plus"></i><span>Autoregistro</span></div>
+    </header>
+
+    <main class="registration-main">
+      <div class="registration-heading">
+        <nav class="breadcrumb">Acceso público / Registro de usuario</nav>
+        <h1>Crear cuenta</h1>
+        <p>Regístrate para acceder a las funcionalidades autorizadas del proceso.</p>
+      </div>
+
+      <div class="period-banner is-enabled" id="periodBanner" role="status">
+        <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+        <div><strong id="periodTitle">Periodo de autoregistro habilitado</strong><span id="periodDescription">Puedes completar tu registro durante el periodo vigente.</span></div>
+      </div>
+
+      <form class="registration-card" id="registrationForm" novalidate>
+        <section class="registration-section">
+          <div class="section-heading"><span class="section-icon"><i class="fa-regular fa-id-card"></i></span><div><h2>Datos de identidad</h2><p>Valida tu documento para consultar tus nombres y apellidos.</p></div></div>
+          <div class="identity-query">
+            <label class="field-label" for="documentType">Tipo de documento <span>*</span><select class="form-select" id="documentType"><option value="DNI">DNI</option><option value="CE">CE</option></select></label>
+            <label class="field-label" for="documentNumber">Número de documento <span>*</span><input class="form-control" id="documentNumber" inputmode="numeric" autocomplete="off" placeholder="Ingresa tu número" required></label>
+            <button class="btn btn-outline-ssee button button-secondary" type="button" id="consultBtn"><i class="fa-solid fa-magnifying-glass"></i> Consultar</button>
+          </div>
+          <div class="identity-feedback" id="identityFeedback" hidden></div>
+          <div class="readonly-grid" id="identityFields">
+            <label class="field-label" for="givenNames">Nombres<input class="form-control" id="givenNames" readonly placeholder="Se completa al validar"></label>
+            <label class="field-label" for="paternalSurname">Apellido paterno<input class="form-control" id="paternalSurname" readonly placeholder="Se completa al validar"></label>
+            <label class="field-label" for="maternalSurname">Apellido materno<input class="form-control" id="maternalSurname" readonly placeholder="Se completa al validar"></label>
+          </div>
+        </section>
+
+        <section class="registration-section">
+          <div class="section-heading"><span class="section-icon"><i class="fa-solid fa-lock"></i></span><div><h2>Datos de acceso</h2><p>Define las credenciales que utilizarás para ingresar.</p></div></div>
+          <div class="access-grid">
+            <label class="field-label" for="email">Correo electrónico <span>*</span><input class="form-control" id="email" type="email" autocomplete="email" placeholder="usuario@ejemplo.gob.pe" required></label>
+            <label class="field-label" for="securityCode">Código de seguridad <span>*</span><input class="form-control" id="securityCode" autocomplete="off" placeholder="Ingresa el código" required></label>
+            <div class="security-code" aria-label="Código de seguridad de demostración"><span>8K4P2</span><i class="fa-solid fa-shield-halved"></i></div>
+            <label class="field-label password-field" for="password">Contraseña <span>*</span><span class="password-input"><input class="form-control" id="password" type="password" autocomplete="new-password" required><button class="password-toggle" type="button" data-password-target="password" aria-label="Mostrar contraseña"><i class="fa-regular fa-eye"></i></button></span></label>
+            <label class="field-label password-field" for="passwordConfirm">Verificar contraseña <span>*</span><span class="password-input"><input class="form-control" id="passwordConfirm" type="password" autocomplete="new-password" required><button class="password-toggle" type="button" data-password-target="passwordConfirm" aria-label="Mostrar contraseña"><i class="fa-regular fa-eye"></i></button></span></label>
+          </div>
+          <p class="security-note"><i class="fa-solid fa-circle-info"></i> La contraseña debe cumplir la política de seguridad establecida para el sistema.</p>
+        </section>
+
+        <div class="form-actions"><button class="btn btn-outline-ssee button button-secondary" type="button" id="clearBtn"><i class="fa-solid fa-rotate-left"></i> Limpiar</button><button class="btn btn-ssee button button-primary" type="submit" id="registerBtn"><i class="fa-solid fa-user-check"></i> Crear cuenta</button></div>
+      </form>
+
+      <section class="success-card" id="successCard" hidden>
+        <span class="success-icon"><i class="fa-solid fa-circle-check"></i></span>
+        <div><h2>Registro completado</h2><p>Tu cuenta fue creada con autenticación <strong>Autoregistro</strong> y se le asignó el rol predeterminado del proceso.</p><span class="success-meta"><i class="fa-solid fa-shield-check"></i> El acceso queda habilitado según las autorizaciones del proceso.</span></div>
+      </section>
+    </main>
+
+    <footer class="footer"><div class="minedu-mark"><span>PERÚ</span><strong>Ministerio de Educación</strong></div><div><p>2026. Todos los derechos reservados.</p><p>Ministerio de Educación - S.S.E.E. - Versión 0.1</p></div></footer>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="dist/autoregistro.js"></script>
+</body>
+</html>

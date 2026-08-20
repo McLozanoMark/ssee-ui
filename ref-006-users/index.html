@@ -105,6 +105,10 @@
               </button>
             </div>
           </div>
+          <div class="user-counters" aria-label="Indicadores de atención">
+            <div><span>Accesos próximos a vencer</span><strong id="expiringCount">0</strong></div>
+            <div><span>Sin proyecto</span><strong id="noProjectCount">0</strong></div>
+          </div>
           <form class="filter-panel" id="filterForm">
             <label class="global-search"
               ><i class="fa-solid fa-magnifying-glass icon"></i
@@ -118,6 +122,7 @@
               type="button"
               id="filterToggle"
               aria-label="Abrir filtros"
+              title="Filtro personalizado"
             >
               <span></span><span></span><span></span>
             </button>
@@ -125,6 +130,7 @@
               <select class="form-select" id="filterTray" aria-label="Bandeja">
                 <option>Todos</option>
                 <option>Pendientes de rol</option>
+                <option>Sin proyecto</option>
                 <option>Por vencer</option>
               </select>
               <input
@@ -144,8 +150,6 @@
               >
                 <option>Todos</option>
                 <option>Activo</option>
-                <option>Por vencer</option>
-                <option>Vencido</option>
                 <option>Inactivo</option></select
               ><select
                 class="form-select"
@@ -173,8 +177,10 @@
                     <th>Usuario</th>
                     <th>Nombres y apellidos</th>
                     <th>Correo</th>
-                    <th>Autenticación</th>
+                    <th>Tipo de autenticación</th>
                     <th>Roles</th>
+                    <th>Proyectos</th>
+                    <th>Vigencia</th>
                     <th>Estado</th>
                     <th>Último acceso</th>
                     <th>Acciones</th>
@@ -245,7 +251,7 @@
             <div><span class="modal-eyebrow">Gestión de acceso</span><h2 class="modal-title" id="rolesModalTitle">Asignar roles</h2></div>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
-          <div class="modal-body"><p class="modal-context" id="rolesModalContext"></p><div class="role-picker" id="rolePicker"></div><p class="modal-feedback" id="roleModalFeedback" hidden></p></div>
+          <div class="modal-body"><p class="modal-context" id="rolesModalContext"></p><div class="access-edit-note" id="accessEditNote" hidden></div><div class="site-picker" id="sitePicker"></div><div class="role-picker" id="rolePicker"></div><div class="project-picker" id="projectPicker"></div><label class="modal-label" id="validityField" for="validitySelect">Vigencia<select class="form-select" id="validitySelect"><option>Sin fecha de vencimiento</option><option>30 días</option><option>90 días</option><option>1 año</option></select></label><p class="modal-feedback" id="roleModalFeedback" hidden></p></div>
           <div class="modal-footer"><button type="button" class="btn btn-outline-ssee button button-secondary" data-bs-dismiss="modal">Cancelar</button><button type="button" class="btn btn-ssee button button-primary" id="saveRolesBtn">Reasignar</button></div>
         </div>
       </div>

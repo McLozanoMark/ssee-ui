@@ -55,8 +55,9 @@ refs.usersBody.addEventListener("click", (event) => {
   if (action) {
     if (action.dataset.userAction === "detail") openSelected(Number(action.dataset.user));
     if (action.dataset.userAction === "roles") openRoles(Number(action.dataset.user));
+    if (action.dataset.userAction === "edit") openRoles(Number(action.dataset.user), "edit");
     if (action.dataset.userAction === "toggle-status") toggleStatus(Number(action.dataset.user));
-    if (["edit", "renew"].includes(action.dataset.userAction)) showToast("Esta acción está pendiente de definición.", "info");
+    if (action.dataset.userAction === "renew") showToast("Renovar vigencia queda pendiente de confirmación del flujo.", "info");
     return;
   }
   const button = event.target.closest("[data-user]");

@@ -1,6 +1,8 @@
 import { roles } from "./data.js";
 import { state } from "./state.js";
 import { refs, closeActionMenus, enableTooltips, showToast } from "./ui.js";
+import { getMessage } from "../../design-system/messages.js";
+import { openConfirmModal, closeConfirmModal } from "../../design-system/interaction.js";
 
 export function renderRoles() {
   refs.rolesBody.innerHTML = state.filteredRoles.map((role) => {
@@ -16,6 +18,7 @@ export function renderRoles() {
 
     return `
       <tr>
+        <td>${originalIndex + 1}</td>
         <td><strong>${role.name}</strong></td>
         <td><div class="description">${role.description}</div></td>
         <td><div class="tags">${permissionTags}</div></td>
@@ -24,15 +27,18 @@ export function renderRoles() {
         <td>${role.updated}</td>
         <td>
           <div class="row-actions">
-            <div class="action-menu">
-              <button class="menu-btn" type="button" data-menu="${originalIndex}" aria-expanded="false" aria-label="Abrir acciones de ${role.name}">
+            <div class="dropdown action-menu">
+              <button class="menu-btn" type="button" data-menu="${originalIndex}" aria-expanded="false" aria-label="Acciones de ${role.name}" title="Acciones">
                 <i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
               </button>
               <div class="legacy-dropdown" data-dropdown="${originalIndex}" hidden>
-                <button type="button" data-edit="${originalIndex}">
-                  <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
-                  Editar
-                </button>
+                <button type="button" data-edit="${originalIndex}"><i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span></button>
+                <div class="dropdown-switch">
+                  <span><i class="fa-solid fa-power-off" aria-hidden="true"></i>${role.status === "Activo" ? "Inactivar" : "Activar"}</span>
+                  <label class="form-check form-switch switch ${hasUsers ? "is-disabled" : ""}" data-state="${originalIndex}" title="${hasUsers ? "No disponible: el rol tiene usuarios asociados." : ""}">
+                    <input class="form-check-input" type="checkbox" ${role.status === "Activo" ? "checked" : ""} ${hasUsers ? "disabled" : ""} aria-label="${role.status === "Activo" ? "Inactivar" : "Activar"} ${role.name}">
+                  </label>
+                </div>
               </div>
             </div>
             <label class="form-check form-switch switch ${hasUsers ? "is-disabled" : ""}" data-state="${originalIndex}" title="${hasUsers ? "No disponible: el rol tiene usuarios asociados." : ""}">
@@ -44,6 +50,7 @@ export function renderRoles() {
     `;
   }).join("");
 
+  refs.emptyState.textContent = getMessage("M9");
   refs.emptyState.hidden = state.filteredRoles.length > 0;
   refs.pageSummary.textContent = state.filteredRoles.length
     ? `Mostrando 1 a ${state.filteredRoles.length} de ${state.filteredRoles.length} registros`
@@ -94,12 +101,21 @@ export function handleRoleAction(event, onEdit) {
     const input = stateControl.querySelector("input");
     const role = roles[Number(stateControl.dataset.state)];
     if (input.disabled || (role.status === "Activo" && role.users > 0)) {
-      showToast("No disponible: el rol tiene usuarios asociados.", "warning");
+      showToast(getMessage("M15"), "warning");
       return;
     }
-    role.status = role.status === "Activo" ? "Inactivo" : "Activo";
-    role.updated = "18/08/2026 09:00";
-    applyFilters();
-    showToast(`Rol ${role.status === "Activo" ? "activado" : "inactivado"} correctamente.`, "success");
+    state.pendingStatus = { index: Number(stateControl.dataset.state), next: role.status === "Activo" ? "Inactivo" : "Activo" };
+    openConfirmModal("confirmModal", getMessage(state.pendingStatus.next === "Activo" ? "M5" : "M6"));
   }
+}
+
+export function confirmStatus() {
+  if (!state.pendingStatus) return;
+  const { index, next } = state.pendingStatus;
+  roles[index].status = next;
+  roles[index].updated = "18/08/2026 09:00";
+  state.pendingStatus = null;
+  closeConfirmModal("confirmModal");
+  applyFilters();
+  showToast(getMessage(next === "Activo" ? "M7" : "M8"), "success");
 }

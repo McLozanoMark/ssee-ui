@@ -1,4 +1,4 @@
-const demoIndexLink=document.createElement("a");demoIndexLink.className="demo-index-link";demoIndexLink.href="../index.html";demoIndexLink.textContent="← Volver al índice";document.body.append(demoIndexLink);
+
 /* source: design-system/messages.js */
 const MESSAGE_CATALOG = Object.freeze({
   M1: { text: "¿Está seguro que desea guardar esta información?", type: "Confirmación", scope: "General" },
@@ -77,85 +77,129 @@ function getMessage(code, values = []) {
 }
 
 
-/* source: ref-004-admision/js/main.js */
+/* source: design-system/auth-validation.js */
+function hasRequiredValues(values) {
+  return values.every((value) => String(value ?? "").trim().length > 0);
+}
+
+function validatePassportAccess({ documentNumber, password, user }) {
+  return Boolean(user)
+    && user.password === password
+    && user.documentNumber === documentNumber
+    && user.active
+    && user.synchronized
+    && user.projects > 0
+    && user.roles > 0;
+}
+
+function validateDocumentAccess({ documentNumber, birthDate, issueDate, user }) {
+  return Boolean(user)
+    && user.number === documentNumber
+    && user.birthDate === birthDate
+    && user.issueDate === issueDate
+    && user.active
+    && user.valid
+    && user.projects > 0
+    && user.roles > 0;
+}
+
+function validateAutoregisterAccess({ email, password, account, periodState }) {
+  return periodState === "open"
+    && Boolean(account)
+    && account.email === email
+    && account.password === password
+    && account.active;
+}
 
 
-const roles = ["Administrador USE", "Supervisor de Seguimiento", "Evaluador", "Registrador"];
+/* source: design-system/auth-audit.js */
+const AUDIT_STORAGE_KEY = "ssee-auth-audit";
+
+function recordAuditEvent({ user, authType, operation = "Inicio de sesión", closureType = "", result, reason = "" }) {
+  const entry = {
+    timestamp: new Date().toISOString(),
+    user,
+    authenticationType: authType,
+    operation,
+    closureType,
+    result,
+    reason
+  };
+  try {
+    const current = JSON.parse(sessionStorage.getItem(AUDIT_STORAGE_KEY) || "[]");
+    sessionStorage.setItem(AUDIT_STORAGE_KEY, JSON.stringify([entry, ...current].slice(0, 50)));
+  } catch {
+    // The demo remains usable when browser storage is unavailable.
+  }
+  return entry;
+}
+
+function recordAuthAttempt(args) {
+  return recordAuditEvent(args);
+}
+
+
+/* source: ref-007-auth-passport/js/main.js */
+
+
+
+
 const refs = {
-  form: document.getElementById("identityForm"),
+  form: document.getElementById("loginForm"),
   number: document.getElementById("documentNumber"),
-  result: document.getElementById("identityResult"),
-  admit: document.getElementById("admitBtn"),
-  roles: document.getElementById("roleOptions"),
-  projects: document.getElementById("projectOptions"),
-  toast: document.getElementById("toast"),
+  password: document.getElementById("password"),
+  feedback: document.getElementById("authFeedback"),
+  success: document.getElementById("authSuccess"),
+  toast: document.getElementById("toast")
 };
-let consulted = false;
 
-function toast(message, type = "info") {
+const passportUsers = {
+  "12345678": { documentNumber: "12345678", password: "ClaveSegura1", synchronized: true, active: true, projects: 1, roles: 1 },
+  "87654321": { documentNumber: "87654321", password: "ClaveSegura1", synchronized: true, active: true, projects: 0, roles: 0 },
+  "99999999": { documentNumber: "99999999", password: "ClaveSegura1", synchronized: true, active: false, projects: 1, roles: 1 }
+};
+
+function showToast(message, type = "info") {
   refs.toast.className = `toast toast-${type}`;
-  refs.toast.innerHTML = `<i class="fa-solid ${type === "success" ? "fa-circle-check" : type === "warning" ? "fa-triangle-exclamation" : "fa-circle-info"}"></i><span>${message}</span>`;
+  const icon = type === "success" ? "fa-circle-check" : type === "warning" ? "fa-triangle-exclamation" : type === "error" ? "fa-circle-xmark" : "fa-circle-info";
+  refs.toast.innerHTML = `<i class="fa-solid ${icon}"></i><span>${message}</span>`;
   refs.toast.classList.add("is-visible");
-  clearTimeout(toast.timer);
-  toast.timer = setTimeout(() => refs.toast.classList.remove("is-visible"), 4500);
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(() => refs.toast.classList.remove("is-visible"), 4500);
 }
 
-function renderRoles() {
-  refs.roles.innerHTML = roles.map((role) => `<label class="role-check"><input class="form-check-input" type="checkbox" value="${role}"><span>${role}</span></label>`).join("");
-}
-
-function updateAdmit() {
-  refs.admit.disabled = !consulted
-    || !document.querySelector("#roleOptions input:checked")
-    || !document.querySelector("#projectOptions input:checked");
-}
-
-function resetForm() {
-  refs.form.reset();
-  document.querySelectorAll("#projectOptions input, #roleOptions input").forEach((input) => {
-    input.checked = false;
-  });
-  document.getElementById("email").value = "";
-  document.getElementById("site").value = "";
-  document.getElementById("validity").value = "";
-  refs.result.hidden = true;
-  consulted = false;
-  updateAdmit();
-}
-
-function confirmAdmission() {
-  const modal = document.createElement("div");
-  modal.className = "modal fade";
-  modal.innerHTML = `<div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content admission-modal"><div class="modal-header"><div><span class="modal-eyebrow">Confirmar admisión</span><h2 class="modal-title">Confirmar acción</h2></div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div><div class="modal-body"><p>${getMessage("M1")}</p><p>Se creará el acceso con el proyecto y los roles seleccionados.</p></div><div class="modal-footer"><button type="button" class="btn btn-outline-ssee button button-secondary" data-bs-dismiss="modal">No, cancelar</button><button type="button" class="btn btn-ssee button button-primary" data-confirm="admission">Sí, continuar</button></div></div></div>`;
-  document.body.append(modal);
-  const instance = new bootstrap.Modal(modal);
-  modal.addEventListener("click", (event) => {
-    if (event.target.closest("[data-confirm='admission']")) {
-      instance.hide();
-      toast(getMessage("M2"), "success");
-    }
-  });
-  modal.addEventListener("hidden.bs.modal", () => modal.remove());
-  instance.show();
+function showError(message) {
+  refs.feedback.hidden = false;
+  refs.feedback.textContent = message;
 }
 
 refs.form.addEventListener("submit", (event) => {
   event.preventDefault();
-  if (refs.number.value.trim().length < 8) {
-    toast(getMessage("M12"), "warning");
+  refs.feedback.hidden = true;
+  refs.success.hidden = true;
+  if (!hasRequiredValues([refs.number.value, refs.password.value])) {
+    recordAuthAttempt({ user: refs.number.value.trim() || "No identificado", authType: "Passport", result: "Fallida", reason: "Datos incompletos" });
+    showError(getMessage("M11"));
+    showToast(getMessage("M11"), "warning");
     return;
   }
-  consulted = true;
-  document.getElementById("identityName").textContent = "Ana María Paredes García";
-  document.getElementById("identityDocument").textContent = `${document.getElementById("documentType").value} ${refs.number.value.trim()}`;
-  document.getElementById("identityBirth").textContent = "15/04/1988";
-  refs.result.hidden = false;
-  updateAdmit();
-  toast("Información consultada correctamente.", "success");
+  const user = passportUsers[refs.number.value.trim()];
+  if (!validatePassportAccess({ documentNumber: refs.number.value.trim(), password: refs.password.value, user })) {
+    recordAuthAttempt({ user: refs.number.value.trim(), authType: "Passport", result: "Fallida", reason: "Credenciales inválidas o acceso no autorizado" });
+    showError(getMessage("M27"));
+    showToast(getMessage("M27"), "warning");
+    return;
+  }
+  refs.form.hidden = true;
+  refs.success.hidden = false;
+  recordAuthAttempt({ user: refs.number.value.trim(), authType: "Passport", result: "Exitosa" });
+  showToast("Autenticación validada correctamente.", "success");
 });
 
-document.addEventListener("input", updateAdmit);
-refs.admit.addEventListener("click", confirmAdmission);
-document.getElementById("clearBtn").addEventListener("click", resetForm);
-document.getElementById("cancelBtn").addEventListener("click", resetForm);
-renderRoles();
+document.querySelector(".password-toggle").addEventListener("click", (event) => {
+  const button = event.currentTarget;
+  const visible = refs.password.type === "text";
+  refs.password.type = visible ? "password" : "text";
+  button.querySelector("i").className = `fa-regular ${visible ? "fa-eye" : "fa-eye-slash"}`;
+  button.setAttribute("aria-label", visible ? "Mostrar contraseña" : "Ocultar contraseña");
+});

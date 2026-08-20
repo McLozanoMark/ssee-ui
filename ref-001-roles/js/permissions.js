@@ -4,7 +4,7 @@ import { refs } from "./ui.js";
 export function renderPermissions() {
   refs.permissionBody.innerHTML = permissionRows.map((row, rowIndex) => {
     const checks = row.checks.map((checked, checkIndex) => `
-      <td><input type="checkbox" data-permission="${rowIndex}-${checkIndex}" ${checked ? "checked" : ""} aria-label="${row.name} permiso ${checkIndex + 1}"></td>
+      <td>${row.level < 3 ? '<span class="permission-scope" aria-label="No aplica">-</span>' : `<input type="checkbox" data-permission="${rowIndex}-${checkIndex}" ${checked ? "checked" : ""} aria-label="${row.name} permiso ${checkIndex + 1}">`}</td>
     `).join("");
     const icon = row.level < 3 ? "fa-folder-open" : "fa-file-lines";
     return `

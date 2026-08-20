@@ -2,7 +2,8 @@ import { roles } from "./data.js";
 import { state, resetEditingState } from "./state.js";
 import { refs, clearErrors, closeActionMenus, setFormStep, showForm, showList, showToast } from "./ui.js";
 import { renderPermissions, hasSelectedPermission, selectedPermissionLabels } from "./permissions.js";
-import { applyFilters, handleRoleAction, renderRoles } from "./roles.js";
+import { applyFilters, handleRoleAction, renderRoles, confirmStatus } from "./roles.js";
+import { getMessage } from "../../design-system/messages.js";
 
 function validateInfo() {
   clearErrors();
@@ -15,13 +16,14 @@ function validateInfo() {
     refs.nameError.textContent = "Ingresa el nombre del rol.";
     valid = false;
   } else if (duplicate) {
-    refs.nameError.textContent = "Ya existe un rol con ese nombre.";
+    refs.nameError.textContent = getMessage("M10");
     valid = false;
   }
   if (!description) {
     refs.descriptionError.textContent = "Ingresa la descripción del rol.";
     valid = false;
   }
+  refs.formAlert.querySelector("span").textContent = getMessage("M66");
   refs.formAlert.hidden = valid;
   return valid;
 }
@@ -34,7 +36,7 @@ function openRoleForm(role = null, index = null) {
 function saveRole() {
   if (!hasSelectedPermission()) {
     refs.permissionHint.classList.add("is-error");
-    showToast("Selecciona al menos un permiso para guardar el rol.", "warning");
+    showToast(getMessage("M16"), "warning");
     return;
   }
 
@@ -50,8 +52,8 @@ function saveRole() {
   };
   const wasEditing = state.editingIndex !== null;
   if (wasEditing) roles[state.editingIndex] = savedRole;
-  else roles.unshift(savedRole);
-  const message = wasEditing ? "Rol actualizado correctamente." : "Rol registrado correctamente.";
+  else roles.push(savedRole);
+  const message = getMessage(wasEditing ? "M3" : "M2");
   applyFilters();
   showList();
   resetEditingState();
@@ -75,13 +77,14 @@ document.getElementById("clearBtn").addEventListener("click", () => {
   showToast("Filtros limpiados.", "info");
 });
 document.getElementById("newRoleBtn").addEventListener("click", () => openRoleForm());
-document.getElementById("exportBtn").addEventListener("click", () => showToast("Exportación Excel generada para el prototipo."));
+document.getElementById("exportBtn").addEventListener("click", () => showToast(getMessage("M67"), "success"));
 refs.rolesBody.addEventListener("click", (event) => handleRoleAction(event, openRoleForm));
 document.addEventListener("click", (event) => { if (!event.target.closest(".action-menu")) closeActionMenus(); });
 document.getElementById("continueBtn").addEventListener("click", () => { if (validateInfo()) setFormStep("permissions"); });
 document.getElementById("backBtn").addEventListener("click", () => setFormStep("info"));
 document.getElementById("cancelInfoBtn").addEventListener("click", () => { showList(); resetEditingState(); });
 document.getElementById("saveRoleBtn").addEventListener("click", saveRole);
+document.getElementById("confirmBtn").addEventListener("click", confirmStatus);
 
 renderPermissions();
 renderRoles();
