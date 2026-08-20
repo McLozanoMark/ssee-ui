@@ -13,7 +13,12 @@ component vocabulary.
 - `components.css`: reusable technical navigation, toast and status helpers.
 - `app.css`: canonical S.S.E.E. shell and CRUD layout.
 - `interaction.js`: shared toast, tooltip, menu and confirmation behavior.
+- `messages.js`: shared analyst message catalog and parameter substitution.
 
 The baseline uses Bootstrap 5, Font Awesome CDN, compact `rem` sizing, the
 reference-zero header, upper-right toasts, standardized confirmation modals,
 and the technical `Volver al índice` navigation for local demos.
+
+The message catalog was transcribed from Ali's shared workbook screenshot on
+2026-08-19. The original XLSX remains the authoritative source if a wording or
+classification differs from the transcription.

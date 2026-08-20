@@ -1,4 +1,18 @@
+import { getMessage } from "./messages.js";
+
+const standardMessages = {
+  "Completa los campos obligatorios.": "M11",
+  "Fuente registrada correctamente.": "M2",
+  "Muestra registrada correctamente.": "M2",
+  "Asignación registrada correctamente.": "M2",
+  "Asignación reasignada correctamente.": "M3",
+  "Fuente activada correctamente.": "M7",
+  "Fuente inactivada correctamente.": "M8",
+  "Muestra clonada como borrador.": "M2",
+};
+
 export function showToast(element, message, type = "info") {
+  message = standardMessages[message] ? getMessage(standardMessages[message]) : message;
   element.classList.remove("is-visible");
   void element.offsetWidth;
   const icons = {
