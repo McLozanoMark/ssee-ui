@@ -1,5 +1,6 @@
 import { state } from "./state.js";
 import { refs, showList, showToast } from "./ui.js";
+import { getPrototypeMessage } from "../../design-system/messages.js";
 import {
   applyFilters,
   renderUsers,
@@ -9,44 +10,48 @@ import {
   saveRoles,
   confirmRoles,
   toggleStatus,
+  toggleEditedUserStatus,
+  cancelRoleEdit,
 } from "./users.js";
 document.getElementById("filterForm").addEventListener("submit", (event) => {
   event.preventDefault();
   applyFilters();
-  showToast("Filtros aplicados.", "info");
-});
-document.getElementById("filterName").addEventListener("input", applyFilters);
-document
-  .getElementById("filterDescription")
-  .addEventListener("input", applyFilters);
-document.getElementById("filterTray").addEventListener("change", (event) => {
-  state.tray = event.target.value;
-  applyFilters();
+  showToast(getPrototypeMessage("filtersApplied"), "info");
 });
 document.getElementById("filterToggle").addEventListener("click", () => {
-  document.getElementById("filterForm").classList.toggle("is-expanded");
+  const filterForm = document.getElementById("filterForm");
+  const filterToggle = document.getElementById("filterToggle");
+  const expanded = filterForm.classList.toggle("is-expanded");
+  filterToggle.setAttribute("aria-expanded", String(expanded));
+  filterToggle.setAttribute("aria-label", expanded ? "Cerrar filtros" : "Abrir filtros");
 });
 document.getElementById("clearBtn").addEventListener("click", () => {
   [
     "filterName",
+    "filterUsername",
     "filterDescription",
+    "filterEmail",
     "filterTray",
     "filterRole",
     "filterStatus",
     "filterAuth",
+    "filterProject",
+    "filterValidity",
+    "filterLastAccess",
   ].forEach(
     (id) =>
       (document.getElementById(id).value =
         id === "filterTray" ||
         id === "filterRole" ||
         id === "filterStatus" ||
-        id === "filterAuth"
+        id === "filterAuth" ||
+        id === "filterValidity"
           ? "Todos"
           : ""),
   );
   state.tray = "Todos";
   applyFilters();
-  showToast("Filtros limpiados.", "info");
+  showToast(getPrototypeMessage("filtersCleared"), "info");
 });
 refs.usersBody.addEventListener("click", (event) => {
   const roleButton = event.target.closest("[data-role-action='open']");
@@ -70,4 +75,6 @@ document.getElementById("backBtn").addEventListener("click", showList);
 document.getElementById("exportBtn").addEventListener("click", exportUsers);
 document.getElementById("saveRolesBtn").addEventListener("click", saveRoles);
 document.getElementById("confirmRolesBtn").addEventListener("click", confirmRoles);
+refs.editUserStatusToggle.addEventListener("change", toggleEditedUserStatus);
+document.getElementById("cancelRolesBtn").addEventListener("click", cancelRoleEdit);
 renderUsers();

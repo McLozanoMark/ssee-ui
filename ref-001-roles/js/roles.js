@@ -23,27 +23,20 @@ export function renderRoles() {
         <td><div class="description">${role.description}</div></td>
         <td><div class="tags">${permissionTags}</div></td>
         <td><span class="users-count"><i class="fa-regular fa-user user-icon" aria-hidden="true"></i>${role.users}</span></td>
-        <td><span class="status ${role.status === "Activo" ? "active" : "inactive"}">${role.status}</span></td>
-        <td>${role.updated}</td>
         <td>
-          <div class="row-actions">
-            <div class="dropdown action-menu">
-              <button class="menu-btn" type="button" data-menu="${originalIndex}" aria-expanded="false" aria-label="Acciones de ${role.name}" title="Acciones">
-                <i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
-              </button>
-              <div class="legacy-dropdown" data-dropdown="${originalIndex}" hidden>
-                <button type="button" data-edit="${originalIndex}"><i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span></button>
-                <div class="dropdown-switch">
-                  <span><i class="fa-solid fa-power-off" aria-hidden="true"></i>${role.status === "Activo" ? "Inactivar" : "Activar"}</span>
-                  <label class="form-check form-switch switch ${hasUsers ? "is-disabled" : ""}" data-state="${originalIndex}" title="${hasUsers ? "No disponible: el rol tiene usuarios asociados." : ""}">
-                    <input class="form-check-input" type="checkbox" ${role.status === "Activo" ? "checked" : ""} ${hasUsers ? "disabled" : ""} aria-label="${role.status === "Activo" ? "Inactivar" : "Activar"} ${role.name}">
-                  </label>
-                </div>
-              </div>
-            </div>
+          <div class="status-cell">
+            <span class="status ${role.status === "Activo" ? "active" : "inactive"}">${role.status}</span>
             <label class="form-check form-switch switch ${hasUsers ? "is-disabled" : ""}" data-state="${originalIndex}" title="${hasUsers ? "No disponible: el rol tiene usuarios asociados." : ""}">
               <input class="form-check-input" type="checkbox" ${role.status === "Activo" ? "checked" : ""} ${hasUsers ? "disabled" : ""} aria-label="${role.status === "Activo" ? "Inactivar" : "Activar"} ${role.name}">
             </label>
+          </div>
+        </td>
+        <td>${role.updated}</td>
+        <td>
+          <div class="row-actions">
+            <button type="button" class="row-action" data-action="edit" data-edit="${originalIndex}" aria-label="Editar ${role.name}" title="Editar">
+              <i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span>
+            </button>
           </div>
         </td>
       </tr>
@@ -62,11 +55,22 @@ export function renderRoles() {
 export function applyFilters() {
   const query = refs.filterName.value.trim().toLowerCase();
   const description = refs.filterDescription.value.trim().toLowerCase();
+  const permission = document.getElementById("filterPermission").value.trim().toLowerCase();
+  const users = document.getElementById("filterUsers").value;
+  const updated = document.getElementById("filterUpdated").value;
   const status = refs.filterStatus.value;
   state.filteredRoles = roles.filter((role) => {
     const searchable = [role.name, role.description, role.status, ...role.permissions].join(" ").toLowerCase();
+    const updatedIso = role.updated.slice(0, 10).split("/").reverse().join("-");
+    const usersMatch = users === "Todos"
+      || (users === "0" && role.users === 0)
+      || (users === "1-3" && role.users >= 1 && role.users <= 3)
+      || (users === "4+" && role.users >= 4);
     return searchable.includes(query)
       && role.description.toLowerCase().includes(description)
+      && role.permissions.join(" ").toLowerCase().includes(permission)
+      && usersMatch
+      && (!updated || updatedIso === updated)
       && (status === "Todos" || role.status === status);
   });
   renderRoles();
@@ -109,7 +113,32 @@ export function handleRoleAction(event, onEdit) {
   }
 }
 
+export function handleEditStatusToggle(event) {
+  const role = roles[state.editingIndex];
+  if (!role) return;
+  if (role.users > 0) {
+    showToast(getMessage("M15"), "warning");
+    event.target.checked = role.status === "Activo";
+    return;
+  }
+  const next = event.target.checked ? "Activo" : "Inactivo";
+  refs.editStatusToggles.forEach((toggle) => { toggle.checked = role.status === "Activo"; });
+  state.pendingEditStatus = { index: state.editingIndex, next };
+  openConfirmModal("confirmModal", getMessage(next === "Activo" ? "M5" : "M6"));
+}
+
 export function confirmStatus() {
+  if (state.pendingEditStatus) {
+    const { index, next } = state.pendingEditStatus;
+    roles[index].status = next;
+    roles[index].updated = "18/08/2026 09:00";
+    state.pendingEditStatus = null;
+    refs.editStatusToggles.forEach((toggle) => { toggle.checked = next === "Activo"; });
+    closeConfirmModal("confirmModal");
+    applyFilters();
+    showToast(getMessage(next === "Activo" ? "M7" : "M8"), "success");
+    return;
+  }
   if (!state.pendingStatus) return;
   const { index, next } = state.pendingStatus;
   roles[index].status = next;

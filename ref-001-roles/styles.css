@@ -1,1 +1,4 @@
-@import url("../design-system/app.css");
+@import url("../design-system/app.css?v=20260824-inter");
+
+.wizard-card.role-form { padding: 1.25rem; }
+.wizard-card .form-step { min-height: 20rem; }

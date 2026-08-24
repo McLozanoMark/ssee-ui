@@ -1,4 +1,5 @@
-import { getMessage } from "../../design-system/messages.js";
+import { getMessage, getPrototypeMessage } from "../../design-system/messages.js";
+import { renderToast } from "../../design-system/interaction.js";
 
 const roles = ["Administrador USE", "Supervisor de Seguimiento", "Evaluador", "Registrador"];
 const refs = {
@@ -13,11 +14,7 @@ const refs = {
 let consulted = false;
 
 function toast(message, type = "info") {
-  refs.toast.className = `toast toast-${type}`;
-  refs.toast.innerHTML = `<i class="fa-solid ${type === "success" ? "fa-circle-check" : type === "warning" ? "fa-triangle-exclamation" : "fa-circle-info"}"></i><span>${message}</span>`;
-  refs.toast.classList.add("is-visible");
-  clearTimeout(toast.timer);
-  toast.timer = setTimeout(() => refs.toast.classList.remove("is-visible"), 4500);
+  renderToast(refs.toast, message, type);
 }
 
 function renderRoles() {
@@ -71,7 +68,7 @@ refs.form.addEventListener("submit", (event) => {
   document.getElementById("identityBirth").textContent = "15/04/1988";
   refs.result.hidden = false;
   updateAdmit();
-  toast("Información consultada correctamente.", "success");
+  toast(getPrototypeMessage("identityLookupSuccess"), "success");
 });
 
 document.addEventListener("input", updateAdmit);

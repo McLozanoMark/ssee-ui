@@ -8,6 +8,7 @@ const availableSites = ["Unidad de Seguimiento y Evaluación", "Oficina de Opera
 let roleTarget = null;
 let pendingRoles = null;
 let pendingStatus = null;
+let pendingCancel = false;
 function matchesTray(user) {
   return (
     state.tray === "Todos" ||
@@ -18,25 +19,38 @@ function matchesTray(user) {
 }
 export function applyFilters() {
   const q = document.getElementById("filterName").value.trim().toLowerCase(),
+    username = document.getElementById("filterUsername").value.trim().toLowerCase(),
     description = document
       .getElementById("filterDescription")
       .value.trim()
       .toLowerCase(),
+    email = document.getElementById("filterEmail").value.trim().toLowerCase(),
     role = document.getElementById("filterRole").value,
     status = document.getElementById("filterStatus").value,
-    auth = document.getElementById("filterAuth").value;
+    auth = document.getElementById("filterAuth").value,
+    project = document.getElementById("filterProject").value.trim().toLowerCase(),
+    validity = document.getElementById("filterValidity").value,
+    lastAccess = document.getElementById("filterLastAccess").value;
   state.filteredUsers = users.filter(
     (user) =>
       matchesTray(user) &&
+      (!username || user.username.toLowerCase().includes(username)) &&
       (!q ||
-        [user.username, user.name, user.email, user.auth, user.status, user.expires, ...user.roles]
+        [user.username, user.name, user.email, user.auth, user.status, user.expires, user.lastAccess, ...user.roles, ...(user.projects || [])]
           .join(" ")
           .toLowerCase()
           .includes(q)) &&
       (!description || user.name.toLowerCase().includes(description)) &&
+      (!email || user.email.toLowerCase().includes(email)) &&
       (role === "Todos" || user.roles.includes(role)) &&
       (status === "Todos" || user.status === status) &&
-      (auth === "Todos" || user.auth === auth),
+      (auth === "Todos" || user.auth === auth) &&
+      (!project || (user.projects || []).join(" ").toLowerCase().includes(project)) &&
+      (validity === "Todos"
+        || (validity === "Sin vencimiento" && user.expires === "-")
+        || (validity === "Por vencer" && user.expiresSoon)
+        || (validity === "Vencido" && user.expires !== "-" && !user.expiresSoon)) &&
+      (!lastAccess || user.lastAccess.slice(0, 10).split("/").reverse().join("-") === lastAccess),
   );
   renderUsers();
 }
@@ -57,7 +71,7 @@ export function renderUsers() {
             <li><button class="dropdown-item" type="button" data-user="${index}" data-user-action="edit"><i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span></button></li>
             <li><button class="dropdown-item" type="button" data-user="${index}" data-user-action="roles"><i class="fa-solid fa-user-tag" aria-hidden="true"></i><span>Asignar rol</span></button></li>
             <li><button class="dropdown-item" type="button" data-user="${index}" data-user-action="renew"><i class="fa-solid fa-calendar-plus" aria-hidden="true"></i><span>Renovar vigencia</span></button></li>
-            <li><div class="dropdown-switch"><span><i class="fa-solid fa-power-off" aria-hidden="true"></i>${user.status === "Activo" ? "Inactivar" : "Activar"}</span><label class="form-check form-switch switch ${canToggleStatus ? "" : "is-disabled"}" title="${canToggleStatus ? "" : "Estado administrado por Passport"}"><input class="form-check-input" type="checkbox" data-user="${index}" data-user-action="toggle-status" ${user.status === "Activo" ? "checked" : ""} ${canToggleStatus ? "" : "disabled"} aria-label="${user.status === "Activo" ? "Inactivar" : "Activar"} ${user.name}"></label></div></li>
+            <li><div class="dropdown-switch ${canToggleStatus ? "" : "is-disabled"} ${user.status === "Activo" ? "will-deactivate" : "will-activate"}"><span><i class="fa-solid fa-power-off" aria-hidden="true"></i>${user.status === "Activo" ? "Inactivar" : "Activar"}</span><label class="form-check form-switch switch ${canToggleStatus ? "" : "is-disabled"}" title="${canToggleStatus ? "" : "Estado administrado por Passport"}"><input class="form-check-input" type="checkbox" data-user="${index}" data-user-action="toggle-status" ${user.status === "Activo" ? "checked" : ""} ${canToggleStatus ? "" : "disabled"} aria-label="${user.status === "Activo" ? "Inactivar" : "Activar"} ${user.name}"></label></div></li>
           </ul>
         </div>`;
       const projectTags = user.projects?.length
@@ -75,7 +89,9 @@ export function renderUsers() {
     .join("");
   refs.emptyState.textContent = getMessage("M9");
   refs.emptyState.hidden = state.filteredUsers.length > 0;
-  refs.pageSummary.textContent = `Mostrando 1 a ${state.filteredUsers.length} de ${state.filteredUsers.length} registros`;
+  refs.pageSummary.textContent = state.filteredUsers.length
+    ? `Mostrando 1 a ${state.filteredUsers.length} de ${state.filteredUsers.length} registros`
+    : "Mostrando 0 registros";
   refs.userCount.textContent = `${users.length} usuarios registrados`;
   document.getElementById("expiringCount").textContent = users.filter((user) => user.expiresSoon).length;
   document.getElementById("noProjectCount").textContent = users.filter((user) => !user.projects?.length).length;
@@ -95,6 +111,7 @@ export function openRoles(index, mode = "roles") {
   const canEditSite = roleTarget.auth === "Documento";
   const canEditValidity = roleTarget.auth === "Documento";
   const canEditAny = canEditRoles || canEditSite || canEditValidity;
+  const canToggleStatus = ["Documento", "Autoregistro"].includes(roleTarget.auth);
   refs.rolesModalTitle.textContent = mode === "edit" ? "Editar acceso" : "Asignar roles";
   document.getElementById("saveRolesBtn").textContent = mode === "edit" ? "Guardar" : "Reasignar";
   document.getElementById("saveRolesBtn").hidden = !canEditAny;
@@ -108,6 +125,8 @@ export function openRoles(index, mode = "roles") {
   refs.projectPicker.innerHTML = canEditProjects ? `<span class="modal-label-text">Proyectos</span>${availableProjects.map((project) => `<label class="role-option project-option"><span class="role-avatar">${project.charAt(0)}</span><span class="role-option-name">${project}</span><input type="checkbox" value="${project}" ${roleTarget.projects?.includes(project) ? "checked" : ""}></label>`).join("")}` : "";
   refs.validityField.hidden = !canEditValidity;
   refs.validitySelect.value = roleTarget.expires === "-" ? "Sin fecha de vencimiento" : "90 días";
+  refs.editUserStatusControl.hidden = !(mode === "edit" && canToggleStatus);
+  refs.editUserStatusToggle.checked = roleTarget.status === "Activo";
   refs.roleModalFeedback.hidden = true;
   bootstrap.Modal.getOrCreateInstance(refs.rolesModal).show();
 }
@@ -126,14 +145,11 @@ export function saveRoles() {
   }
   const currentValidity = roleTarget.expires === "-" ? "Sin fecha de vencimiento" : "90 días";
   const changed = selected.join("|") !== roleTarget.roles.join("|") || projects.join("|") !== (roleTarget.projects || []).join("|") || validity !== currentValidity || site !== roleTarget.site;
-  if (changed) {
-    pendingRoles = { roles: selected, projects, validity, site };
-    refs.confirmRolesMessage.textContent = `${getMessage("M1")} El cambio puede afectar los permisos y el acceso de ${roleTarget.name}.`;
-    bootstrap.Modal.getOrCreateInstance(refs.rolesModal).hide();
-    bootstrap.Modal.getOrCreateInstance(refs.confirmRolesModal).show();
-    return;
-  }
-  applyRoles({ roles: selected, projects, validity, site });
+  pendingRoles = { roles: selected, projects, validity, site };
+  refs.confirmRolesMessage.textContent = changed
+    ? `${getMessage("M1")} El cambio puede afectar los permisos y el acceso de ${roleTarget.name}.`
+    : `${getMessage("M1")} No se detectaron cambios en el acceso de ${roleTarget.name}.`;
+  bootstrap.Modal.getOrCreateInstance(refs.confirmRolesModal).show();
 }
 export function toggleStatus(index) {
   const user = state.filteredUsers[index];
@@ -143,11 +159,33 @@ export function toggleStatus(index) {
   refs.confirmRolesMessage.textContent = `${getMessage(next === "Activo" ? "M5" : "M6")} ${user.name}?`;
   bootstrap.Modal.getOrCreateInstance(refs.confirmRolesModal).show();
 }
+export function toggleEditedUserStatus(event) {
+  if (!roleTarget || !["Documento", "Autoregistro"].includes(roleTarget.auth)) return;
+  const next = event.target.checked ? "Activo" : "Inactivo";
+  refs.editUserStatusToggle.checked = roleTarget.status === "Activo";
+  pendingStatus = { user: roleTarget, next };
+  refs.confirmRolesMessage.textContent = `${getMessage(next === "Activo" ? "M5" : "M6")} ${roleTarget.name}?`;
+  bootstrap.Modal.getOrCreateInstance(refs.confirmRolesModal).show();
+}
+export function cancelRoleEdit() {
+  pendingCancel = true;
+  refs.confirmRolesMessage.textContent = getMessage("M14");
+  bootstrap.Modal.getOrCreateInstance(refs.confirmRolesModal).show();
+}
 export function confirmRoles() {
+  if (pendingCancel) {
+    pendingCancel = false;
+    pendingRoles = null;
+    pendingStatus = null;
+    bootstrap.Modal.getOrCreateInstance(refs.confirmRolesModal).hide();
+    bootstrap.Modal.getOrCreateInstance(refs.rolesModal).hide();
+    return;
+  }
   if (pendingStatus) {
     const { user, next } = pendingStatus;
     user.status = next;
     pendingStatus = null;
+    refs.editUserStatusToggle.checked = next === "Activo";
     bootstrap.Modal.getOrCreateInstance(refs.confirmRolesModal).hide();
     renderUsers();
     showToast(getMessage(next === "Activo" ? "M7" : "M8"), "success");

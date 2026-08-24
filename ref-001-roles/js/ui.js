@@ -1,3 +1,6 @@
+import { renderToast } from "../../design-system/interaction.js";
+import { state } from "./state.js";
+
 export const refs = {
   listView: document.getElementById("listView"),
   formView: document.getElementById("formView"),
@@ -21,28 +24,22 @@ export const refs = {
   permissionStep: document.getElementById("permissionStep"),
   stepInfo: document.getElementById("stepInfo"),
   stepPerms: document.getElementById("stepPerms"),
+  backButton: document.getElementById("backBtn"),
+  continueButton: document.getElementById("continueBtn"),
+  saveRoleButton: document.getElementById("saveRoleBtn"),
   summaryName: document.getElementById("summaryName"),
   summaryDescription: document.getElementById("summaryDescription"),
   formTitle: document.getElementById("formTitle"),
   formBreadcrumb: document.getElementById("formBreadcrumb"),
   toast: document.getElementById("toast"),
-  confirmModal: document.getElementById("confirmModal")
+  confirmModal: document.getElementById("confirmModal"),
+  editStatusControls: [...document.querySelectorAll("[data-edit-status-control]")],
+  editStatusToggles: [...document.querySelectorAll("[data-edit-status-toggle]")],
+  saveStepButtons: [...document.querySelectorAll("[data-save-step]")]
 };
 
 export function showToast(message, type = "info") {
-  refs.toast.classList.remove("is-visible");
-  void refs.toast.offsetWidth;
-  const icons = {
-    success: "fa-circle-check",
-    error: "fa-circle-exclamation",
-    warning: "fa-triangle-exclamation",
-    info: "fa-circle-info"
-  };
-  refs.toast.className = `toast toast-${type}`;
-  refs.toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}" aria-hidden="true"></i><span>${message}</span>`;
-  refs.toast.classList.add("is-visible");
-  window.clearTimeout(showToast.timeoutId);
-  showToast.timeoutId = window.setTimeout(() => refs.toast.classList.remove("is-visible"), 4500);
+  renderToast(refs.toast, message, type);
 }
 
 export function enableTooltips() {
@@ -71,9 +68,20 @@ export function showForm(role = null) {
   refs.formView.classList.add("is-active");
   refs.roleName.value = role?.name || "";
   refs.roleDescription.value = role?.description || "";
-  const label = role ? "Editar rol" : "Nuevo rol";
-  refs.formTitle.textContent = role ? "Editar rol" : "Registrar nuevo rol";
-  refs.formBreadcrumb.textContent = `Administración / Roles / ${label}`;
+  const label = role ? "Editar rol" : "Registrar rol";
+  refs.formTitle.textContent = role ? "Editar rol" : "Registrar rol";
+  refs.formBreadcrumb.innerHTML = `<a href="../index.html">Índice de requerimientos</a> / ALI-REF-001 / Gestión de roles / ${label}`;
+  refs.editStatusControls.forEach((control) => { control.hidden = !role; });
+  const statusBlocked = Boolean(role && role.users > 0);
+  refs.editStatusToggles.forEach((toggle) => {
+    toggle.checked = role?.status === "Activo";
+    toggle.disabled = statusBlocked;
+    const switchLabel = toggle.closest(".switch");
+    if (switchLabel) {
+      switchLabel.classList.toggle("is-disabled", statusBlocked);
+      switchLabel.title = statusBlocked ? "No disponible: el rol tiene usuarios asociados." : "";
+    }
+  });
   setFormStep("info");
   clearErrors();
 }
@@ -84,6 +92,13 @@ export function setFormStep(step) {
   refs.permissionStep.classList.toggle("is-active", !isInfo);
   refs.stepInfo.classList.toggle("is-current", isInfo);
   refs.stepPerms.classList.toggle("is-current", !isInfo);
+  refs.stepInfo.classList.toggle("is-complete", !isInfo);
+  refs.backButton.hidden = isInfo;
+  refs.continueButton.hidden = !isInfo;
+  refs.saveRoleButton.hidden = isInfo;
+  refs.saveStepButtons.forEach((button) => {
+    button.hidden = state.editingIndex === null || button.dataset.saveStep !== step;
+  });
   if (!isInfo) {
     refs.summaryName.textContent = refs.roleName.value.trim();
     refs.summaryDescription.textContent = refs.roleDescription.value.trim();

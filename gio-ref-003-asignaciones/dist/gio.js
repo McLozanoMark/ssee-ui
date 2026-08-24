@@ -13,7 +13,7 @@ const standardMessages = {
   "Muestra clonada como borrador.": "M2",
 };
 
-function showToast(element, message, type = "info") {
+function renderToast(element, message, type = "info") {
   message = standardMessages[message] ? getMessage(standardMessages[message]) : message;
   element.classList.remove("is-visible");
   void element.offsetWidth;
@@ -26,8 +26,8 @@ function showToast(element, message, type = "info") {
   element.className = `toast toast-${type}`;
   element.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}" aria-hidden="true"></i><span>${message}</span>`;
   element.classList.add("is-visible");
-  window.clearTimeout(showToast.timeoutId);
-  showToast.timeoutId = window.setTimeout(() => element.classList.remove("is-visible"), 4500);
+  window.clearTimeout(renderToast.timeoutId);
+  renderToast.timeoutId = window.setTimeout(() => element.classList.remove("is-visible"), 4500);
 }
 
 function enableTooltips() {
@@ -132,11 +132,28 @@ const MESSAGE_CATALOG = Object.freeze({
   M67: { text: "Registros exportados correctamente.", type: "Información", scope: "General" }
 });
 
+// Confirmed prototype copy pending official codes in the stakeholder workbook.
+const PROTOTYPE_MESSAGES = Object.freeze({
+  identityLookupSuccess: "Información consultada correctamente.",
+  authenticationSuccess: "Autenticación validada correctamente.",
+  syncStarted: "Sincronización iniciada.",
+  filtersApplied: "Filtros aplicados.",
+  filtersCleared: "Filtros limpiados.",
+  sessionClosed: "La sesión se cerró correctamente.",
+  sessionInactive: "La sesión ya no está activa.",
+  sessionActive: "La sesión continúa activa.",
+  previousSessionClosed: "La sesión anterior fue finalizada automáticamente."
+});
+
 function getMessage(code, values = []) {
   const entry = MESSAGE_CATALOG[code];
   if (!entry) return "";
   let index = 0;
   return entry.text.replace(/%s/g, () => values[index++] ?? "");
+}
+
+function getPrototypeMessage(key) {
+  return PROTOTYPE_MESSAGES[key] || "";
 }
 
 
@@ -158,7 +175,7 @@ const state = { filteredAssignments: [...assignments], editingIndex: null, pendi
 /* source: gio-ref-003-asignaciones/js/ui.js */
 
 const refs = { assignmentsBody: document.getElementById("assignmentsBody"), emptyState: document.getElementById("emptyState"), pageSummary: document.getElementById("pageSummary"), assignmentCount: document.getElementById("assignmentCount"), toast: document.getElementById("toast"), assignmentModal: document.getElementById("assignmentModal"), assignmentTitle: document.getElementById("assignmentTitle"), assignmentContext: document.getElementById("assignmentContext"), assignmentInstrument: document.getElementById("assignmentInstrument"), assignmentUser: document.getElementById("assignmentUser"), assignmentSample: document.getElementById("assignmentSample"), assignmentStart: document.getElementById("assignmentStart"), assignmentEnd: document.getElementById("assignmentEnd"), assignmentSaveBtn: document.getElementById("assignmentSaveBtn") };
-document.querySelectorAll(".location-card strong").forEach((node) => { node.textContent = "Ubicación"; });
+document.querySelectorAll(".location-card strong").forEach((node) => { node.textContent = "Sede"; });
 document.querySelectorAll(".account-copy strong").forEach((node) => { node.textContent = "Administrador"; });
 
 function showToast(first, second, third) {
@@ -176,10 +193,10 @@ function showToast(first, second, third) {
 
 refs.emptyState.textContent = getMessage("M9");
 function statusClass(status) { return status === "Finalizada" ? "active" : status === "Anulada" ? "expired" : status === "En proceso" || status === "Reasignada" ? "warning" : ""; }
-function renderAssignments() { refs.assignmentsBody.innerHTML = state.filteredAssignments.map((assignment) => { const index = assignments.indexOf(assignment); const canReassign = !["Finalizada", "Anulada"].includes(assignment.status); return `<tr><td><strong>${assignment.instrument}</strong></td><td>${assignment.user}</td><td>${assignment.sample}</td><td>${assignment.start}</td><td>${assignment.end}</td><td>${assignment.progress}</td><td><span class="status ${statusClass(assignment.status)}">${assignment.status}</span></td><td><div class="action-menu"><button class="menu-btn" type="button" data-menu-button="${index}" aria-expanded="false" aria-label="Abrir acciones de ${assignment.instrument} para ${assignment.user}"><i class="fa-solid fa-ellipsis-vertical"></i></button><div class="legacy-dropdown" data-menu-panel="${index}" hidden><button type="button" data-action="view" data-index="${index}"><i class="fa-regular fa-eye"></i>Ver detalle</button>${canReassign ? `<button type="button" data-action="reassign" data-index="${index}"><i class="fa-solid fa-arrows-rotate"></i>Reasignar</button>` : ""}${canReassign ? `<button type="button" data-action="remove" data-index="${index}"><i class="fa-solid fa-ban"></i>Anular</button>` : ""}</div></div></td></tr>`; }).join(""); refs.emptyState.hidden = state.filteredAssignments.length > 0; refs.pageSummary.textContent = state.filteredAssignments.length ? `Mostrando 1 a ${state.filteredAssignments.length} de ${state.filteredAssignments.length} registros` : "Mostrando 0 registros"; refs.assignmentCount.textContent = `${assignments.length} asignaciones registradas`; enableTooltips(); }
-function applyFilters() { const query = document.getElementById("filterQuery").value.trim().toLowerCase(); const status = document.getElementById("filterStatus").value; const period = document.getElementById("filterPeriod").value; const progress = document.getElementById("filterProgress").value; state.filteredAssignments = assignments.filter((assignment) => [assignment.id, assignment.instrument, assignment.user, assignment.sample, assignment.status].join(" ").toLowerCase().includes(query) && (status === "Todos" || assignment.status === status) && (period === "Todos" || assignment.period === period) && (progress === "Todos" || assignment.progressGroup === progress)); renderAssignments(); }
-function openAssignment(index = null) { state.editingIndex = index; const assignment = index === null ? null : assignments[index]; refs.assignmentTitle.textContent = assignment ? "Reasignar instrumento" : "Nueva asignación"; refs.assignmentSaveBtn.textContent = assignment ? "Reasignar" : "Guardar asignación"; refs.assignmentContext.textContent = assignment ? `Actualiza la asignación de ${assignment.instrument} para ${assignment.user}.` : "Selecciona los elementos que participarán en la asignación."; refs.assignmentInstrument.value = assignment?.instrument || "Ficha de seguimiento"; refs.assignmentUser.value = assignment?.user || "Ana Paredes"; refs.assignmentSample.value = assignment?.sample || "Muestra nacional 2026"; refs.assignmentStart.value = assignment ? assignment.start.split("/").reverse().join("-") : "2026-08-18"; refs.assignmentEnd.value = assignment ? assignment.end.split("/").reverse().join("-") : "2026-09-18"; bootstrap.Modal.getOrCreateInstance(refs.assignmentModal).show(); }
-function handleAction(event) { const menu = event.target.closest("[data-menu-button]"); const action = event.target.closest("[data-action]"); if (menu) { const panel = refs.assignmentsBody.querySelector(`[data-menu-panel='${menu.dataset.menuButton}']`); const opening = panel?.hidden; closeMenus(refs.assignmentsBody); if (opening && panel) { panel.hidden = false; menu.setAttribute("aria-expanded", "true"); } return; } if (!action) return; closeMenus(refs.assignmentsBody); const index = Number(action.dataset.index); const assignment = assignments[index]; if (action.dataset.action === "view") showToast(refs.toast, `${assignment.instrument} está ${assignment.status} con un progreso de ${assignment.progress}.`, "info"); if (action.dataset.action === "reassign") openAssignment(index); if (action.dataset.action === "remove") { state.pendingAssignment = { index, remove: true }; openConfirmModal("confirmModal", `Vas a anular la asignación de ${assignment.instrument} para ${assignment.user}. ¿Deseas continuar?`); } }
+function renderAssignments() { refs.assignmentsBody.innerHTML = state.filteredAssignments.map((assignment) => { const index = assignments.indexOf(assignment); const canReassign = !["Finalizada", "Anulada"].includes(assignment.status); return `<tr><td><strong>${assignment.instrument}</strong></td><td>${assignment.user}</td><td>${assignment.sample}</td><td>${assignment.start}</td><td>${assignment.end}</td><td>${assignment.progress}</td><td><span class="status ${statusClass(assignment.status)}">${assignment.status}</span></td><td><div class="row-actions"><button class="row-action" type="button" data-action="view" data-index="${index}" title="Ver detalle"><i class="fa-regular fa-eye" aria-hidden="true"></i><span>Ver detalle</span></button>${canReassign ? `<button class="row-action" type="button" data-action="reassign" data-index="${index}" title="Reasignar"><i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i><span>Reasignar</span></button><button class="row-action" type="button" data-action="remove" data-index="${index}" title="Anular"><i class="fa-solid fa-ban" aria-hidden="true"></i><span>Anular</span></button>` : ""}</div></td></tr>`; }).join(""); refs.emptyState.hidden = state.filteredAssignments.length > 0; refs.pageSummary.textContent = state.filteredAssignments.length ? `Mostrando 1 a ${state.filteredAssignments.length} de ${state.filteredAssignments.length} registros` : "Mostrando 0 registros"; refs.assignmentCount.textContent = `${assignments.length} asignaciones registradas`; enableTooltips(); }
+function applyFilters() { const query = document.getElementById("filterQuery").value.trim().toLowerCase(); const instrument = document.getElementById("filterInstrument").value.trim().toLowerCase(); const user = document.getElementById("filterUser").value.trim().toLowerCase(); const sample = document.getElementById("filterSample").value.trim().toLowerCase(); const start = document.getElementById("filterStart").value; const end = document.getElementById("filterEnd").value; const status = document.getElementById("filterStatus").value; const period = document.getElementById("filterPeriod").value; const progress = document.getElementById("filterProgress").value; state.filteredAssignments = assignments.filter((assignment) => { const searchable = [assignment.id, assignment.instrument, assignment.user, assignment.sample, assignment.start, assignment.end, assignment.progress, assignment.status].join(" ").toLowerCase(); const startIso = assignment.start.split("/").reverse().join("-"); const endIso = assignment.end.split("/").reverse().join("-"); return searchable.includes(query) && assignment.instrument.toLowerCase().includes(instrument) && assignment.user.toLowerCase().includes(user) && assignment.sample.toLowerCase().includes(sample) && (!start || startIso === start) && (!end || endIso === end) && (status === "Todos" || assignment.status === status) && (period === "Todos" || assignment.period === period) && (progress === "Todos" || assignment.progressGroup === progress); }); renderAssignments(); }
+function openAssignment(index = null) { state.editingIndex = index; const assignment = index === null ? null : assignments[index]; refs.assignmentTitle.textContent = assignment ? "Reasignar instrumento" : "Registrar asignación"; refs.assignmentSaveBtn.textContent = assignment ? "Reasignar" : "Guardar asignación"; refs.assignmentContext.textContent = assignment ? `Actualiza la asignación de ${assignment.instrument} para ${assignment.user}.` : "Selecciona los elementos que participarán en la asignación."; refs.assignmentInstrument.value = assignment?.instrument || "Ficha de seguimiento"; refs.assignmentUser.value = assignment?.user || "Ana Paredes"; refs.assignmentSample.value = assignment?.sample || "Muestra nacional 2026"; refs.assignmentStart.value = assignment ? assignment.start.split("/").reverse().join("-") : "2026-08-18"; refs.assignmentEnd.value = assignment ? assignment.end.split("/").reverse().join("-") : "2026-09-18"; bootstrap.Modal.getOrCreateInstance(refs.assignmentModal).show(); }
+function handleAction(event) { const action = event.target.closest("[data-action]"); if (!action) return; const index = Number(action.dataset.index); const assignment = assignments[index]; if (action.dataset.action === "view") showToast(refs.toast, `${assignment.instrument} está ${assignment.status} con un progreso de ${assignment.progress}.`, "info"); if (action.dataset.action === "reassign") openAssignment(index); if (action.dataset.action === "remove") { state.pendingAssignment = { index, remove: true }; openConfirmModal("confirmModal", `Vas a anular la asignación de ${assignment.instrument} para ${assignment.user}. ¿Deseas continuar?`); } }
 function openNewAssignment() { openAssignment(); }
 function saveAssignment(event) { event.preventDefault(); const payload = { instrument: refs.assignmentInstrument.value, user: refs.assignmentUser.value, sample: refs.assignmentSample.value, start: refs.assignmentStart.value.split("-").reverse().join("/"), end: refs.assignmentEnd.value.split("-").reverse().join("/"), period: refs.assignmentStart.value.slice(0, 4), progress: "0%", progressGroup: "Sin iniciar", status: "Pendiente", updated: "18/08/2026 09:30" }; if (state.editingIndex === null) { payload.id = `ASN-${String(assignments.length + 1).padStart(3, "0")}`; assignments.unshift(payload); bootstrap.Modal.getOrCreateInstance(refs.assignmentModal).hide(); renderAssignments(); showToast(refs.toast, "Asignación registrada correctamente.", "success"); return; } state.pendingAssignment = { index: state.editingIndex, payload }; openConfirmModal("confirmModal", `La reasignación cambiará el instrumento asignado a ${payload.user}. ¿Deseas continuar?`); }
 function confirmAction() { if (!state.pendingAssignment) return; const pending = state.pendingAssignment; if (pending.remove) { assignments[pending.index].status = "Anulada"; assignments[pending.index].updated = "18/08/2026 09:30"; showToast(refs.toast, "Asignación anulada correctamente.", "success"); } else { assignments[pending.index] = { ...assignments[pending.index], ...pending.payload, status: "Reasignada", updated: "18/08/2026 09:30" }; bootstrap.Modal.getOrCreateInstance(refs.assignmentModal).hide(); showToast(refs.toast, "Asignación reasignada correctamente.", "success"); } state.pendingAssignment = null; closeConfirmModal("confirmModal"); renderAssignments(); }
@@ -190,7 +207,12 @@ function confirmAction() { if (!state.pendingAssignment) return; const pending =
 
 
 document.getElementById("filterForm").addEventListener("submit", (event) => { event.preventDefault(); applyFilters(); showToast(refs.toast, "Filtros aplicados.", "info"); });
-["filterQuery", "filterStatus", "filterPeriod", "filterProgress"].forEach((id) => document.getElementById(id).addEventListener("input", applyFilters));
-document.getElementById("filterToggle").addEventListener("click", () => document.getElementById("filterForm").classList.toggle("is-expanded"));
-document.getElementById("clearBtn").addEventListener("click", () => { document.getElementById("filterQuery").value = ""; document.getElementById("filterStatus").value = "Todos"; document.getElementById("filterPeriod").value = "Todos"; document.getElementById("filterProgress").value = "Todos"; applyFilters(); showToast(refs.toast, "Filtros limpiados.", "info"); });
+document.getElementById("filterToggle").addEventListener("click", () => {
+  const filterForm = document.getElementById("filterForm");
+  const filterToggle = document.getElementById("filterToggle");
+  const expanded = filterForm.classList.toggle("is-expanded");
+  filterToggle.setAttribute("aria-expanded", String(expanded));
+  filterToggle.setAttribute("aria-label", expanded ? "Cerrar filtros" : "Abrir filtros");
+});
+document.getElementById("clearBtn").addEventListener("click", () => { document.getElementById("filterQuery").value = ""; document.getElementById("filterInstrument").value = ""; document.getElementById("filterUser").value = ""; document.getElementById("filterSample").value = ""; document.getElementById("filterStart").value = ""; document.getElementById("filterEnd").value = ""; document.getElementById("filterStatus").value = "Todos"; document.getElementById("filterPeriod").value = "Todos"; document.getElementById("filterProgress").value = "Todos"; applyFilters(); showToast(refs.toast, "Filtros limpiados.", "info"); });
 document.getElementById("newAssignmentBtn").addEventListener("click", openNewAssignment); refs.assignmentsBody.addEventListener("click", handleAction); document.getElementById("assignmentForm").addEventListener("submit", saveAssignment); document.getElementById("confirmBtn").addEventListener("click", confirmAction); document.getElementById("exportBtn").addEventListener("click", () => showToast(refs.toast, getMessage("M67"), "success")); document.addEventListener("click", (event) => { if (!event.target.closest(".action-menu")) document.querySelectorAll("[data-menu-panel]").forEach((panel) => { panel.hidden = true; }); }); renderAssignments();

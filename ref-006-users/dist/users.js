@@ -69,11 +69,91 @@ const MESSAGE_CATALOG = Object.freeze({
   M67: { text: "Registros exportados correctamente.", type: "Información", scope: "General" }
 });
 
+// Confirmed prototype copy pending official codes in the stakeholder workbook.
+const PROTOTYPE_MESSAGES = Object.freeze({
+  identityLookupSuccess: "Información consultada correctamente.",
+  authenticationSuccess: "Autenticación validada correctamente.",
+  syncStarted: "Sincronización iniciada.",
+  filtersApplied: "Filtros aplicados.",
+  filtersCleared: "Filtros limpiados.",
+  sessionClosed: "La sesión se cerró correctamente.",
+  sessionInactive: "La sesión ya no está activa.",
+  sessionActive: "La sesión continúa activa.",
+  previousSessionClosed: "La sesión anterior fue finalizada automáticamente."
+});
+
 function getMessage(code, values = []) {
   const entry = MESSAGE_CATALOG[code];
   if (!entry) return "";
   let index = 0;
   return entry.text.replace(/%s/g, () => values[index++] ?? "");
+}
+
+function getPrototypeMessage(key) {
+  return PROTOTYPE_MESSAGES[key] || "";
+}
+
+
+/* source: design-system/interaction.js */
+
+
+const standardMessages = {
+  "Completa los campos obligatorios.": "M11",
+  "Fuente registrada correctamente.": "M2",
+  "Muestra registrada correctamente.": "M2",
+  "Asignación registrada correctamente.": "M2",
+  "Asignación reasignada correctamente.": "M3",
+  "Fuente activada correctamente.": "M7",
+  "Fuente inactivada correctamente.": "M8",
+  "Muestra clonada como borrador.": "M2",
+};
+
+function renderToast(element, message, type = "info") {
+  message = standardMessages[message] ? getMessage(standardMessages[message]) : message;
+  element.classList.remove("is-visible");
+  void element.offsetWidth;
+  const icons = {
+    success: "fa-circle-check",
+    error: "fa-circle-exclamation",
+    warning: "fa-triangle-exclamation",
+    info: "fa-circle-info"
+  };
+  element.className = `toast toast-${type}`;
+  element.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}" aria-hidden="true"></i><span>${message}</span>`;
+  element.classList.add("is-visible");
+  window.clearTimeout(renderToast.timeoutId);
+  renderToast.timeoutId = window.setTimeout(() => element.classList.remove("is-visible"), 4500);
+}
+
+function enableTooltips() {
+  if (!window.bootstrap) return;
+  document.querySelectorAll("[data-bs-toggle='tooltip']").forEach((element) => {
+    bootstrap.Tooltip.getOrCreateInstance(element);
+  });
+}
+
+function closeMenus(root = document) {
+  root.querySelectorAll("[data-menu-panel]").forEach((panel) => {
+    panel.hidden = true;
+  });
+  root.querySelectorAll("[data-menu-button]").forEach((button) => {
+    button.setAttribute("aria-expanded", "false");
+  });
+}
+
+function openConfirmModal(id, message) {
+  const modal = document.getElementById(id);
+  if (!modal || !window.bootstrap) return null;
+  const messageNode = modal.querySelector("[data-confirm-message]");
+  if (messageNode) messageNode.textContent = message;
+  const instance = bootstrap.Modal.getOrCreateInstance(modal);
+  instance.show();
+  return instance;
+}
+
+function closeConfirmModal(id) {
+  const modal = document.getElementById(id);
+  if (modal && window.bootstrap) bootstrap.Modal.getOrCreateInstance(modal).hide();
 }
 
 
@@ -162,6 +242,8 @@ const state = {
 
 
 /* source: ref-006-users/js/ui.js */
+
+
 const refs = {
   usersBody: document.getElementById("usersBody"),
   emptyState: document.getElementById("emptyState"),
@@ -183,21 +265,11 @@ const refs = {
   roleModalFeedback: document.getElementById("roleModalFeedback"),
   confirmRolesModal: document.getElementById("confirmRolesModal"),
   confirmRolesMessage: document.getElementById("confirmRolesMessage"),
+  editUserStatusControl: document.getElementById("editUserStatusControl"),
+  editUserStatusToggle: document.getElementById("editUserStatusToggle"),
 };
 function showToast(message, type = "info") {
-  refs.toast.classList.remove("is-visible");
-  void refs.toast.offsetWidth;
-  const icons = {
-    success: "fa-circle-check",
-    error: "fa-circle-exclamation",
-    warning: "fa-triangle-exclamation",
-    info: "fa-circle-info"
-  };
-  refs.toast.className = `toast toast-${type}`;
-  refs.toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}" aria-hidden="true"></i><span>${message}</span>`;
-  refs.toast.classList.add("is-visible");
-  window.clearTimeout(showToast.timeoutId);
-  showToast.timeoutId = window.setTimeout(() => refs.toast.classList.remove("is-visible"), 4500);
+  renderToast(refs.toast, message, type);
 }
 function showList() {
   refs.listView.classList.add("is-active");
@@ -241,6 +313,7 @@ const availableSites = ["Unidad de Seguimiento y Evaluación", "Oficina de Opera
 let roleTarget = null;
 let pendingRoles = null;
 let pendingStatus = null;
+let pendingCancel = false;
 function matchesTray(user) {
   return (
     state.tray === "Todos" ||
@@ -251,25 +324,38 @@ function matchesTray(user) {
 }
 function applyFilters() {
   const q = document.getElementById("filterName").value.trim().toLowerCase(),
+    username = document.getElementById("filterUsername").value.trim().toLowerCase(),
     description = document
       .getElementById("filterDescription")
       .value.trim()
       .toLowerCase(),
+    email = document.getElementById("filterEmail").value.trim().toLowerCase(),
     role = document.getElementById("filterRole").value,
     status = document.getElementById("filterStatus").value,
-    auth = document.getElementById("filterAuth").value;
+    auth = document.getElementById("filterAuth").value,
+    project = document.getElementById("filterProject").value.trim().toLowerCase(),
+    validity = document.getElementById("filterValidity").value,
+    lastAccess = document.getElementById("filterLastAccess").value;
   state.filteredUsers = users.filter(
     (user) =>
       matchesTray(user) &&
+      (!username || user.username.toLowerCase().includes(username)) &&
       (!q ||
-        [user.username, user.name, user.email, user.auth, user.status, user.expires, ...user.roles]
+        [user.username, user.name, user.email, user.auth, user.status, user.expires, user.lastAccess, ...user.roles, ...(user.projects || [])]
           .join(" ")
           .toLowerCase()
           .includes(q)) &&
       (!description || user.name.toLowerCase().includes(description)) &&
+      (!email || user.email.toLowerCase().includes(email)) &&
       (role === "Todos" || user.roles.includes(role)) &&
       (status === "Todos" || user.status === status) &&
-      (auth === "Todos" || user.auth === auth),
+      (auth === "Todos" || user.auth === auth) &&
+      (!project || (user.projects || []).join(" ").toLowerCase().includes(project)) &&
+      (validity === "Todos"
+        || (validity === "Sin vencimiento" && user.expires === "-")
+        || (validity === "Por vencer" && user.expiresSoon)
+        || (validity === "Vencido" && user.expires !== "-" && !user.expiresSoon)) &&
+      (!lastAccess || user.lastAccess.slice(0, 10).split("/").reverse().join("-") === lastAccess),
   );
   renderUsers();
 }
@@ -290,7 +376,7 @@ function renderUsers() {
             <li><button class="dropdown-item" type="button" data-user="${index}" data-user-action="edit"><i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span></button></li>
             <li><button class="dropdown-item" type="button" data-user="${index}" data-user-action="roles"><i class="fa-solid fa-user-tag" aria-hidden="true"></i><span>Asignar rol</span></button></li>
             <li><button class="dropdown-item" type="button" data-user="${index}" data-user-action="renew"><i class="fa-solid fa-calendar-plus" aria-hidden="true"></i><span>Renovar vigencia</span></button></li>
-            <li><div class="dropdown-switch"><span><i class="fa-solid fa-power-off" aria-hidden="true"></i>${user.status === "Activo" ? "Inactivar" : "Activar"}</span><label class="form-check form-switch switch ${canToggleStatus ? "" : "is-disabled"}" title="${canToggleStatus ? "" : "Estado administrado por Passport"}"><input class="form-check-input" type="checkbox" data-user="${index}" data-user-action="toggle-status" ${user.status === "Activo" ? "checked" : ""} ${canToggleStatus ? "" : "disabled"} aria-label="${user.status === "Activo" ? "Inactivar" : "Activar"} ${user.name}"></label></div></li>
+            <li><div class="dropdown-switch ${canToggleStatus ? "" : "is-disabled"} ${user.status === "Activo" ? "will-deactivate" : "will-activate"}"><span><i class="fa-solid fa-power-off" aria-hidden="true"></i>${user.status === "Activo" ? "Inactivar" : "Activar"}</span><label class="form-check form-switch switch ${canToggleStatus ? "" : "is-disabled"}" title="${canToggleStatus ? "" : "Estado administrado por Passport"}"><input class="form-check-input" type="checkbox" data-user="${index}" data-user-action="toggle-status" ${user.status === "Activo" ? "checked" : ""} ${canToggleStatus ? "" : "disabled"} aria-label="${user.status === "Activo" ? "Inactivar" : "Activar"} ${user.name}"></label></div></li>
           </ul>
         </div>`;
       const projectTags = user.projects?.length
@@ -308,7 +394,9 @@ function renderUsers() {
     .join("");
   refs.emptyState.textContent = getMessage("M9");
   refs.emptyState.hidden = state.filteredUsers.length > 0;
-  refs.pageSummary.textContent = `Mostrando 1 a ${state.filteredUsers.length} de ${state.filteredUsers.length} registros`;
+  refs.pageSummary.textContent = state.filteredUsers.length
+    ? `Mostrando 1 a ${state.filteredUsers.length} de ${state.filteredUsers.length} registros`
+    : "Mostrando 0 registros";
   refs.userCount.textContent = `${users.length} usuarios registrados`;
   document.getElementById("expiringCount").textContent = users.filter((user) => user.expiresSoon).length;
   document.getElementById("noProjectCount").textContent = users.filter((user) => !user.projects?.length).length;
@@ -328,6 +416,7 @@ function openRoles(index, mode = "roles") {
   const canEditSite = roleTarget.auth === "Documento";
   const canEditValidity = roleTarget.auth === "Documento";
   const canEditAny = canEditRoles || canEditSite || canEditValidity;
+  const canToggleStatus = ["Documento", "Autoregistro"].includes(roleTarget.auth);
   refs.rolesModalTitle.textContent = mode === "edit" ? "Editar acceso" : "Asignar roles";
   document.getElementById("saveRolesBtn").textContent = mode === "edit" ? "Guardar" : "Reasignar";
   document.getElementById("saveRolesBtn").hidden = !canEditAny;
@@ -341,6 +430,8 @@ function openRoles(index, mode = "roles") {
   refs.projectPicker.innerHTML = canEditProjects ? `<span class="modal-label-text">Proyectos</span>${availableProjects.map((project) => `<label class="role-option project-option"><span class="role-avatar">${project.charAt(0)}</span><span class="role-option-name">${project}</span><input type="checkbox" value="${project}" ${roleTarget.projects?.includes(project) ? "checked" : ""}></label>`).join("")}` : "";
   refs.validityField.hidden = !canEditValidity;
   refs.validitySelect.value = roleTarget.expires === "-" ? "Sin fecha de vencimiento" : "90 días";
+  refs.editUserStatusControl.hidden = !(mode === "edit" && canToggleStatus);
+  refs.editUserStatusToggle.checked = roleTarget.status === "Activo";
   refs.roleModalFeedback.hidden = true;
   bootstrap.Modal.getOrCreateInstance(refs.rolesModal).show();
 }
@@ -359,14 +450,11 @@ function saveRoles() {
   }
   const currentValidity = roleTarget.expires === "-" ? "Sin fecha de vencimiento" : "90 días";
   const changed = selected.join("|") !== roleTarget.roles.join("|") || projects.join("|") !== (roleTarget.projects || []).join("|") || validity !== currentValidity || site !== roleTarget.site;
-  if (changed) {
-    pendingRoles = { roles: selected, projects, validity, site };
-    refs.confirmRolesMessage.textContent = `${getMessage("M1")} El cambio puede afectar los permisos y el acceso de ${roleTarget.name}.`;
-    bootstrap.Modal.getOrCreateInstance(refs.rolesModal).hide();
-    bootstrap.Modal.getOrCreateInstance(refs.confirmRolesModal).show();
-    return;
-  }
-  applyRoles({ roles: selected, projects, validity, site });
+  pendingRoles = { roles: selected, projects, validity, site };
+  refs.confirmRolesMessage.textContent = changed
+    ? `${getMessage("M1")} El cambio puede afectar los permisos y el acceso de ${roleTarget.name}.`
+    : `${getMessage("M1")} No se detectaron cambios en el acceso de ${roleTarget.name}.`;
+  bootstrap.Modal.getOrCreateInstance(refs.confirmRolesModal).show();
 }
 function toggleStatus(index) {
   const user = state.filteredUsers[index];
@@ -376,11 +464,33 @@ function toggleStatus(index) {
   refs.confirmRolesMessage.textContent = `${getMessage(next === "Activo" ? "M5" : "M6")} ${user.name}?`;
   bootstrap.Modal.getOrCreateInstance(refs.confirmRolesModal).show();
 }
+function toggleEditedUserStatus(event) {
+  if (!roleTarget || !["Documento", "Autoregistro"].includes(roleTarget.auth)) return;
+  const next = event.target.checked ? "Activo" : "Inactivo";
+  refs.editUserStatusToggle.checked = roleTarget.status === "Activo";
+  pendingStatus = { user: roleTarget, next };
+  refs.confirmRolesMessage.textContent = `${getMessage(next === "Activo" ? "M5" : "M6")} ${roleTarget.name}?`;
+  bootstrap.Modal.getOrCreateInstance(refs.confirmRolesModal).show();
+}
+function cancelRoleEdit() {
+  pendingCancel = true;
+  refs.confirmRolesMessage.textContent = getMessage("M14");
+  bootstrap.Modal.getOrCreateInstance(refs.confirmRolesModal).show();
+}
 function confirmRoles() {
+  if (pendingCancel) {
+    pendingCancel = false;
+    pendingRoles = null;
+    pendingStatus = null;
+    bootstrap.Modal.getOrCreateInstance(refs.confirmRolesModal).hide();
+    bootstrap.Modal.getOrCreateInstance(refs.rolesModal).hide();
+    return;
+  }
   if (pendingStatus) {
     const { user, next } = pendingStatus;
     user.status = next;
     pendingStatus = null;
+    refs.editUserStatusToggle.checked = next === "Activo";
     bootstrap.Modal.getOrCreateInstance(refs.confirmRolesModal).hide();
     renderUsers();
     showToast(getMessage(next === "Activo" ? "M7" : "M8"), "success");
@@ -409,43 +519,46 @@ function exportUsers() {
 
 
 
+
 document.getElementById("filterForm").addEventListener("submit", (event) => {
   event.preventDefault();
   applyFilters();
-  showToast("Filtros aplicados.", "info");
-});
-document.getElementById("filterName").addEventListener("input", applyFilters);
-document
-  .getElementById("filterDescription")
-  .addEventListener("input", applyFilters);
-document.getElementById("filterTray").addEventListener("change", (event) => {
-  state.tray = event.target.value;
-  applyFilters();
+  showToast(getPrototypeMessage("filtersApplied"), "info");
 });
 document.getElementById("filterToggle").addEventListener("click", () => {
-  document.getElementById("filterForm").classList.toggle("is-expanded");
+  const filterForm = document.getElementById("filterForm");
+  const filterToggle = document.getElementById("filterToggle");
+  const expanded = filterForm.classList.toggle("is-expanded");
+  filterToggle.setAttribute("aria-expanded", String(expanded));
+  filterToggle.setAttribute("aria-label", expanded ? "Cerrar filtros" : "Abrir filtros");
 });
 document.getElementById("clearBtn").addEventListener("click", () => {
   [
     "filterName",
+    "filterUsername",
     "filterDescription",
+    "filterEmail",
     "filterTray",
     "filterRole",
     "filterStatus",
     "filterAuth",
+    "filterProject",
+    "filterValidity",
+    "filterLastAccess",
   ].forEach(
     (id) =>
       (document.getElementById(id).value =
         id === "filterTray" ||
         id === "filterRole" ||
         id === "filterStatus" ||
-        id === "filterAuth"
+        id === "filterAuth" ||
+        id === "filterValidity"
           ? "Todos"
           : ""),
   );
   state.tray = "Todos";
   applyFilters();
-  showToast("Filtros limpiados.", "info");
+  showToast(getPrototypeMessage("filtersCleared"), "info");
 });
 refs.usersBody.addEventListener("click", (event) => {
   const roleButton = event.target.closest("[data-role-action='open']");
@@ -469,4 +582,6 @@ document.getElementById("backBtn").addEventListener("click", showList);
 document.getElementById("exportBtn").addEventListener("click", exportUsers);
 document.getElementById("saveRolesBtn").addEventListener("click", saveRoles);
 document.getElementById("confirmRolesBtn").addEventListener("click", confirmRoles);
+refs.editUserStatusToggle.addEventListener("change", toggleEditedUserStatus);
+document.getElementById("cancelRolesBtn").addEventListener("click", cancelRoleEdit);
 renderUsers();

@@ -1,3 +1,5 @@
+import { renderToast } from "../../design-system/interaction.js";
+
 export const refs = {
   usersBody: document.getElementById("usersBody"),
   emptyState: document.getElementById("emptyState"),
@@ -19,21 +21,11 @@ export const refs = {
   roleModalFeedback: document.getElementById("roleModalFeedback"),
   confirmRolesModal: document.getElementById("confirmRolesModal"),
   confirmRolesMessage: document.getElementById("confirmRolesMessage"),
+  editUserStatusControl: document.getElementById("editUserStatusControl"),
+  editUserStatusToggle: document.getElementById("editUserStatusToggle"),
 };
 export function showToast(message, type = "info") {
-  refs.toast.classList.remove("is-visible");
-  void refs.toast.offsetWidth;
-  const icons = {
-    success: "fa-circle-check",
-    error: "fa-circle-exclamation",
-    warning: "fa-triangle-exclamation",
-    info: "fa-circle-info"
-  };
-  refs.toast.className = `toast toast-${type}`;
-  refs.toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}" aria-hidden="true"></i><span>${message}</span>`;
-  refs.toast.classList.add("is-visible");
-  window.clearTimeout(showToast.timeoutId);
-  showToast.timeoutId = window.setTimeout(() => refs.toast.classList.remove("is-visible"), 4500);
+  renderToast(refs.toast, message, type);
 }
 export function showList() {
   refs.listView.classList.add("is-active");

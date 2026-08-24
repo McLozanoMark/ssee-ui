@@ -12,8 +12,8 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     />
-    <link rel="stylesheet" href="../ref-001-roles/styles.css" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="../ref-001-roles/styles.css?v=20260824-inter" />
+    <link rel="stylesheet" href="styles.css?v=20260824-inter" />
   </head>
   <body>
     <div class="app-shell">
@@ -54,7 +54,7 @@
                 ><i class="fa-solid fa-location-dot"></i
               ></span>
               <div>
-                <strong>Ubicación</strong
+                <strong>Sede</strong
                 ><span>Unidad de Seguimiento y Evaluación</span>
               </div>
               <i
@@ -84,7 +84,7 @@
           <div class="page-head">
             <div class="title-cluster">
               <nav class="breadcrumb" aria-label="Ruta">
-                <a href="../index.html">Índice de requerimientos</a> / Administración / Usuarios
+                <a href="../index.html">Índice de requerimientos</a> / ALI-REF-006 / Gestión de usuarios
               </nav>
               <div class="title-row">
                 <div class="title-icon" aria-hidden="true">
@@ -122,51 +122,84 @@
               type="button"
               id="filterToggle"
               aria-label="Abrir filtros"
+              aria-expanded="false"
               title="Filtro personalizado"
             >
               <span></span><span></span><span></span>
             </button>
             <div class="advanced-filters" id="advancedFilters">
-              <select class="form-select" id="filterTray" aria-label="Bandeja">
-                <option>Todos</option>
-                <option>Pendientes de rol</option>
-                <option>Sin proyecto</option>
-                <option>Por vencer</option>
-              </select>
-              <input
-                class="form-control"
-                id="filterDescription"
-                type="search"
-                placeholder="Nombres y apellidos"
-              /><select class="form-select" id="filterRole" aria-label="Rol">
-                <option>Todos</option>
-                <option>Administrador USE</option>
-                <option>Supervisor de Seguimiento</option>
-                <option>Evaluador</option></select
-              ><select
-                class="form-select"
-                id="filterStatus"
-                aria-label="Estado"
-              >
-                <option>Todos</option>
-                <option>Activo</option>
-                <option>Inactivo</option></select
-              ><select
-                class="form-select"
-                id="filterAuth"
-                aria-label="Autenticación"
-              >
-                <option>Todos</option>
-                <option>Passport</option>
-                <option>Documento</option>
-                <option>Autoregistro</option></select
-              ><button
-                class="btn btn-outline-ssee button button-secondary"
-                type="button"
-                id="clearBtn"
-              >
-                <i class="fa-solid fa-rotate-left icon"></i>Limpiar
-              </button>
+              <label class="filter-field">
+                <span>Usuario</span>
+                <input class="form-control" id="filterUsername" type="search" placeholder="Buscar por usuario" />
+              </label>
+              <label class="filter-field">
+                <span>Bandeja</span>
+                <select class="form-select" id="filterTray" aria-label="Bandeja">
+                  <option>Todos</option>
+                  <option>Pendientes de rol</option>
+                  <option>Sin proyecto</option>
+                  <option>Por vencer</option>
+                </select>
+              </label>
+              <label class="filter-field">
+                <span>Nombres y apellidos</span>
+                <input class="form-control" id="filterDescription" type="search" placeholder="Buscar por nombres y apellidos" />
+              </label>
+              <label class="filter-field">
+                <span>Correo</span>
+                <input class="form-control" id="filterEmail" type="email" placeholder="Buscar por correo" />
+              </label>
+              <label class="filter-field">
+                <span>Rol</span>
+                <select class="form-select" id="filterRole" aria-label="Rol">
+                  <option>Todos</option>
+                  <option>Administrador USE</option>
+                  <option>Supervisor de Seguimiento</option>
+                  <option>Evaluador</option>
+                </select>
+              </label>
+              <label class="filter-field">
+                <span>Estado</span>
+                <select class="form-select" id="filterStatus" aria-label="Estado">
+                  <option>Todos</option>
+                  <option>Activo</option>
+                  <option>Inactivo</option>
+                </select>
+              </label>
+              <label class="filter-field">
+                <span>Autenticación</span>
+                <select class="form-select" id="filterAuth" aria-label="Autenticación">
+                  <option>Todos</option>
+                  <option>Passport</option>
+                  <option>Documento</option>
+                  <option>Autoregistro</option>
+                </select>
+              </label>
+              <label class="filter-field">
+                <span>Proyectos</span>
+                <input class="form-control" id="filterProject" type="search" placeholder="Buscar por proyecto" />
+              </label>
+              <label class="filter-field">
+                <span>Vigencia</span>
+                <select class="form-select" id="filterValidity" aria-label="Vigencia">
+                  <option>Todos</option>
+                  <option>Sin vencimiento</option>
+                  <option>Por vencer</option>
+                  <option>Vencido</option>
+                </select>
+              </label>
+              <label class="filter-field">
+                <span>Último acceso</span>
+                <input class="form-control" id="filterLastAccess" type="date" aria-label="Último acceso" />
+              </label>
+              <div class="filter-actions" aria-label="Acciones de filtro">
+                <button class="btn filter-action btn-ssee button button-primary" type="submit">
+                  <i class="fa-solid fa-magnifying-glass icon"></i>Buscar
+                </button>
+                <button class="btn filter-action btn-outline-ssee button button-secondary" type="button" id="clearBtn">
+                  <i class="fa-solid fa-rotate-left icon"></i>Limpiar
+                </button>
+              </div>
             </div>
           </form>
           <section class="table-panel" aria-label="Resultados de usuarios">
@@ -218,7 +251,7 @@
           <div class="page-head compact">
             <div>
               <nav class="breadcrumb" aria-label="Ruta">
-                <a href="../index.html">Índice de requerimientos</a> / Administración / Usuarios / Detalle
+                <a href="../index.html">Índice de requerimientos</a> / ALI-REF-006 / Gestión de usuarios / Detalle
               </nav>
               <h1 id="detailTitle">Detalle del usuario</h1>
             </div>
@@ -233,7 +266,7 @@
         </section>
         <footer class="footer">
           <div class="minedu-mark">
-            <span>PERÚ</span><strong>Ministerio de Educación</strong>
+            <img class="minedu-logo" src="../assets/minedu.jpg" alt="Ministerio de Educación">
           </div>
           <div>
             <p>2026. Todos los derechos reservados.</p>
@@ -252,7 +285,18 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
           <div class="modal-body"><p class="modal-context" id="rolesModalContext"></p><div class="access-edit-note" id="accessEditNote" hidden></div><div class="site-picker" id="sitePicker"></div><div class="role-picker" id="rolePicker"></div><div class="project-picker" id="projectPicker"></div><label class="modal-label" id="validityField" for="validitySelect">Vigencia<select class="form-select" id="validitySelect"><option>Sin fecha de vencimiento</option><option>30 días</option><option>90 días</option><option>1 año</option></select></label><p class="modal-feedback" id="roleModalFeedback" hidden></p></div>
-          <div class="modal-footer"><button type="button" class="btn btn-outline-ssee button button-secondary" data-bs-dismiss="modal">Cancelar</button><button type="button" class="btn btn-ssee button button-primary" id="saveRolesBtn">Reasignar</button></div>
+          <div class="modal-footer justify-content-between">
+            <div class="edit-status-control" id="editUserStatusControl" hidden>
+              <span>Estado</span>
+              <label class="form-check form-switch switch">
+                <input class="form-check-input" type="checkbox" id="editUserStatusToggle" aria-label="Activar o inactivar usuario">
+              </label>
+            </div>
+            <div class="form-actions-right">
+              <button type="button" class="btn btn-outline-ssee button button-secondary" id="cancelRolesBtn">Cancelar</button>
+              <button type="button" class="btn btn-ssee button button-primary" id="saveRolesBtn">Reasignar</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -260,6 +304,6 @@
       <div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content role-modal"><div class="modal-header"><div><span class="modal-eyebrow">Confirmar cambio</span><h2 class="modal-title" id="confirmRolesTitle">¿Deseas continuar?</h2></div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div><div class="modal-body"><p class="modal-context" id="confirmRolesMessage"></p></div><div class="modal-footer"><button type="button" class="btn btn-outline-ssee button button-secondary" data-bs-dismiss="modal">No, cancelar</button><button type="button" class="btn btn-ssee button button-primary" id="confirmRolesBtn">Sí, continuar</button></div></div></div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="dist/users.js"></script>
+    <script src="dist/users.js?v=20260824"></script>
   </body>
 </html>

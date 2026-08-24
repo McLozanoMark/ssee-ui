@@ -13,7 +13,7 @@ const standardMessages = {
   "Muestra clonada como borrador.": "M2",
 };
 
-function showToast(element, message, type = "info") {
+function renderToast(element, message, type = "info") {
   message = standardMessages[message] ? getMessage(standardMessages[message]) : message;
   element.classList.remove("is-visible");
   void element.offsetWidth;
@@ -26,8 +26,8 @@ function showToast(element, message, type = "info") {
   element.className = `toast toast-${type}`;
   element.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}" aria-hidden="true"></i><span>${message}</span>`;
   element.classList.add("is-visible");
-  window.clearTimeout(showToast.timeoutId);
-  showToast.timeoutId = window.setTimeout(() => element.classList.remove("is-visible"), 4500);
+  window.clearTimeout(renderToast.timeoutId);
+  renderToast.timeoutId = window.setTimeout(() => element.classList.remove("is-visible"), 4500);
 }
 
 function enableTooltips() {
@@ -132,11 +132,28 @@ const MESSAGE_CATALOG = Object.freeze({
   M67: { text: "Registros exportados correctamente.", type: "Información", scope: "General" }
 });
 
+// Confirmed prototype copy pending official codes in the stakeholder workbook.
+const PROTOTYPE_MESSAGES = Object.freeze({
+  identityLookupSuccess: "Información consultada correctamente.",
+  authenticationSuccess: "Autenticación validada correctamente.",
+  syncStarted: "Sincronización iniciada.",
+  filtersApplied: "Filtros aplicados.",
+  filtersCleared: "Filtros limpiados.",
+  sessionClosed: "La sesión se cerró correctamente.",
+  sessionInactive: "La sesión ya no está activa.",
+  sessionActive: "La sesión continúa activa.",
+  previousSessionClosed: "La sesión anterior fue finalizada automáticamente."
+});
+
 function getMessage(code, values = []) {
   const entry = MESSAGE_CATALOG[code];
   if (!entry) return "";
   let index = 0;
   return entry.text.replace(/%s/g, () => values[index++] ?? "");
+}
+
+function getPrototypeMessage(key) {
+  return PROTOTYPE_MESSAGES[key] || "";
 }
 
 
@@ -152,22 +169,87 @@ const samples = [
 
 /* source: gio-ref-002-muestras/js/state.js */
 
-const state = { filteredSamples: [...samples], editingIndex: null, openMenu: null };
+const state = {
+  filteredSamples: [...samples],
+  editingIndex: null,
+  openMenu: null,
+  step: 1,
+  dirty: false,
+  pendingAction: null,
+  pendingCancel: false,
+  draft: null
+};
+
+function createDraft(sample = null) {
+  state.draft = {
+    id: sample?.id || null,
+    name: sample?.name || "",
+    description: sample?.description || "",
+    source: sample?.source || "",
+    instrument: sample?.instrument || "Instrumento de seguimiento",
+    intervention: sample?.intervention || "",
+    period: sample?.period || "",
+    units: sample?.units || "0",
+    status: sample?.status || "Borrador"
+  };
+  state.step = 1;
+  state.dirty = false;
+}
+
+function resetWizard() {
+  state.editingIndex = null;
+  state.openMenu = null;
+  state.step = 1;
+  state.dirty = false;
+  state.pendingAction = null;
+  state.pendingCancel = false;
+  state.draft = null;
+}
 
 
 /* source: gio-ref-002-muestras/js/ui.js */
 
-const refs = { listView: document.getElementById("listView"), formView: document.getElementById("formView"), samplesBody: document.getElementById("samplesBody"), emptyState: document.getElementById("emptyState"), pageSummary: document.getElementById("pageSummary"), sampleCount: document.getElementById("sampleCount"), toast: document.getElementById("toast"), filterQuery: document.getElementById("filterQuery"), filterStatus: document.getElementById("filterStatus"), filterPeriod: document.getElementById("filterPeriod"), filterIntervention: document.getElementById("filterIntervention"), sampleName: document.getElementById("sampleName"), sampleDescription: document.getElementById("sampleDescription"), sampleSource: document.getElementById("sampleSource"), sampleInstrument: document.getElementById("sampleInstrument"), sampleIntervention: document.getElementById("sampleIntervention"), samplePeriod: document.getElementById("samplePeriod"), nameError: document.getElementById("nameError"), descriptionError: document.getElementById("descriptionError"), formTitle: document.getElementById("formTitle"), formBreadcrumb: document.getElementById("formBreadcrumb") };
-document.querySelectorAll(".location-card strong").forEach((node) => { node.textContent = "Ubicación"; });
-document.querySelectorAll(".account-copy strong").forEach((node) => { node.textContent = "Administrador"; });
 
-function showToast(first, second, third) {
-  const hasElement = first && first.nodeType === 1;
-  return renderToast(hasElement ? first : refs.toast, hasElement ? second : first, hasElement ? third : second);
-}
-{ enableTooltips };
+
+const refs = {
+  listView: document.getElementById("listView"), formView: document.getElementById("formView"), filterForm: document.getElementById("filterForm"), samplesBody: document.getElementById("samplesBody"), emptyState: document.getElementById("emptyState"), pageSummary: document.getElementById("pageSummary"), sampleCount: document.getElementById("sampleCount"), toast: document.getElementById("toast"), filterQuery: document.getElementById("filterQuery"), filterStatus: document.getElementById("filterStatus"), filterPeriod: document.getElementById("filterPeriod"), filterIntervention: document.getElementById("filterIntervention"), sampleName: document.getElementById("sampleName"), sampleDescription: document.getElementById("sampleDescription"), sampleSource: document.getElementById("sampleSource"), sampleInstrument: document.getElementById("sampleInstrument"), sampleIntervention: document.getElementById("sampleIntervention"), samplePeriod: document.getElementById("samplePeriod"), nameError: document.getElementById("nameError"), descriptionError: document.getElementById("descriptionError"), formTitle: document.getElementById("formTitle"), formBreadcrumb: document.getElementById("formBreadcrumb"), wizardSteps: [...document.querySelectorAll("[data-wizard-step]")], wizardPanels: [...document.querySelectorAll("[data-wizard-panel]")], confirmModal: document.getElementById("confirmModal")
+};
+
+function showToast(message, type = "info") { renderToast(refs.toast, message, type); }
 function showList() { refs.listView.classList.add("is-active"); refs.formView.classList.remove("is-active"); }
-function showForm(sample = null) { refs.listView.classList.remove("is-active"); refs.formView.classList.add("is-active"); refs.formTitle.textContent = sample ? "Editar muestra" : "Registrar nueva muestra"; refs.formBreadcrumb.textContent = `Gio / Muestras / ${sample ? "Editar muestra" : "Nueva muestra"}`; refs.sampleName.value = sample?.name || ""; refs.sampleDescription.value = sample?.description || ""; refs.sampleSource.value = sample?.source || ""; refs.sampleIntervention.value = sample?.intervention || ""; refs.samplePeriod.value = sample?.period || ""; }
+function showForm(sample = null) {
+  refs.listView.classList.remove("is-active");
+  refs.formView.classList.add("is-active");
+  refs.formTitle.textContent = sample ? "Editar muestra" : "Registrar muestra";
+  refs.formBreadcrumb.innerHTML = `<a href="../index.html">Índice de requerimientos</a><span>/</span><span>GIO-REF-002</span><span>/</span><span>Muestras</span><span>/</span><span>${sample ? "Editar muestra" : "Registrar muestra"}</span>`;
+  syncFormFields();
+  setFormStep(1);
+}
+function syncFormFields() {
+  const draft = state.draft || {};
+  refs.sampleName.value = draft.name || "";
+  refs.sampleDescription.value = draft.description || "";
+  refs.sampleSource.value = draft.source || "";
+  refs.sampleInstrument.value = draft.instrument || "Instrumento de seguimiento";
+  refs.sampleIntervention.value = draft.intervention || "";
+  refs.samplePeriod.value = draft.period || "";
+}
+function updateDraft() {
+  if (!state.draft) return;
+  Object.assign(state.draft, { name: refs.sampleName.value.trim(), description: refs.sampleDescription.value.trim(), source: refs.sampleSource.value, instrument: refs.sampleInstrument.value, intervention: refs.sampleIntervention.value, period: refs.samplePeriod.value });
+  state.dirty = true;
+}
+function setFormStep(step) {
+  state.step = step;
+  refs.wizardSteps.forEach((item) => { const itemStep = Number(item.dataset.wizardStep); item.classList.toggle("is-current", itemStep === step); item.classList.toggle("is-complete", itemStep < step); item.disabled = false; });
+  refs.wizardPanels.forEach((panel) => panel.classList.toggle("is-active", Number(panel.dataset.wizardPanel) === step));
+  document.getElementById("backBtn").hidden = step === 1;
+  document.getElementById("continueBtn").hidden = step === 2;
+  document.getElementById("completeBtn").hidden = step !== 2;
+  document.getElementById("saveStepBtn").hidden = state.editingIndex === null;
+}
+function clearErrors() { refs.nameError.textContent = ""; refs.descriptionError.textContent = ""; }
+{ enableTooltips, closeMenus };
 
 
 /* source: gio-ref-002-muestras/js/samples.js */
@@ -176,12 +258,29 @@ function showForm(sample = null) { refs.listView.classList.remove("is-active"); 
 
 
 
-refs.emptyState.textContent = getMessage("M9");
-function statusClass(status) { return status === "Publicada" ? "active" : status === "Anulada" ? "expired" : status === "Configurada" ? "warning" : status === "Cerrada" ? "inactive" : ""; }
-function renderSamples() { refs.samplesBody.innerHTML = state.filteredSamples.map((sample) => { const index = samples.indexOf(sample); return `<tr><td><strong>${sample.id}</strong></td><td><strong>${sample.name}</strong><div class="description">${sample.description}</div></td><td>${sample.intervention}</td><td>${sample.period}</td><td>${sample.source}</td><td>${sample.units}</td><td><span class="status ${statusClass(sample.status)}">${sample.status}</span></td><td><div class="action-menu"><button class="menu-btn" type="button" data-menu-button="${index}" aria-expanded="false" aria-label="Abrir acciones de ${sample.name}"><i class="fa-solid fa-ellipsis-vertical"></i></button><div class="legacy-dropdown" data-menu-panel="${index}" hidden><button type="button" data-action="view" data-index="${index}"><i class="fa-regular fa-eye"></i>Ver detalle</button><button type="button" data-action="edit" data-index="${index}"><i class="fa-regular fa-pen-to-square"></i>Editar</button><button type="button" data-action="clone" data-index="${index}"><i class="fa-regular fa-copy"></i>Clonar</button></div></div></td></tr>`; }).join(""); refs.emptyState.hidden = state.filteredSamples.length > 0; refs.pageSummary.textContent = state.filteredSamples.length ? `Mostrando 1 a ${state.filteredSamples.length} de ${state.filteredSamples.length} registros` : "Mostrando 0 registros"; refs.sampleCount.textContent = `${samples.length} muestras registradas`; enableTooltips(); }
-function applyFilters() { const query = refs.filterQuery.value.trim().toLowerCase(); const status = refs.filterStatus.value; const period = refs.filterPeriod.value; const intervention = refs.filterIntervention.value; state.filteredSamples = samples.filter((sample) => [sample.id, sample.name, sample.intervention, sample.source, sample.status].join(" ").toLowerCase().includes(query) && (status === "Todos" || sample.status === status) && (period === "Todos" || sample.period === period) && (intervention === "Todos" || sample.intervention === intervention)); renderSamples(); }
-function handleAction(event) { const menu = event.target.closest("[data-menu-button]"); const action = event.target.closest("[data-action]"); if (menu) { const panel = refs.samplesBody.querySelector(`[data-menu-panel='${menu.dataset.menuButton}']`); const opening = panel?.hidden; closeMenus(refs.samplesBody); if (opening && panel) { panel.hidden = false; menu.setAttribute("aria-expanded", "true"); } return; } if (!action) return; closeMenus(refs.samplesBody); const sample = samples[Number(action.dataset.index)]; if (action.dataset.action === "edit") { state.editingIndex = samples.indexOf(sample); showForm(sample); } else if (action.dataset.action === "clone") { samples.unshift({ ...sample, id: `MST-${String(samples.length + 1).padStart(3, "0")}`, name: `${sample.name} - copia`, status: "Borrador", updated: "18/08/2026 09:30" }); applyFilters(); showToast(refs.toast, "Muestra clonada como borrador.", "success"); } else { showToast(refs.toast, `${sample.name}: ${sample.units} unidades en estado ${sample.status}.`, "info"); } }
-function saveSample(event) { event.preventDefault(); refs.nameError.textContent = refs.sampleName.value.trim() ? "" : "Ingresa el nombre de la muestra."; refs.descriptionError.textContent = refs.sampleDescription.value.trim() ? "" : "Ingresa la descripción de la muestra."; if (!refs.sampleName.value.trim() || !refs.sampleDescription.value.trim() || !refs.sampleSource.value || !refs.sampleIntervention.value || !refs.samplePeriod.value) { showToast(refs.toast, "Completa los campos obligatorios.", "warning"); return; } const previous = state.editingIndex === null ? null : samples[state.editingIndex]; const payload = { id: previous?.id || `MST-${String(samples.length + 1).padStart(3, "0")}`, name: refs.sampleName.value.trim(), description: refs.sampleDescription.value.trim(), source: refs.sampleSource.value, intervention: refs.sampleIntervention.value, period: refs.samplePeriod.value, units: previous?.units || "0", status: previous?.status || "Borrador", updated: "18/08/2026 09:30" }; if (previous) samples[state.editingIndex] = payload; else samples.unshift(payload); state.editingIndex = null; applyFilters(); showList(); showToast(refs.toast, "Muestra registrada correctamente.", "success"); }
+
+const escapeHtml = (value = "") => String(value).replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character]));
+function statusClass(status) { return status === "Publicada" ? "active" : status === "Anulada" ? "expired" : status === "Configurada" ? "draft" : status === "Cerrada" ? "inactive" : ""; }
+
+function renderSamples() {
+  refs.samplesBody.innerHTML = state.filteredSamples.map((sample) => {
+    const index = samples.indexOf(sample);
+    return `<tr><td><strong>${escapeHtml(sample.id)}</strong></td><td><strong>${escapeHtml(sample.name)}</strong><div class="description">${escapeHtml(sample.description)}</div></td><td>${escapeHtml(sample.intervention)}</td><td>${escapeHtml(sample.period)}</td><td>${escapeHtml(sample.source)}</td><td>${escapeHtml(sample.units)}</td><td><span class="status ${statusClass(sample.status)}">${escapeHtml(sample.status)}</span></td><td><div class="row-actions"><button class="row-action" type="button" data-action="view" data-index="${index}" title="Ver detalle"><i class="fa-regular fa-eye" aria-hidden="true"></i><span>Ver detalle</span></button><button class="row-action" type="button" data-action="edit" data-index="${index}" title="Editar"><i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span></button><button class="row-action" type="button" data-action="clone" data-index="${index}" title="Clonar"><i class="fa-regular fa-copy" aria-hidden="true"></i><span>Clonar</span></button></div></td></tr>`;
+  }).join("");
+  refs.emptyState.hidden = state.filteredSamples.length > 0;
+  refs.pageSummary.textContent = state.filteredSamples.length ? `Mostrando 1 a ${state.filteredSamples.length} de ${state.filteredSamples.length} registros` : "Mostrando 0 registros";
+  refs.sampleCount.textContent = `${samples.length} muestras registradas`;
+  enableTooltips();
+}
+function applyFilters() { const query = refs.filterQuery.value.trim().toLowerCase(); const id = document.getElementById("filterId").value.trim().toLowerCase(); const description = document.getElementById("filterDescription").value.trim().toLowerCase(); const source = document.getElementById("filterSource").value.trim().toLowerCase(); const status = refs.filterStatus.value; const period = refs.filterPeriod.value; const intervention = refs.filterIntervention.value; const units = document.getElementById("filterUnits").value; state.filteredSamples = samples.filter((sample) => { const searchable = [sample.id, sample.name, sample.description, sample.intervention, sample.period, sample.source, sample.units, sample.status].join(" ").toLowerCase(); const unitCount = Number(String(sample.units).replace(/,/g, "")); const unitsMatch = units === "Todos" || (units === "0" && unitCount === 0) || (units === "1-500" && unitCount >= 1 && unitCount <= 500) || (units === "501-1000" && unitCount > 500 && unitCount <= 1000) || (units === "1000+" && unitCount > 1000); return searchable.includes(query) && sample.id.toLowerCase().includes(id) && sample.description.toLowerCase().includes(description) && sample.source.toLowerCase().includes(source) && (status === "Todos" || sample.status === status) && (period === "Todos" || sample.period === period) && (intervention === "Todos" || sample.intervention === intervention) && unitsMatch; }); renderSamples(); }
+function handleAction(event) { const action = event.target.closest("[data-action]"); if (!action) return; const sample = samples[Number(action.dataset.index)]; if (action.dataset.action === "edit") { state.editingIndex = samples.indexOf(sample); state.dirty = false; state.draft = { id: sample.id, name: sample.name, description: sample.description, source: sample.source, instrument: sample.instrument || "Instrumento de seguimiento", intervention: sample.intervention, period: sample.period, units: sample.units, status: sample.status }; showForm(sample); } else if (action.dataset.action === "clone") { samples.unshift({ ...sample, id: `MST-${String(samples.length + 1).padStart(3, "0")}`, name: `${sample.name} - copia`, status: "Borrador", updated: "21/08/2026 09:00" }); applyFilters(); showToast("Muestra clonada como borrador.", "success"); } else { showToast(`${sample.name}: ${sample.units} unidades en estado ${sample.status}.`, "info"); } }
+function validateStep(step = state.step) { if (step === 1) { clearErrors(); const validName = refs.sampleName.value.trim(); const validDescription = refs.sampleDescription.value.trim(); refs.nameError.textContent = validName ? "" : "Ingresa el nombre de la muestra."; refs.descriptionError.textContent = validDescription ? "" : "Ingresa la descripción de la muestra."; return Boolean(validName && validDescription && refs.sampleSource.value && refs.sampleIntervention.value && refs.samplePeriod.value); } return true; }
+function persistDraft() { const previous = state.editingIndex === null ? null : samples[state.editingIndex]; if (!previous) return; Object.assign(previous, state.draft, { updated: "21/08/2026 09:00" }); state.dirty = false; applyFilters(); }
+function requestSaveStep() { updateDraft(); if (!validateStep()) { showToast(getMessage("M12"), "warning"); return; } state.pendingAction = "saveStep"; openConfirmModal("confirmModal", getMessage("M1")); }
+function requestComplete() { updateDraft(); if (!validateStep(1)) { showToast(getMessage("M12"), "warning"); return; } state.pendingAction = "complete"; openConfirmModal("confirmModal", getMessage("M1")); }
+function requestCancel() { if (!state.dirty) { resetWizard(); showList(); return; } state.pendingCancel = true; openConfirmModal("confirmModal", getMessage("M14")); }
+function confirmPendingAction() { if (state.pendingCancel) { closeConfirmModal("confirmModal"); resetWizard(); showList(); return; } if (state.pendingAction === "saveStep") { persistDraft(); state.pendingAction = null; closeConfirmModal("confirmModal"); showToast(getMessage("M3"), "success"); return; } if (state.pendingAction === "complete") { const wasEditing = state.editingIndex !== null; const previous = wasEditing ? samples[state.editingIndex] : null; const payload = { id: previous?.id || `MST-${String(samples.length + 1).padStart(3, "0")}`, name: state.draft.name, description: state.draft.description, source: state.draft.source, instrument: state.draft.instrument, intervention: state.draft.intervention, period: state.draft.period, units: previous?.units || "0", status: previous?.status || "Borrador", updated: "21/08/2026 09:00" }; if (wasEditing) samples[state.editingIndex] = payload; else samples.unshift(payload); state.pendingAction = null; closeConfirmModal("confirmModal"); resetWizard(); applyFilters(); showList(); showToast(getMessage(wasEditing ? "M3" : "M2"), "success"); } }
+function updateSampleField() { updateDraft(); }
 
 
 /* source: gio-ref-002-muestras/js/main.js */
@@ -189,14 +288,24 @@ function saveSample(event) { event.preventDefault(); refs.nameError.textContent 
 
 
 
-document.getElementById("filterForm").addEventListener("submit", (event) => { event.preventDefault(); applyFilters(); showToast(refs.toast, "Filtros aplicados.", "info"); });
-["filterQuery", "filterStatus", "filterPeriod", "filterIntervention"].forEach((id) => document.getElementById(id).addEventListener("input", applyFilters));
-document.getElementById("filterToggle").addEventListener("click", () => document.getElementById("filterForm").classList.toggle("is-expanded"));
-document.getElementById("clearBtn").addEventListener("click", () => { refs.filterQuery.value = ""; refs.filterStatus.value = "Todos"; refs.filterPeriod.value = "Todos"; refs.filterIntervention.value = "Todos"; applyFilters(); showToast(refs.toast, "Filtros limpiados.", "info"); });
-document.getElementById("newSampleBtn").addEventListener("click", () => { state.editingIndex = null; document.getElementById("sampleForm").reset(); showForm(); });
-document.getElementById("cancelBtn").addEventListener("click", () => { state.editingIndex = null; showList(); });
-document.getElementById("sampleForm").addEventListener("submit", saveSample);
+
+const $ = (id) => document.getElementById(id);
+function moveStep(step) { setFormStep(step); }
+refs.filterForm.addEventListener("submit", (event) => { event.preventDefault(); applyFilters(); showToast(getPrototypeMessage("filtersApplied"), "info"); });
+$("filterToggle").addEventListener("click", () => { const expanded = refs.filterForm.classList.toggle("is-expanded"); $("filterToggle").setAttribute("aria-expanded", String(expanded)); $("filterToggle").setAttribute("aria-label", expanded ? "Cerrar filtros" : "Abrir filtros"); });
+$("clearBtn").addEventListener("click", () => { refs.filterQuery.value = ""; $("filterId").value = ""; $("filterDescription").value = ""; $("filterSource").value = ""; refs.filterStatus.value = "Todos"; refs.filterPeriod.value = "Todos"; refs.filterIntervention.value = "Todos"; $("filterUnits").value = "Todos"; applyFilters(); showToast(getPrototypeMessage("filtersCleared"), "info"); });
+$("newSampleBtn").addEventListener("click", () => { state.editingIndex = null; createDraft(); showForm(); });
+$("cancelBtn").addEventListener("click", requestCancel);
+$("backBtn").addEventListener("click", () => moveStep(1));
+$("saveStepBtn").addEventListener("click", requestSaveStep);
+$("continueBtn").addEventListener("click", () => { updateDraft(); if (!validateStep()) { showToast(getMessage("M12"), "warning"); return; } moveStep(2); });
+$("completeBtn").addEventListener("click", requestComplete);
+$("sampleForm").addEventListener("input", updateDraft);
+$("sampleForm").addEventListener("change", updateDraft);
+refs.wizardSteps.forEach((button) => button.addEventListener("click", () => { const step = Number(button.dataset.wizardStep); if (step === 2 && !validateStep()) { showToast(getMessage("M12"), "warning"); return; } moveStep(step); }));
 refs.samplesBody.addEventListener("click", handleAction);
-document.getElementById("exportBtn").addEventListener("click", () => showToast(refs.toast, getMessage("M67"), "success"));
+$("exportBtn").addEventListener("click", () => showToast(getMessage("M67"), "success"));
+$("confirmBtn").addEventListener("click", confirmPendingAction);
+$("confirmModal").addEventListener("hidden.bs.modal", () => { state.pendingAction = null; state.pendingCancel = false; });
 document.addEventListener("click", (event) => { if (!event.target.closest(".action-menu")) document.querySelectorAll("[data-menu-panel]").forEach((panel) => { panel.hidden = true; }); });
 renderSamples();

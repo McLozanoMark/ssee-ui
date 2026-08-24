@@ -1,4 +1,5 @@
-import { getMessage } from "../../design-system/messages.js";
+import { getMessage, getPrototypeMessage } from "../../design-system/messages.js";
+import { renderToast } from "../../design-system/interaction.js";
 
 const refs = {
   form: document.getElementById("registrationForm"),
@@ -30,12 +31,7 @@ let consulted = false;
 let periodState = new URLSearchParams(window.location.search).get("period") || "open";
 
 function showToast(message, type = "info") {
-  refs.toast.className = `toast toast-${type}`;
-  const icon = type === "success" ? "fa-circle-check" : type === "warning" ? "fa-triangle-exclamation" : type === "error" ? "fa-circle-xmark" : "fa-circle-info";
-  refs.toast.innerHTML = `<i class="fa-solid ${icon}"></i><span>${message}</span>`;
-  refs.toast.classList.add("is-visible");
-  clearTimeout(showToast.timer);
-  showToast.timer = setTimeout(() => refs.toast.classList.remove("is-visible"), 4500);
+  renderToast(refs.toast, message, type);
 }
 
 function setPeriodState(state) {
@@ -75,8 +71,8 @@ function consultIdentity() {
   refs.paternalSurname.value = identity.paternal;
   refs.maternalSurname.value = identity.maternal;
   consulted = true;
-  setFeedback("Datos de identidad consultados correctamente.", "success");
-  showToast("Información consultada correctamente.", "success");
+  setFeedback(getPrototypeMessage("identityLookupSuccess"), "success");
+  showToast(getPrototypeMessage("identityLookupSuccess"), "success");
 }
 
 function passwordIsValid(value) {

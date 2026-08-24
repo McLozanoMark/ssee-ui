@@ -1,1 +1,71 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>SSEE - REF-002 pendiente</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f4f6fb;font-family:Arial,sans-serif;color:#102a56}.pending{max-width:34rem;padding:2rem;background:#fff;border:1px solid #dbe3f0;border-radius:.75rem;box-shadow:0 .75rem 2rem rgba(15,23,42,.08);text-align:center}.pending i{font-size:2rem;color:#3f35e8}.pending h1{font-size:1.4rem;margin:1rem 0 .5rem}.pending p{color:#64748b;font-size:.9rem;line-height:1.5}.pending a{display:inline-block;margin-top:1rem;color:#3f35e8;font-weight:700;text-decoration:none}</style><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"></head><body><main class="pending"><i class="fa-solid fa-hourglass-half" aria-hidden="true"></i><h1>REF-002 · Permisos de roles</h1><p>Este requerimiento está documentado y pendiente de construcción de su demo local. No se presenta como flujo terminado hasta completar su revisión y dependencias con Gestión de roles.</p><a href="../index.html">← Volver al índice</a></main></body></html>
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SSEE - Gestión de permisos de roles</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="styles.css?v=20260824-inter">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Navegación principal">
+      <div class="side-brand">
+        <div class="logo-symbol" aria-hidden="true">S</div>
+        <div><strong>S.S.E.E.</strong><span>Seguimiento y Evaluación Estratégica</span></div>
+      </div>
+      <nav class="side-nav" aria-label="Menú lateral">
+        <a href="#" class="nav-item is-open">Administración</a>
+        <a href="../ref-001-roles/index.html" class="nav-item">Roles</a>
+        <a href="#" class="nav-item is-active" aria-current="page">Permisos de roles</a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-button top-menu" type="button" aria-label="Abrir menú"><span></span><span></span><span></span></button>
+        <div class="top-divider" aria-hidden="true"></div>
+        <div class="top-info">
+          <div class="info-card"><span class="info-icon" aria-hidden="true"><i class="fa-regular fa-clock"></i></span><div><strong>Último acceso</strong><span>5:00 PM - 25/12/2024</span></div></div>
+          <div class="info-card location-card"><span class="info-icon" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></span><div><strong>Sede</strong><span>Unidad de Seguimiento y Evaluación</span></div><i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i></div>
+        </div>
+        <div class="top-divider" aria-hidden="true"></div>
+        <div class="account"><button class="bell" type="button" aria-label="Notificaciones"><i class="fa-regular fa-bell"></i></button><div class="account-separator" aria-hidden="true"></div><div class="account-copy"><strong>Administrador</strong><span>Superadmin</span></div><div class="avatar" aria-hidden="true">A</div><i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i></div>
+      </header>
+
+      <section class="view is-active permission-page" aria-labelledby="pageTitle">
+        <div class="page-head">
+          <div class="title-cluster">
+            <nav class="breadcrumb" aria-label="Ruta"><a href="../index.html">Índice de requerimientos</a><span>/</span><span>ALI-REF-002</span><span>/</span><span>Gestión de permisos de roles</span></nav>
+            <div class="title-row"><div class="title-icon" aria-hidden="true"><i class="fa-solid fa-shield-halved"></i></div><div><h1 id="pageTitle">Gestión de permisos de roles</h1><p>Configura los privilegios de acceso para un rol.</p></div></div>
+          </div>
+        </div>
+
+        <section class="permission-card" aria-labelledby="roleContextTitle">
+          <div class="permission-context">
+            <div><span class="context-label" id="roleContextTitle">Rol seleccionado</span><label class="visually-hidden" for="roleSelect">Seleccionar rol</label><select class="form-select role-select" id="roleSelect" aria-describedby="roleDescription"></select></div>
+            <div class="context-description"><span class="context-label">Descripción</span><strong id="roleDescription">Gestiona configuración general del sistema.</strong></div>
+            <div class="context-state"><span class="context-label">Estado</span><span class="status active" id="roleStatus">Activo</span></div>
+          </div>
+
+          <div class="permission-toolbar"><div><h2>Permisos del rol</h2><p>Selecciona las operaciones que podrá realizar el rol.</p></div><label class="matrix-search"><span class="visually-hidden">Buscar en la matriz</span><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input class="form-control" id="matrixSearch" type="search" placeholder="Buscar módulo, submenú o funcionalidad"></label></div>
+
+          <div class="permission-panel"><div class="table-wrap"><table class="permission-table" aria-describedby="permissionHint"><thead><tr><th scope="col">Módulo / Submenú / Funcionalidad</th><th scope="col">Consultar</th><th scope="col">Registrar</th><th scope="col">Modificar</th><th scope="col">Eliminar</th><th scope="col">Exportar</th><th scope="col">Validar</th></tr></thead><tbody id="permissionBody"></tbody></table></div></div>
+
+          <div class="permission-meta"><p class="hint" id="permissionHint"><i class="fa-solid fa-circle-info" aria-hidden="true"></i><span>Los permisos operativos requieren el permiso Consultar. Las operaciones no aplicables se muestran deshabilitadas.</span></p><div class="pagination" aria-label="Paginación de permisos"><p>Mostrando 1 a 10 de 10 registros</p><div class="page-buttons"><button class="page-btn" type="button" disabled>&laquo;</button><button class="page-btn" type="button" disabled>&lsaquo;</button><button class="page-btn is-current" type="button">1</button><button class="page-btn" type="button" disabled>&rsaquo;</button><button class="page-btn" type="button" disabled>&raquo;</button></div></div></div>
+
+          <div class="wizard-footer permission-footer"><div class="footer-left"><span class="traceability-note"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i> Los cambios quedan registrados en la auditoría.</span></div><div class="footer-actions"><button class="btn btn-outline-ssee button button-secondary" type="button" id="cancelBtn">Cancelar</button><button class="btn btn-ssee button button-primary" type="button" id="saveBtn">Guardar cambios</button></div></div>
+        </section>
+      </section>
+
+      <footer class="footer"><div class="minedu-mark"><img class="minedu-logo" src="../assets/minedu.jpg" alt="Ministerio de Educación"></div><div><p>2026. Todos los derechos reservados.</p><p>Ministerio de Educación - S.S.E.E. - Versión 0.1</p></div></footer>
+    </main>
+  </div>
+
+  <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content"><div class="modal-header"><h2 class="modal-title h5">Confirmar acción</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div><div class="modal-body"><p data-confirm-message class="mb-0"></p></div><div class="modal-footer"><button type="button" class="btn btn-outline-ssee button button-secondary" data-bs-dismiss="modal">No, cancelar</button><button type="button" class="btn btn-ssee button button-primary" id="confirmBtn">Sí, continuar</button></div></div></div></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <a class="demo-index-link" href="../index.html"><i class="fa-solid fa-list" aria-hidden="true"></i> Volver al índice</a>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script><script src="dist/permissions.js?v=20260824"></script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-const demoIndexLink=document.createElement("a");demoIndexLink.className="demo-index-link";demoIndexLink.href="../index.html";demoIndexLink.textContent="← Volver al índice";document.body.append(demoIndexLink);
+
 /* source: design-system/messages.js */
 const MESSAGE_CATALOG = Object.freeze({
   M1: { text: "¿Está seguro que desea guardar esta información?", type: "Confirmación", scope: "General" },
@@ -157,90 +157,167 @@ function closeConfirmModal(id) {
 }
 
 
-/* source: ref-003-passport/js/main.js */
+/* source: ref-002-permisos/js/data.js */
+const operations = ["Consultar", "Registrar", "Modificar", "Eliminar", "Exportar", "Validar"];
 
-
-
-const records = [
-  { username: "12345678", name: "María Lozano", type: "Passport", roles: ["Administrador USE"], projects: ["Operativo 2026"], status: "Activo" },
-  { username: "87654321", name: "Juan Castro", type: "Documento", roles: ["Supervisor de Seguimiento"], projects: ["Evaluación 2026"], status: "Activo" },
-  { username: "45871236", name: "Rosa Quispe", type: "Autoregistro", roles: [], projects: [], status: "Inactivo" },
-  { username: "74125896", name: "Diego Huamán", type: "Passport", roles: ["Registrador"], projects: ["Seguimiento 2026"], status: "Activo" },
+const roles = [
+  { id: "admin", name: "Administrador USE", description: "Gestiona configuración general del sistema.", status: "Activo" },
+  { id: "supervisor", name: "Supervisor de Seguimiento", description: "Consulta y supervisa avances de seguimiento.", status: "Activo" },
+  { id: "evaluator", name: "Evaluador", description: "Registra y revisa información de evaluación.", status: "Activo" }
 ];
 
-const body = document.getElementById("usersBody");
-const toast = document.getElementById("toast");
-const typeFilter = document.createElement("select");
+const row = (id, level, type, name, parentId, checks, unavailable = []) => ({ id, level, type, name, parentId, checks: { ...checks }, unavailable });
 
-function showToast(message, type = "info") {
-  renderToast(toast, message, type);
-}
+const permissionRows = [
+  row("administracion", 1, "module", "Administración", null, { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }),
+  row("usuarios", 2, "submenu", "Gestión de usuarios", "administracion", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }),
+  row("usuarios-consulta", 3, "functionality", "Consultar usuarios", "usuarios", { Consultar: true, Registrar: false, Modificar: false, Eliminar: false, Exportar: true, Validar: false }, ["Registrar", "Modificar", "Eliminar", "Validar"]),
+  row("usuarios-roles", 3, "functionality", "Asignar roles", "usuarios", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: false, Validar: false }, ["Eliminar", "Exportar", "Validar"]),
+  row("roles", 2, "submenu", "Gestión de roles", "administracion", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }, ["Validar"]),
+  row("roles-permisos", 3, "functionality", "Gestionar permisos de roles", "roles", { Consultar: true, Registrar: false, Modificar: true, Eliminar: false, Exportar: true, Validar: false }, ["Registrar", "Eliminar", "Validar"]),
+  row("instrumentos", 1, "module", "Instrumentos", null, { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: true }),
+  row("instrumentos-gestion", 2, "submenu", "Gestión de instrumentos", "instrumentos", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: true }),
+  row("instrumentos-registro", 3, "functionality", "Registro de instrumentos", "instrumentos-gestion", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }, ["Validar"]),
+  row("instrumentos-validacion", 3, "functionality", "Validación de instrumentos", "instrumentos-gestion", { Consultar: true, Registrar: false, Modificar: true, Eliminar: false, Exportar: false, Validar: true }, ["Eliminar", "Exportar"])
+];
 
-function configureView() {
-  document.querySelector(".side-nav .nav-item.is-active").textContent = "Usuarios";
-  document.querySelector(".location-card strong").textContent = "Sede";
-  document.querySelector(".account-copy strong").textContent = "Administrador";
-  document.querySelector(".location-card").insertAdjacentHTML("beforeend", '<i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>');
-  document.querySelector(".account").innerHTML = '<button class="bell" type="button" aria-label="Notificaciones"><i class="fa-regular fa-bell"></i></button><div class="account-separator" aria-hidden="true"></div><div class="account-copy"><strong>Administrador</strong><span>Superadmin</span></div><div class="avatar" aria-hidden="true">A</div><i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>';
-  document.querySelector(".breadcrumb").innerHTML = '<a href="../index.html">Índice de requerimientos</a> / ALI-REF-003 / Sincronización Passport';
-  document.querySelector("h1").textContent = "Gestión de usuarios";
-  document.querySelector(".page-subtitle").textContent = "Bandeja general de usuarios y sincronización con Passport.";
-  document.getElementById("syncBtn").innerHTML = '<i class="fa-solid fa-rotate"></i> Sincronizar Passport';
-  document.querySelector(".source-notice span").textContent = "La sincronización automática mantiene los datos de Passport actualizados. Este botón permite forzarla de inmediato.";
-  document.querySelector(".table-heading h2").textContent = "Bandeja general de usuarios";
-  document.querySelector(".table-heading .muted").remove();
-  document.querySelector(".ssee-table thead tr").innerHTML = "<th>Usuario</th><th>Nombres y apellidos</th><th>Tipo de autenticación</th><th>Roles</th><th>Proyectos</th><th>Estado</th><th>Acciones</th>";
-  document.querySelector(".result-grid").innerHTML = `
-    <div class="result-card"><i class="fa-solid fa-users"></i><div><span>Total de usuarios</span><strong id="totalUsers">0</strong></div></div>
-    <div class="result-card"><i class="fa-solid fa-user-check"></i><div><span>Activos</span><strong id="activeUsers">0</strong></div></div>
-    <div class="result-card"><i class="fa-solid fa-user-slash"></i><div><span>Inactivos</span><strong id="inactiveUsers">0</strong></div></div>
-    <div class="result-card"><i class="fa-solid fa-user-lock"></i><div><span>Pendientes de acceso</span><strong id="pendingUsers">0</strong></div></div>`;
-  const label = document.createElement("label");
-  label.className = "table-filter";
-  label.innerHTML = "Tipo de autenticación";
-  typeFilter.className = "form-select";
-  typeFilter.innerHTML = "<option>Todos</option><option>Passport</option><option>Documento</option><option>Autoregistro</option>";
-  label.append(typeFilter);
-  document.querySelector(".table-heading").append(label);
-  typeFilter.addEventListener("change", render);
-}
 
-function render() {
-  const type = typeFilter.value || "Todos";
-  const visible = records.filter((record) => type === "Todos" || record.type === type);
-  body.innerHTML = visible.map((record) => `
-    <tr><td><strong>${record.username}</strong></td><td>${record.name}</td><td>${record.type}</td>
-      <td>${record.roles.length ? record.roles.map((role) => `<span class="tag">${role}</span>`).join(" ") : '<span class="muted">Pendiente</span>'}</td>
-      <td>${record.projects.length ? record.projects.map((project) => `<span class="tag">${project}</span>`).join(" ") : '<span class="muted">Pendiente</span>'}</td>
-      <td><span class="status ${record.status === "Activo" ? "active" : "inactive"}">${record.status}</span></td>
-      <td><button class="menu-btn" type="button" data-access-action="open-users" title="Administrar acceso" aria-label="Administrar acceso de ${record.name}"><i class="fa-solid fa-user-gear"></i></button></td></tr>`).join("");
-  document.getElementById("totalUsers").textContent = visible.length;
-  document.getElementById("activeUsers").textContent = visible.filter((record) => record.status === "Activo").length;
-  document.getElementById("inactiveUsers").textContent = visible.filter((record) => record.status === "Inactivo").length;
-  document.getElementById("pendingUsers").textContent = visible.filter((record) => !record.roles.length || !record.projects.length).length;
-}
+/* source: ref-002-permisos/js/state.js */
 
-configureView();
-document.getElementById("syncBtn").addEventListener("click", () => {
-  const button = document.getElementById("syncBtn");
-  const syncState = document.getElementById("syncState");
-  button.disabled = true;
-  syncState.textContent = "En proceso";
-  syncState.className = "status warning";
-  showToast(getPrototypeMessage("syncStarted"), "info");
-  setTimeout(() => {
-    syncState.textContent = "Completada";
-    syncState.className = "status active";
-    document.getElementById("lastSync").textContent = "18/08/2026 09:00";
-    document.getElementById("processed").textContent = "28";
-    button.disabled = false;
-    showToast(getMessage("M22"), "success");
-  }, 1200);
-});
 
-render();
-body.addEventListener("click", (event) => {
-  if (event.target.closest("[data-access-action='open-users']")) {
-    window.location.href = "../ref-006-users/index.html";
+const cloneRows = () => permissionRows.map((item) => ({ ...item, checks: { ...item.checks } }));
+
+const state = { selectedRoleId: roles[0].id, rows: cloneRows(), dirty: false, pendingAction: null, query: "" };
+
+function selectedRole() { return roles.find((role) => role.id === state.selectedRoleId) || roles[0]; }
+function resetDraft() { state.rows = cloneRows(); state.dirty = false; state.pendingAction = null; }
+
+
+/* source: ref-002-permisos/js/permissions.js */
+
+
+
+function descendants(rowId) {
+  const result = [];
+  const queue = [rowId];
+  while (queue.length) {
+    const parentId = queue.shift();
+    state.rows.filter((row) => row.parentId === parentId).forEach((child) => { result.push(child); queue.push(child.id); });
   }
+  return result;
+}
+
+function rowById(rowId) { return state.rows.find((row) => row.id === rowId); }
+
+function setRowOperation(row, operation, checked) {
+  if (row.unavailable.includes(operation)) return;
+  if (operation === "Consultar" && !checked) {
+    row.checks.Consultar = false;
+    operations.filter((item) => item !== "Consultar").forEach((item) => { row.checks[item] = false; });
+    return;
+  }
+  row.checks[operation] = checked;
+  if (checked && operation !== "Consultar") row.checks.Consultar = true;
+}
+
+function isDisabled(row, operation) { return row.unavailable.includes(operation) || (operation !== "Consultar" && !row.checks.Consultar); }
+
+function handlePermissionChange(rowId, operation, checked) {
+  const source = rowById(rowId);
+  if (!source || source.unavailable.includes(operation)) return;
+  setRowOperation(source, operation, checked);
+  descendants(rowId).forEach((child) => setRowOperation(child, operation, checked));
+  state.dirty = true;
+}
+
+function visibleRows() {
+  const query = state.query.trim().toLowerCase();
+  return query ? state.rows.filter((row) => row.name.toLowerCase().includes(query)) : state.rows;
+}
+
+function hasChanges() { return state.dirty; }
+function commitPermissions() { state.dirty = false; }
+
+
+/* source: ref-002-permisos/js/ui.js */
+
+
+
+
+
+const refs = { roleSelect: document.getElementById("roleSelect"), roleDescription: document.getElementById("roleDescription"), roleStatus: document.getElementById("roleStatus"), permissionBody: document.getElementById("permissionBody"), matrixSearch: document.getElementById("matrixSearch"), toast: document.getElementById("toast"), confirmModal: document.getElementById("confirmModal") };
+
+function renderRoleContext(roles) {
+  refs.roleSelect.innerHTML = roles.map((role) => `<option value="${role.id}">${role.name}</option>`).join("");
+  refs.roleSelect.value = state.selectedRoleId;
+  const role = selectedRole();
+  refs.roleDescription.textContent = role.description;
+  refs.roleStatus.textContent = role.status;
+  refs.roleStatus.className = `status ${role.status === "Activo" ? "active" : "inactive"}`;
+}
+
+function renderPermissions() {
+  refs.permissionBody.innerHTML = visibleRows().map((row) => `
+    <tr class="is-${row.type}" data-row-id="${row.id}">
+      <td><span class="permission-name level-${row.level}"><i class="fa-solid ${row.type === "functionality" ? "fa-file-lines" : "fa-folder-open"}" aria-hidden="true"></i>${row.name}</span></td>
+      ${operations.map((operation) => {
+        const disabled = isDisabled(row, operation);
+        const unavailable = row.unavailable.includes(operation);
+        const title = unavailable ? "Operación no aplicable para esta funcionalidad" : (disabled ? "Selecciona Consultar para habilitar esta operación" : "");
+        return `<td><input class="form-check-input${unavailable ? " is-not-applicable" : ""}" type="checkbox" data-row="${row.id}" data-operation="${operation}" ${row.checks[operation] ? "checked" : ""} ${disabled ? "disabled" : ""} aria-label="${operation} en ${row.name}"${title ? ` title="${title}" data-bs-toggle="tooltip"` : ""}></td>`;
+      }).join("")}
+    </tr>
+  `).join("");
+  enableTooltips();
+}
+
+function showToast(message, type = "info") { renderToast(refs.toast, message, type); }
+
+
+/* source: ref-002-permisos/js/main.js */
+
+
+
+
+
+
+
+function rerender() { renderPermissions(); renderRoleContext(roles); }
+
+function confirmAction() {
+  if (state.pendingAction === "save") {
+    commitPermissions();
+    state.pendingAction = null;
+    closeConfirmModal("confirmModal");
+    showToast(getMessage("M18"), "success");
+    return;
+  }
+  if (state.pendingAction === "cancel") {
+    resetDraft();
+    state.pendingAction = null;
+    closeConfirmModal("confirmModal");
+    window.location.href = "../ref-001-roles/index.html";
+  }
+}
+
+refs.permissionBody.addEventListener("change", (event) => {
+  const checkbox = event.target.closest("input[data-row][data-operation]");
+  if (!checkbox) return;
+  handlePermissionChange(checkbox.dataset.row, checkbox.dataset.operation, checkbox.checked);
+  renderPermissions();
 });
+
+refs.roleSelect.addEventListener("change", () => { state.selectedRoleId = refs.roleSelect.value; resetDraft(); rerender(); });
+refs.matrixSearch.addEventListener("input", () => { state.query = refs.matrixSearch.value; renderPermissions(); });
+
+document.getElementById("saveBtn").addEventListener("click", () => { state.pendingAction = "save"; openConfirmModal("confirmModal", getMessage("M1")); });
+document.getElementById("cancelBtn").addEventListener("click", () => {
+  if (!hasChanges()) { window.location.href = "../ref-001-roles/index.html"; return; }
+  state.pendingAction = "cancel";
+  openConfirmModal("confirmModal", getMessage("M14"));
+});
+document.getElementById("confirmBtn").addEventListener("click", confirmAction);
+refs.confirmModal.addEventListener("hidden.bs.modal", () => { state.pendingAction = null; });
+
+renderRoleContext(roles);
+renderPermissions();

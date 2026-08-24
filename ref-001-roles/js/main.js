@@ -2,8 +2,9 @@ import { roles } from "./data.js";
 import { state, resetEditingState } from "./state.js";
 import { refs, clearErrors, closeActionMenus, setFormStep, showForm, showList, showToast } from "./ui.js";
 import { renderPermissions, hasSelectedPermission, selectedPermissionLabels } from "./permissions.js";
-import { applyFilters, handleRoleAction, renderRoles, confirmStatus } from "./roles.js";
-import { getMessage } from "../../design-system/messages.js";
+import { applyFilters, handleRoleAction, renderRoles, confirmStatus, handleEditStatusToggle } from "./roles.js";
+import { getMessage, getPrototypeMessage } from "../../design-system/messages.js";
+import { openConfirmModal, closeConfirmModal } from "../../design-system/interaction.js";
 
 function validateInfo() {
   clearErrors();
@@ -33,13 +34,7 @@ function openRoleForm(role = null, index = null) {
   showForm(role);
 }
 
-function saveRole() {
-  if (!hasSelectedPermission()) {
-    refs.permissionHint.classList.add("is-error");
-    showToast(getMessage("M16"), "warning");
-    return;
-  }
-
+function commitRoleSave({ stay = false } = {}) {
   const selectedLabels = selectedPermissionLabels();
   const savedRole = {
     name: refs.roleName.value.trim(),
@@ -55,36 +50,106 @@ function saveRole() {
   else roles.push(savedRole);
   const message = getMessage(wasEditing ? "M3" : "M2");
   applyFilters();
+  if (stay && wasEditing) {
+    showToast(message, "success");
+    return;
+  }
   showList();
   resetEditingState();
   showToast(message, "success");
 }
 
+function saveEditStep(step) {
+  if (step === "info" && !validateInfo()) return;
+  if (step === "permissions" && !hasSelectedPermission()) {
+    refs.permissionHint.classList.add("is-error");
+    showToast(getMessage("M16"), "warning");
+    return;
+  }
+  state.pendingSaveStep = step;
+  openConfirmModal("confirmModal", getMessage("M1"));
+}
+
+function saveRole() {
+  if (!hasSelectedPermission()) {
+    refs.permissionHint.classList.add("is-error");
+    showToast(getMessage("M16"), "warning");
+    return;
+  }
+  if (state.pendingSave) return;
+  state.pendingSave = true;
+  openConfirmModal("confirmModal", getMessage("M1"));
+}
+
+function cancelRoleForm() {
+  if (state.pendingCancel) return;
+  state.pendingCancel = true;
+  openConfirmModal("confirmModal", getMessage("M14"));
+}
+
+function confirmPendingAction() {
+  if (state.pendingSaveStep) {
+    state.pendingSaveStep = null;
+    closeConfirmModal("confirmModal");
+    commitRoleSave({ stay: true });
+    return;
+  }
+  if (state.pendingSave) {
+    state.pendingSave = false;
+    closeConfirmModal("confirmModal");
+    commitRoleSave();
+    return;
+  }
+  if (state.pendingCancel) {
+    state.pendingCancel = false;
+    closeConfirmModal("confirmModal");
+    showList();
+    resetEditingState();
+    return;
+  }
+  confirmStatus();
+}
+
 refs.filterForm.addEventListener("submit", (event) => {
   event.preventDefault();
   applyFilters();
-  showToast("Filtros aplicados.", "info");
+  showToast(getPrototypeMessage("filtersApplied"), "info");
 });
-refs.filterName.addEventListener("input", applyFilters);
-refs.filterToggle.addEventListener("click", () => refs.filterForm.classList.toggle("is-expanded"));
+refs.filterToggle.addEventListener("click", () => {
+  const expanded = refs.filterForm.classList.toggle("is-expanded");
+  refs.filterToggle.setAttribute("aria-expanded", String(expanded));
+  refs.filterToggle.setAttribute("aria-label", expanded ? "Cerrar filtros" : "Abrir filtros");
+});
 refs.stepInfo.addEventListener("click", () => setFormStep("info"));
 refs.stepPerms.addEventListener("click", () => { if (validateInfo()) setFormStep("permissions"); });
 document.getElementById("clearBtn").addEventListener("click", () => {
   refs.filterName.value = "";
   refs.filterDescription.value = "";
+  document.getElementById("filterPermission").value = "";
+  document.getElementById("filterUsers").value = "Todos";
+  document.getElementById("filterUpdated").value = "";
   refs.filterStatus.value = "Todos";
   applyFilters();
-  showToast("Filtros limpiados.", "info");
+  showToast(getPrototypeMessage("filtersCleared"), "info");
 });
 document.getElementById("newRoleBtn").addEventListener("click", () => openRoleForm());
 document.getElementById("exportBtn").addEventListener("click", () => showToast(getMessage("M67"), "success"));
 refs.rolesBody.addEventListener("click", (event) => handleRoleAction(event, openRoleForm));
+refs.editStatusToggles.forEach((toggle) => toggle.addEventListener("change", handleEditStatusToggle));
 document.addEventListener("click", (event) => { if (!event.target.closest(".action-menu")) closeActionMenus(); });
 document.getElementById("continueBtn").addEventListener("click", () => { if (validateInfo()) setFormStep("permissions"); });
 document.getElementById("backBtn").addEventListener("click", () => setFormStep("info"));
-document.getElementById("cancelInfoBtn").addEventListener("click", () => { showList(); resetEditingState(); });
+document.getElementById("cancelInfoBtn").addEventListener("click", cancelRoleForm);
 document.getElementById("saveRoleBtn").addEventListener("click", saveRole);
-document.getElementById("confirmBtn").addEventListener("click", confirmStatus);
+refs.saveStepButtons.forEach((button) => button.addEventListener("click", () => saveEditStep(button.dataset.saveStep)));
+document.getElementById("confirmBtn").addEventListener("click", confirmPendingAction);
+refs.confirmModal.addEventListener("hidden.bs.modal", () => {
+  state.pendingSave = false;
+  state.pendingSaveStep = null;
+  state.pendingCancel = false;
+  state.pendingEditStatus = null;
+  state.pendingStatus = null;
+});
 
 renderPermissions();
 renderRoles();

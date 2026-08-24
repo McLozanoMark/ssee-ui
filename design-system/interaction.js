@@ -11,7 +11,7 @@ const standardMessages = {
   "Muestra clonada como borrador.": "M2",
 };
 
-export function showToast(element, message, type = "info") {
+export function renderToast(element, message, type = "info") {
   message = standardMessages[message] ? getMessage(standardMessages[message]) : message;
   element.classList.remove("is-visible");
   void element.offsetWidth;
@@ -24,8 +24,8 @@ export function showToast(element, message, type = "info") {
   element.className = `toast toast-${type}`;
   element.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}" aria-hidden="true"></i><span>${message}</span>`;
   element.classList.add("is-visible");
-  window.clearTimeout(showToast.timeoutId);
-  showToast.timeoutId = window.setTimeout(() => element.classList.remove("is-visible"), 4500);
+  window.clearTimeout(renderToast.timeoutId);
+  renderToast.timeoutId = window.setTimeout(() => element.classList.remove("is-visible"), 4500);
 }
 
 export function enableTooltips() {

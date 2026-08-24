@@ -1,4 +1,5 @@
-import { getMessage } from "../../design-system/messages.js";
+import { getMessage, getPrototypeMessage } from "../../design-system/messages.js";
+import { renderToast } from "../../design-system/interaction.js";
 
 const records = [
   { username: "12345678", name: "María Lozano", type: "Passport", roles: ["Administrador USE"], projects: ["Operativo 2026"], status: "Activo" },
@@ -12,20 +13,16 @@ const toast = document.getElementById("toast");
 const typeFilter = document.createElement("select");
 
 function showToast(message, type = "info") {
-  toast.className = `toast toast-${type}`;
-  toast.innerHTML = `<i class="fa-solid ${type === "success" ? "fa-circle-check" : type === "warning" ? "fa-triangle-exclamation" : "fa-circle-info"}"></i><span>${message}</span>`;
-  toast.classList.add("is-visible");
-  clearTimeout(showToast.timer);
-  showToast.timer = setTimeout(() => toast.classList.remove("is-visible"), 4500);
+  renderToast(toast, message, type);
 }
 
 function configureView() {
   document.querySelector(".side-nav .nav-item.is-active").textContent = "Usuarios";
-  document.querySelector(".location-card strong").textContent = "Ubicación";
+  document.querySelector(".location-card strong").textContent = "Sede";
   document.querySelector(".account-copy strong").textContent = "Administrador";
   document.querySelector(".location-card").insertAdjacentHTML("beforeend", '<i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>');
   document.querySelector(".account").innerHTML = '<button class="bell" type="button" aria-label="Notificaciones"><i class="fa-regular fa-bell"></i></button><div class="account-separator" aria-hidden="true"></div><div class="account-copy"><strong>Administrador</strong><span>Superadmin</span></div><div class="avatar" aria-hidden="true">A</div><i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>';
-  document.querySelector(".breadcrumb").textContent = "Administración / Usuarios / Passport";
+  document.querySelector(".breadcrumb").innerHTML = '<a href="../index.html">Índice de requerimientos</a> / ALI-REF-003 / Sincronización Passport';
   document.querySelector("h1").textContent = "Gestión de usuarios";
   document.querySelector(".page-subtitle").textContent = "Bandeja general de usuarios y sincronización con Passport.";
   document.getElementById("syncBtn").innerHTML = '<i class="fa-solid fa-rotate"></i> Sincronizar Passport';
@@ -70,7 +67,7 @@ document.getElementById("syncBtn").addEventListener("click", () => {
   button.disabled = true;
   syncState.textContent = "En proceso";
   syncState.className = "status warning";
-  showToast("Sincronización iniciada.", "info");
+  showToast(getPrototypeMessage("syncStarted"), "info");
   setTimeout(() => {
     syncState.textContent = "Completada";
     syncState.className = "status active";

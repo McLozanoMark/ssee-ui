@@ -67,9 +67,26 @@ export const MESSAGE_CATALOG = Object.freeze({
   M67: { text: "Registros exportados correctamente.", type: "Información", scope: "General" }
 });
 
+// Confirmed prototype copy pending official codes in the stakeholder workbook.
+export const PROTOTYPE_MESSAGES = Object.freeze({
+  identityLookupSuccess: "Información consultada correctamente.",
+  authenticationSuccess: "Autenticación validada correctamente.",
+  syncStarted: "Sincronización iniciada.",
+  filtersApplied: "Filtros aplicados.",
+  filtersCleared: "Filtros limpiados.",
+  sessionClosed: "La sesión se cerró correctamente.",
+  sessionInactive: "La sesión ya no está activa.",
+  sessionActive: "La sesión continúa activa.",
+  previousSessionClosed: "La sesión anterior fue finalizada automáticamente."
+});
+
 export function getMessage(code, values = []) {
   const entry = MESSAGE_CATALOG[code];
   if (!entry) return "";
   let index = 0;
   return entry.text.replace(/%s/g, () => values[index++] ?? "");
+}
+
+export function getPrototypeMessage(key) {
+  return PROTOTYPE_MESSAGES[key] || "";
 }

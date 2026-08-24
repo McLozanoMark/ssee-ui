@@ -1,5 +1,24 @@
-@import url("../design-system/app.css");
+@import url("../design-system/app.css?v=20260824-inter");
 
 .sample-form { display: grid; gap: 1rem; }
 .sample-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
 @media (max-width: 64rem) { .sample-form-grid { grid-template-columns: 1fr; } }
+
+.breadcrumb { display: flex; align-items: center; flex-wrap: wrap; gap: 0.45rem; }
+.breadcrumb a { text-decoration: none; }
+.breadcrumb span { color: var(--ssee-muted); }
+.wizard-card { padding: 1.25rem; border: 1px solid var(--ssee-line); border-radius: 0.75rem; background: #fff; box-shadow: var(--ssee-shadow); }
+.wizard-panel { display: none; min-height: 20rem; }
+.wizard-panel.is-active { display: block; }
+.panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.2rem; }
+.panel-heading h2 { margin: 0.2rem 0 0.25rem; font-size: 1.2rem; }
+.panel-heading p:not(.eyebrow) { margin: 0; color: var(--ssee-muted); font-size: 0.86rem; }
+.eyebrow { margin: 0; color: var(--ssee-primary); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+.source-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.source-form-grid label, .configuration-box label { display: grid; gap: 0.4rem; color: var(--ssee-text); font-size: 0.83rem; font-weight: 700; }
+.field-error { display: block; min-height: 1rem; color: var(--ssee-danger); font-size: 0.74rem; font-weight: 500; }
+.configuration-box { max-width: 32rem; padding: 1rem; border: 1px solid var(--ssee-line); border-radius: 0.55rem; background: #fbfcff; }
+.hint { margin-top: 1rem; }
+.wizard-footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--ssee-line); }
+.footer-actions { display: flex; align-items: center; justify-content: flex-end; gap: 0.65rem; margin-left: auto; }
+@media (max-width: 54rem) { .source-form-grid { grid-template-columns: 1fr; } .wizard-step strong { display: none; } .wizard-step { margin: 0 auto; } .wizard-footer { align-items: stretch; flex-direction: column; } .footer-actions { flex-wrap: wrap; margin-left: 0; } }
