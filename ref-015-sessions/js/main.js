@@ -1,4 +1,5 @@
 import { recordAuditEvent } from "../../design-system/auth-audit.js";
+import { getMessage, getPrototypeMessage } from "../../design-system/messages.js";
 import { sessionUsers } from "./data.js";
 import { createSessionState } from "./state.js";
 import { createSessionMarker, invalidateSession, replaceActiveSession } from "./session.js";
@@ -26,30 +27,30 @@ function endSession(message) {
   state.active = false;
   closeDialog();
   showAuthView(refs, user, message);
-  showToast(refs, "La sesión ya no está activa.", "success");
+  showToast(refs, getPrototypeMessage("sessionInactive"), "success");
 }
 
 if (expired) {
   invalidateSession();
-  showAuthView(refs, user, "La sesión finalizó por inactividad. Inicia sesión nuevamente para continuar.");
-  showToast(refs, "La sesión ha expirado por inactividad.", "warning");
+  showAuthView(refs, user, getMessage("M28"));
+  showToast(refs, getMessage("M28"), "warning");
 } else {
   replaceActiveSession(createSessionMarker(user.name, user.role));
   updateLastInteraction(refs, state.lastInteraction);
   refs.interactButton.addEventListener("click", () => {
     state.lastInteraction = new Date();
     updateLastInteraction(refs, state.lastInteraction);
-    showToast(refs, "La sesión continúa activa.", "success");
+    showToast(refs, getPrototypeMessage("sessionActive"), "success");
   });
   refs.newSessionButton.addEventListener("click", () => {
     replaceActiveSession(createSessionMarker(user.name, user.role));
     state.lastInteraction = new Date();
     updateLastInteraction(refs, state.lastInteraction);
-    showToast(refs, "La sesión anterior fue finalizada automáticamente.", "info");
+    showToast(refs, getPrototypeMessage("previousSessionClosed"), "info");
   });
-  refs.expireButton.addEventListener("click", () => endSession("La sesión finalizó por inactividad. Inicia sesión nuevamente para continuar."));
+  refs.expireButton.addEventListener("click", () => endSession(getMessage("M28")));
   refs.logoutButton.addEventListener("click", () => { refs.confirmDialog.hidden = false; refs.cancelLogout.focus(); });
   refs.cancelLogout.addEventListener("click", closeDialog);
-  refs.confirmLogout.addEventListener("click", () => endSession("La sesión se cerró correctamente. Inicia sesión nuevamente para continuar."));
+  refs.confirmLogout.addEventListener("click", () => endSession(getPrototypeMessage("sessionClosed")));
   refs.confirmDialog.addEventListener("click", (event) => { if (event.target === refs.confirmDialog) closeDialog(); });
 }

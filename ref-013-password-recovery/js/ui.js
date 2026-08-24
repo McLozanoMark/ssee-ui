@@ -1,12 +1,8 @@
 import { getMessage } from "../../design-system/messages.js";
+import { renderToast } from "../../design-system/interaction.js";
 
 export function showToast(refs, message, type = "info") {
-  const icon = type === "success" ? "fa-circle-check" : type === "warning" ? "fa-triangle-exclamation" : type === "error" ? "fa-circle-xmark" : "fa-circle-info";
-  refs.toast.className = `toast toast-${type}`;
-  refs.toast.innerHTML = `<i class="fa-solid ${icon}" aria-hidden="true"></i><span>${message}</span>`;
-  refs.toast.classList.add("is-visible");
-  clearTimeout(showToast.timer);
-  showToast.timer = setTimeout(() => refs.toast.classList.remove("is-visible"), 4500);
+  renderToast(refs.toast, message, type);
 }
 
 export function showFeedback(refs, target, messageCode) {

@@ -69,11 +69,91 @@ const MESSAGE_CATALOG = Object.freeze({
   M67: { text: "Registros exportados correctamente.", type: "Información", scope: "General" }
 });
 
+// Confirmed prototype copy pending official codes in the stakeholder workbook.
+const PROTOTYPE_MESSAGES = Object.freeze({
+  identityLookupSuccess: "Información consultada correctamente.",
+  authenticationSuccess: "Autenticación validada correctamente.",
+  syncStarted: "Sincronización iniciada.",
+  filtersApplied: "Filtros aplicados.",
+  filtersCleared: "Filtros limpiados.",
+  sessionClosed: "La sesión se cerró correctamente.",
+  sessionInactive: "La sesión ya no está activa.",
+  sessionActive: "La sesión continúa activa.",
+  previousSessionClosed: "La sesión anterior fue finalizada automáticamente."
+});
+
 function getMessage(code, values = []) {
   const entry = MESSAGE_CATALOG[code];
   if (!entry) return "";
   let index = 0;
   return entry.text.replace(/%s/g, () => values[index++] ?? "");
+}
+
+function getPrototypeMessage(key) {
+  return PROTOTYPE_MESSAGES[key] || "";
+}
+
+
+/* source: design-system/interaction.js */
+
+
+const standardMessages = {
+  "Completa los campos obligatorios.": "M11",
+  "Fuente registrada correctamente.": "M2",
+  "Muestra registrada correctamente.": "M2",
+  "Asignación registrada correctamente.": "M2",
+  "Asignación reasignada correctamente.": "M3",
+  "Fuente activada correctamente.": "M7",
+  "Fuente inactivada correctamente.": "M8",
+  "Muestra clonada como borrador.": "M2",
+};
+
+function renderToast(element, message, type = "info") {
+  message = standardMessages[message] ? getMessage(standardMessages[message]) : message;
+  element.classList.remove("is-visible");
+  void element.offsetWidth;
+  const icons = {
+    success: "fa-circle-check",
+    error: "fa-circle-exclamation",
+    warning: "fa-triangle-exclamation",
+    info: "fa-circle-info"
+  };
+  element.className = `toast toast-${type}`;
+  element.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}" aria-hidden="true"></i><span>${message}</span>`;
+  element.classList.add("is-visible");
+  window.clearTimeout(renderToast.timeoutId);
+  renderToast.timeoutId = window.setTimeout(() => element.classList.remove("is-visible"), 4500);
+}
+
+function enableTooltips() {
+  if (!window.bootstrap) return;
+  document.querySelectorAll("[data-bs-toggle='tooltip']").forEach((element) => {
+    bootstrap.Tooltip.getOrCreateInstance(element);
+  });
+}
+
+function closeMenus(root = document) {
+  root.querySelectorAll("[data-menu-panel]").forEach((panel) => {
+    panel.hidden = true;
+  });
+  root.querySelectorAll("[data-menu-button]").forEach((button) => {
+    button.setAttribute("aria-expanded", "false");
+  });
+}
+
+function openConfirmModal(id, message) {
+  const modal = document.getElementById(id);
+  if (!modal || !window.bootstrap) return null;
+  const messageNode = modal.querySelector("[data-confirm-message]");
+  if (messageNode) messageNode.textContent = message;
+  const instance = bootstrap.Modal.getOrCreateInstance(modal);
+  instance.show();
+  return instance;
+}
+
+function closeConfirmModal(id) {
+  const modal = document.getElementById(id);
+  if (modal && window.bootstrap) bootstrap.Modal.getOrCreateInstance(modal).hide();
 }
 
 
@@ -126,13 +206,9 @@ function createRecoveryState({ authType, tokenState }) {
 /* source: ref-013-password-recovery/js/ui.js */
 
 
+
 function showToast(refs, message, type = "info") {
-  const icon = type === "success" ? "fa-circle-check" : type === "warning" ? "fa-triangle-exclamation" : type === "error" ? "fa-circle-xmark" : "fa-circle-info";
-  refs.toast.className = `toast toast-${type}`;
-  refs.toast.innerHTML = `<i class="fa-solid ${icon}" aria-hidden="true"></i><span>${message}</span>`;
-  refs.toast.classList.add("is-visible");
-  clearTimeout(showToast.timer);
-  showToast.timer = setTimeout(() => refs.toast.classList.remove("is-visible"), 4500);
+  renderToast(refs.toast, message, type);
 }
 
 function showFeedback(refs, target, messageCode) {
@@ -168,6 +244,7 @@ function validateResetPassword({ newPassword, confirmation, policy }) {
 
 
 
+
 const refs = {
   passportPanel: document.getElementById("passportPanel"), passportRedirect: document.getElementById("passportRedirect"), requestForm: document.getElementById("requestForm"), email: document.getElementById("email"), requestFeedback: document.getElementById("requestFeedback"), backToLogin: document.getElementById("backToLogin"), requestView: document.getElementById("requestView"), sentView: document.getElementById("sentView"), resetView: document.getElementById("resetView"), expiredView: document.getElementById("expiredView"), successView: document.getElementById("successView"), openLink: document.getElementById("openLink"), requestNew: document.getElementById("requestNew"), resetForm: document.getElementById("resetForm"), newPassword: document.getElementById("newPassword"), confirmPassword: document.getElementById("confirmPassword"), resetFeedback: document.getElementById("resetFeedback"), cancelReset: document.getElementById("cancelReset"), policyLength: document.getElementById("policyLength"), policyUpper: document.getElementById("policyUpper"), policyLower: document.getElementById("policyLower"), policyNumber: document.getElementById("policyNumber"), toast: document.getElementById("toast")
 };
@@ -188,7 +265,7 @@ function resetToRequest() {
 if (state.authType === "Passport") {
   refs.requestView.hidden = true;
   refs.passportPanel.hidden = false;
-  refs.passportRedirect.addEventListener("click", () => showToast(refs, "El mecanismo oficial de Passport no tiene una URL configurada en esta demo.", "info"));
+  refs.passportRedirect.addEventListener("click", () => { window.location.href = "../ref-007-auth-passport/index.html"; });
 } else if (state.tokenState === "expired") {
   refs.requestView.hidden = true;
   refs.expiredView.hidden = false;
@@ -204,7 +281,7 @@ if (state.authType === "Passport") {
       return;
     }
     showOnly(refs, "sentView");
-    showToast(refs, "Solicitud procesada correctamente.", "success");
+    showToast(refs, getMessage("M35"), "info");
   });
 
   refs.openLink.addEventListener("click", () => {
@@ -225,14 +302,16 @@ if (state.authType === "Passport") {
     }
     state.tokenUsed = true;
     showOnly(refs, "successView");
-    showToast(refs, "La recuperación de contraseña se realizó correctamente.", "success");
+    showToast(refs, getMessage("M37"), "success");
   });
 }
 
 refs.newPassword.addEventListener("input", () => updatePolicy(refs, refs.newPassword.value, recoveryPolicy));
 refs.requestNew.addEventListener("click", resetToRequest);
 refs.cancelReset.addEventListener("click", resetToRequest);
-refs.backToLogin.addEventListener("click", () => showToast(refs, "La pantalla de autenticación no tiene una ruta configurada en esta demo.", "info"));
+refs.backToLogin.addEventListener("click", () => {
+  window.location.href = authType === "Passport" ? "../ref-007-auth-passport/index.html" : "../ref-009-auth-autoregistro/index.html";
+});
 
 document.querySelectorAll(".password-toggle").forEach((button) => button.addEventListener("click", (event) => {
   const input = event.currentTarget.closest(".password-input").querySelector("input");

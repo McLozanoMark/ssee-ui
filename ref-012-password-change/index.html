@@ -6,7 +6,7 @@
   <title>S.S.E.E. - Cambio de contraseña</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="../design-system/app.css">
+  <link rel="stylesheet" href="../design-system/app.css?v=20260824-inter">
   <link rel="stylesheet" href="../ref-007-auth-passport/styles.css">
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -18,7 +18,7 @@
     </header>
     <main class="auth-main">
       <section class="auth-card password-card">
-        <div class="auth-heading"><span class="auth-icon"><i class="fa-solid fa-key" aria-hidden="true"></i></span><div><nav class="breadcrumb">Cuenta / Seguridad</nav><h1>Cambio de contraseña</h1><p>Actualiza la contraseña de tu cuenta S.S.E.E.</p></div></div>
+        <div class="auth-heading"><span class="auth-icon"><i class="fa-solid fa-key" aria-hidden="true"></i></span><div><nav class="breadcrumb"><a href="../index.html">Índice de requerimientos</a> / ALI-REF-012 / Cambio de contraseña</nav><h1>Cambio de contraseña</h1><p>Actualiza la contraseña de tu cuenta S.S.E.E.</p></div></div>
         <div class="account-summary"><span class="avatar">A</span><div><strong id="accountName">Ana Paredes</strong><span id="accountEmail">ana.paredes@ejemplo.gob.pe</span></div><span class="status active" id="accountType">Autoregistro</span></div>
         <div class="source-notice" id="passportNotice" hidden role="status"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i><div><strong>Cambio administrado por Passport</strong><span>La contraseña de este usuario se gestiona en el mecanismo oficial de Passport.</span><button class="btn btn-outline-ssee btn-sm mt-3" id="passportRedirect" type="button"><i class="fa-solid fa-arrow-right"></i> Ir a Passport</button></div></div>
         <form id="passwordForm" novalidate>
@@ -32,7 +32,7 @@
         <section class="auth-success" id="passwordSuccess" hidden><span><i class="fa-solid fa-circle-check"></i></span><div><h2>Contraseña actualizada</h2><p>El cambio de contraseña se realizó correctamente.</p></div></section>
       </section>
     </main>
-    <footer class="footer"><div class="minedu-mark"><span>PERÚ</span><strong>Ministerio de Educación</strong></div><div><p>2026. Todos los derechos reservados.</p><p>Ministerio de Educación - S.S.E.E. - Versión 0.1</p></div></footer>
+    <footer class="footer"><div class="minedu-mark"><img class="minedu-logo" src="../assets/minedu.jpg" alt="Ministerio de Educación"></div><div><p>2026. Todos los derechos reservados.</p><p>Ministerio de Educación - S.S.E.E. - Versión 0.1</p></div></footer>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="dist/password.js"></script>

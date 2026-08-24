@@ -1,4 +1,5 @@
 import { recordAuditEvent } from "../../design-system/auth-audit.js";
+import { getMessage } from "../../design-system/messages.js";
 import { recoveryPolicy, recoveryUsers } from "./data.js";
 import { createRecoveryState } from "./state.js";
 import { showFeedback, showOnly, showToast, updatePolicy } from "./ui.js";
@@ -24,7 +25,7 @@ function resetToRequest() {
 if (state.authType === "Passport") {
   refs.requestView.hidden = true;
   refs.passportPanel.hidden = false;
-  refs.passportRedirect.addEventListener("click", () => showToast(refs, "El mecanismo oficial de Passport no tiene una URL configurada en esta demo.", "info"));
+  refs.passportRedirect.addEventListener("click", () => { window.location.href = "../ref-007-auth-passport/index.html"; });
 } else if (state.tokenState === "expired") {
   refs.requestView.hidden = true;
   refs.expiredView.hidden = false;
@@ -40,7 +41,7 @@ if (state.authType === "Passport") {
       return;
     }
     showOnly(refs, "sentView");
-    showToast(refs, "Solicitud procesada correctamente.", "success");
+    showToast(refs, getMessage("M35"), "info");
   });
 
   refs.openLink.addEventListener("click", () => {
@@ -61,14 +62,16 @@ if (state.authType === "Passport") {
     }
     state.tokenUsed = true;
     showOnly(refs, "successView");
-    showToast(refs, "La recuperación de contraseña se realizó correctamente.", "success");
+    showToast(refs, getMessage("M37"), "success");
   });
 }
 
 refs.newPassword.addEventListener("input", () => updatePolicy(refs, refs.newPassword.value, recoveryPolicy));
 refs.requestNew.addEventListener("click", resetToRequest);
 refs.cancelReset.addEventListener("click", resetToRequest);
-refs.backToLogin.addEventListener("click", () => showToast(refs, "La pantalla de autenticación no tiene una ruta configurada en esta demo.", "info"));
+refs.backToLogin.addEventListener("click", () => {
+  window.location.href = authType === "Passport" ? "../ref-007-auth-passport/index.html" : "../ref-009-auth-autoregistro/index.html";
+});
 
 document.querySelectorAll(".password-toggle").forEach((button) => button.addEventListener("click", (event) => {
   const input = event.currentTarget.closest(".password-input").querySelector("input");

@@ -1,4 +1,5 @@
 import { recordAuditEvent } from "../../design-system/auth-audit.js";
+import { getMessage } from "../../design-system/messages.js";
 import { passwordPolicy } from "./data.js";
 import { createPasswordState } from "./state.js";
 import { showFeedback, showToast, updateAccount, updatePolicy } from "./ui.js";
@@ -19,7 +20,7 @@ function setPassportView() {
 if (state.authType === "Passport") {
   setPassportView();
   updateAccount(refs, state.user);
-  refs.passportRedirect.addEventListener("click", () => showToast(refs, "El mecanismo oficial de Passport no tiene una URL configurada en esta demo.", "info"));
+  refs.passportRedirect.addEventListener("click", () => { window.location.href = "../ref-007-auth-passport/index.html"; });
 } else {
   updateAccount(refs, state.user);
   refs.next.addEventListener("input", () => updatePolicy(refs, refs.next.value, passwordPolicy));
@@ -36,7 +37,7 @@ if (state.authType === "Passport") {
     }
     refs.form.hidden = true;
     refs.success.hidden = false;
-    showToast(refs, "La contraseña se ha actualizado correctamente.", "success");
+    showToast(refs, getMessage("M33"), "success");
   });
 }
 

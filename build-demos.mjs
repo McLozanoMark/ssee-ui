@@ -32,8 +32,19 @@ await bundle("ref-001-roles/dist/roles.js", [
   "ref-001-roles/js/main.js"
 ]);
 
+await bundle("ref-002-permisos/dist/permissions.js", [
+  "design-system/messages.js",
+  "design-system/interaction.js",
+  "ref-002-permisos/js/data.js",
+  "ref-002-permisos/js/state.js",
+  "ref-002-permisos/js/permissions.js",
+  "ref-002-permisos/js/ui.js",
+  "ref-002-permisos/js/main.js"
+]);
+
 await bundle("ref-006-users/dist/users.js", [
   "design-system/messages.js",
+  "design-system/interaction.js",
   "ref-006-users/js/data.js",
   "ref-006-users/js/state.js",
   "ref-006-users/js/ui.js",
@@ -43,16 +54,19 @@ await bundle("ref-006-users/dist/users.js", [
 
 await bundle("ref-004-admision/dist/admission.js", [
   "design-system/messages.js",
+  "design-system/interaction.js",
   "ref-004-admision/js/main.js"
 ]);
 
 await bundle("ref-005-autoregistro/dist/autoregistro.js", [
   "design-system/messages.js",
+  "design-system/interaction.js",
   "ref-005-autoregistro/js/main.js"
 ]);
 
 await bundle("ref-007-auth-passport/dist/auth.js", [
   "design-system/messages.js",
+  "design-system/interaction.js",
   "design-system/auth-validation.js",
   "design-system/auth-audit.js",
   "ref-007-auth-passport/js/main.js"
@@ -60,6 +74,7 @@ await bundle("ref-007-auth-passport/dist/auth.js", [
 
 await bundle("ref-008-auth-document/dist/auth.js", [
   "design-system/messages.js",
+  "design-system/interaction.js",
   "design-system/auth-validation.js",
   "design-system/auth-audit.js",
   "ref-008-auth-document/js/main.js"
@@ -67,6 +82,7 @@ await bundle("ref-008-auth-document/dist/auth.js", [
 
 await bundle("ref-009-auth-autoregistro/dist/auth.js", [
   "design-system/messages.js",
+  "design-system/interaction.js",
   "design-system/auth-validation.js",
   "design-system/auth-audit.js",
   "ref-009-auth-autoregistro/js/main.js"
@@ -74,6 +90,7 @@ await bundle("ref-009-auth-autoregistro/dist/auth.js", [
 
 await bundle("ref-012-password-change/dist/password.js", [
   "design-system/messages.js",
+  "design-system/interaction.js",
   "design-system/auth-audit.js",
   "ref-012-password-change/js/data.js",
   "ref-012-password-change/js/state.js",
@@ -84,6 +101,7 @@ await bundle("ref-012-password-change/dist/password.js", [
 
 await bundle("ref-013-password-recovery/dist/recovery.js", [
   "design-system/messages.js",
+  "design-system/interaction.js",
   "design-system/auth-audit.js",
   "ref-013-password-recovery/js/data.js",
   "ref-013-password-recovery/js/state.js",
@@ -93,6 +111,8 @@ await bundle("ref-013-password-recovery/dist/recovery.js", [
 ]);
 
 await bundle("ref-014-logout/dist/logout.js", [
+  "design-system/messages.js",
+  "design-system/interaction.js",
   "design-system/auth-audit.js",
   "ref-014-logout/js/data.js",
   "ref-014-logout/js/state.js",
@@ -102,6 +122,8 @@ await bundle("ref-014-logout/dist/logout.js", [
 ]);
 
 await bundle("ref-015-sessions/dist/sessions.js", [
+  "design-system/messages.js",
+  "design-system/interaction.js",
   "design-system/auth-audit.js",
   "ref-015-sessions/js/data.js",
   "ref-015-sessions/js/state.js",
@@ -111,6 +133,8 @@ await bundle("ref-015-sessions/dist/sessions.js", [
 ]);
 
 await bundle("ref-016-welcome/dist/welcome.js", [
+  "design-system/messages.js",
+  "design-system/interaction.js",
   "ref-016-welcome/js/data.js",
   "ref-016-welcome/js/state.js",
   "ref-016-welcome/js/ui.js",
@@ -119,6 +143,7 @@ await bundle("ref-016-welcome/dist/welcome.js", [
 
 await bundle("ref-003-passport/dist/passport.js", [
   "design-system/messages.js",
+  "design-system/interaction.js",
   "ref-003-passport/js/main.js"
 ]);
 

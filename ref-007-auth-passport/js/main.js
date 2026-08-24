@@ -1,4 +1,5 @@
-import { getMessage } from "../../design-system/messages.js";
+import { getMessage, getPrototypeMessage } from "../../design-system/messages.js";
+import { renderToast } from "../../design-system/interaction.js";
 import { hasRequiredValues, validatePassportAccess } from "../../design-system/auth-validation.js";
 import { recordAuthAttempt } from "../../design-system/auth-audit.js";
 
@@ -18,12 +19,7 @@ const passportUsers = {
 };
 
 function showToast(message, type = "info") {
-  refs.toast.className = `toast toast-${type}`;
-  const icon = type === "success" ? "fa-circle-check" : type === "warning" ? "fa-triangle-exclamation" : type === "error" ? "fa-circle-xmark" : "fa-circle-info";
-  refs.toast.innerHTML = `<i class="fa-solid ${icon}"></i><span>${message}</span>`;
-  refs.toast.classList.add("is-visible");
-  clearTimeout(showToast.timer);
-  showToast.timer = setTimeout(() => refs.toast.classList.remove("is-visible"), 4500);
+  renderToast(refs.toast, message, type);
 }
 
 function showError(message) {
@@ -51,7 +47,7 @@ refs.form.addEventListener("submit", (event) => {
   refs.form.hidden = true;
   refs.success.hidden = false;
   recordAuthAttempt({ user: refs.number.value.trim(), authType: "Passport", result: "Exitosa" });
-  showToast("Autenticación validada correctamente.", "success");
+  showToast(getPrototypeMessage("authenticationSuccess"), "success");
 });
 
 document.querySelector(".password-toggle").addEventListener("click", (event) => {

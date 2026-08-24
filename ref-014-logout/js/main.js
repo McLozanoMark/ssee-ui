@@ -1,4 +1,5 @@
 import { recordAuditEvent } from "../../design-system/auth-audit.js";
+import { getMessage, getPrototypeMessage } from "../../design-system/messages.js";
 import { sessionUsers } from "./data.js";
 import { createSessionState } from "./state.js";
 import { invalidateSession } from "./session.js";
@@ -28,14 +29,14 @@ function finishLogout(closureType) {
   closeDialog();
   recordAuditEvent({ user: user.name, authType: state.authType, operation: "Cierre de sesión", closureType, result: "Exitosa" });
   showAuthView(refs, user, false);
-  showToast(refs, "La sesión se cerró correctamente.", "success");
+  showToast(refs, getPrototypeMessage("sessionClosed"), "success");
 }
 
 if (expired) {
   invalidateSession();
   recordAuditEvent({ user: user.name, authType: state.authType, operation: "Cierre de sesión", closureType: "Por expiración de sesión", result: "Exitosa" });
   showAuthView(refs, user, true);
-  showToast(refs, "Tu sesión ha expirado. Inicia sesión nuevamente.", "warning");
+  showToast(refs, getMessage("M28"), "warning");
 } else {
   try { sessionStorage.setItem("ssee-demo-session", "active"); } catch { /* demo continues without storage */ }
   refs.logoutButton.addEventListener("click", () => { refs.confirmDialog.hidden = false; refs.cancelLogout.focus(); });
