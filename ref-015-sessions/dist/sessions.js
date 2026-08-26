@@ -66,7 +66,8 @@ const MESSAGE_CATALOG = Object.freeze({
   M64: { text: "La fuente de datos fue eliminada correctamente.", type: "Información", scope: "General" },
   M65: { text: "No hay registros disponibles. Haz clic en \"Nuevo\" para empezar.", type: "Información", scope: "General" },
   M66: { text: "Complete los datos del rol para activar esta sección.", type: "Alerta", scope: "Roles" },
-  M67: { text: "Registros exportados correctamente.", type: "Información", scope: "General" }
+  M67: { text: "Registros exportados correctamente.", type: "Información", scope: "General" },
+  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" }
 });
 
 // Confirmed prototype copy pending official codes in the stakeholder workbook.
