@@ -111,12 +111,11 @@ export function validateStep(step = state.step) {
     state.draft.name = refs.sourceName.value.trim();
     state.draft.description = refs.sourceDescription.value.trim();
     state.draft.origin = refs.sourceOrigin.value;
-    state.draft.originDetail = refs.sourceOriginDetail.value;
     state.draft.usage = refs.sourceUsage.filter((input) => input.checked).map((input) => input.value);
     refs.nameError.textContent = state.draft.name ? "" : "Ingresa el nombre de la fuente.";
     refs.descriptionError.textContent = state.draft.description ? "" : "Ingresa la descripción de la fuente.";
-    refs.originError.textContent = state.draft.origin && state.draft.originDetail && state.draft.usage.length ? "" : "Completa el origen y selecciona al menos un tipo de uso.";
-    return Boolean(state.draft.name && state.draft.description && state.draft.origin && state.draft.originDetail && state.draft.usage.length);
+    refs.originError.textContent = state.draft.origin && state.draft.usage.length ? "" : "Selecciona un origen y al menos un tipo de uso.";
+    return Boolean(state.draft.name && state.draft.description && state.draft.origin && state.draft.usage.length);
   }
   if (step === 2) {
     const fields = state.draft.fields || [];
@@ -164,6 +163,15 @@ export function requestCancel() {
 }
 
 export function confirmPendingAction() {
+  if (state.pendingWizardStep) {
+    const targetStep = state.pendingWizardStep;
+    state.pendingWizardStep = null;
+    persistDraft();
+    closeConfirmModal("confirmModal");
+    showToast(getMessage("M3"), "success");
+    showStepAfterSave(targetStep);
+    return;
+  }
   if (state.pendingCancel) {
     state.pendingCancel = false;
     state.pendingAction = null;
@@ -220,6 +228,11 @@ export function confirmPendingAction() {
   }
 }
 
+function showStepAfterSave(step) {
+  setWizardStep(step);
+  updateWizardFooter();
+}
+
 export function updateDraftField(index, key, value) {
   if (!state.draft?.fields[index]) return;
   state.draft.fields[index][key] = key === "required" ? Boolean(value) : value;
@@ -231,7 +244,6 @@ export function updateGeneralDraft() {
   state.draft.name = refs.sourceName.value.trim();
   state.draft.description = refs.sourceDescription.value.trim();
   state.draft.origin = refs.sourceOrigin.value;
-  state.draft.originDetail = refs.sourceOriginDetail.value;
   state.draft.usage = refs.sourceUsage.filter((input) => input.checked).map((input) => input.value);
   state.dirty = true;
 }

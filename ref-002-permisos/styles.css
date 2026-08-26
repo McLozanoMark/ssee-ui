@@ -28,7 +28,7 @@
 .permission-table .is-not-applicable { color: var(--ssee-action-disabled); font-size: .75rem; font-weight: 700; }
 .permission-meta { display: grid; gap: .75rem; margin-top: .85rem; }
 .permission-meta .hint { margin: 0; }
-.permission-meta .pagination { margin: 0; padding: 0; border: 0; box-shadow: none; }
+.permission-meta .pagination { margin: 0; padding: 0.85rem 0 0; border-top: 1px solid #edf1f7; box-shadow: none; }
 .permission-footer { margin-top: .5rem; }
 .traceability-note { color: var(--ssee-muted); font-size: .78rem; }
 .traceability-note i { color: var(--ssee-primary); margin-right: .35rem; }

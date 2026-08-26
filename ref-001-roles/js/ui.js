@@ -97,9 +97,9 @@ export function setFormStep(step) {
   refs.stepInfo.classList.toggle("is-complete", !isInfo);
   refs.backButton.hidden = isInfo;
   refs.continueButton.hidden = !isInfo;
-  refs.saveRoleButton.hidden = isInfo || state.editingIndex !== null;
+  refs.saveRoleButton.hidden = isInfo;
   refs.saveStepButtons.forEach((button) => {
-    button.hidden = state.editingIndex === null || button.dataset.saveStep !== step;
+    button.hidden = state.editingIndex === null || step === "permissions" || button.dataset.saveStep !== step;
   });
   if (!isInfo) {
     refs.summaryName.textContent = refs.roleName.value.trim();

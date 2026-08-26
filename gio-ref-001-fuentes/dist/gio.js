@@ -129,7 +129,8 @@ const MESSAGE_CATALOG = Object.freeze({
   M64: { text: "La fuente de datos fue eliminada correctamente.", type: "Información", scope: "General" },
   M65: { text: "No hay registros disponibles. Haz clic en \"Nuevo\" para empezar.", type: "Información", scope: "General" },
   M66: { text: "Complete los datos del rol para activar esta sección.", type: "Alerta", scope: "Roles" },
-  M67: { text: "Registros exportados correctamente.", type: "Información", scope: "General" }
+  M67: { text: "Registros exportados correctamente.", type: "Información", scope: "General" },
+  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" }
 });
 
 // Confirmed prototype copy pending official codes in the stakeholder workbook.
@@ -210,6 +211,7 @@ const state = {
   pendingStatus: null,
   pendingAction: null,
   pendingCancel: false,
+  pendingWizardStep: null,
   openMenu: null,
   step: 1,
   sortKey: "id",
@@ -252,6 +254,7 @@ function resetWizard() {
   state.pendingStatus = null;
   state.pendingAction = null;
   state.pendingCancel = false;
+  state.pendingWizardStep = null;
   state.step = 1;
   state.draft = null;
   state.dirty = false;
@@ -280,7 +283,6 @@ const refs = {
   sourceName: document.getElementById("sourceName"),
   sourceDescription: document.getElementById("sourceDescription"),
   sourceOrigin: document.getElementById("sourceOrigin"),
-  sourceOriginDetail: document.getElementById("sourceOriginDetail"),
   sourceUsage: [...document.querySelectorAll("[data-usage]")],
   nameError: document.getElementById("nameError"),
   descriptionError: document.getElementById("descriptionError"),
@@ -325,7 +327,7 @@ function updateWizardFooter() {
   document.getElementById("backBtn").hidden = state.step === 1;
   document.getElementById("continueBtn").hidden = state.step === 4;
   document.getElementById("completeBtn").hidden = state.step !== 4;
-  document.getElementById("saveStepBtn").hidden = !editing;
+  document.getElementById("saveStepBtn").hidden = !editing || state.step === 4;
   document.getElementById("editStatusControl").hidden = !editing;
   sourceStatusSwitchWrap.hidden = !binaryStatus;
   sourceStatusSwitchWrap.dataset.onLabel = "Activa";
@@ -383,10 +385,6 @@ function syncGeneralFields() {
   refs.sourceName.value = draft.name || "";
   refs.sourceDescription.value = draft.description || "";
   refs.sourceOrigin.value = draft.origin || "";
-  refs.sourceOriginDetail.innerHTML = draft.origin === "Interna"
-    ? "<option value=\"\">Selecciona el sistema institucional</option><option>NEXUS</option><option>ESCALE</option><option>SIAGIE</option>"
-    : "<option value=\"\">Selecciona el tipo de carga</option><option>Manual</option><option>Carga masiva</option>";
-  refs.sourceOriginDetail.value = draft.originDetail || "";
   refs.sourceUsage.forEach((input) => { input.checked = draft.usage?.includes(input.value) || false; });
 }
 
@@ -399,7 +397,7 @@ function renderFields() {
       <td><select class="form-select form-select-sm" data-field="type" data-index="${index}" aria-label="Tipo de dato ${index + 1}">${["Texto", "Número", "Fecha", "Lista"].map((type) => `<option ${field.type === type ? "selected" : ""}>${type}</option>`).join("")}</select></td>
       <td class="text-center"><input class="form-check-input" type="checkbox" data-field="required" data-index="${index}" ${field.required ? "checked" : ""} aria-label="Campo obligatorio ${index + 1}"></td>
       <td><input class="form-control form-control-sm" data-field="description" data-index="${index}" value="${uiEscapeHtml(field.description)}" aria-label="Descripción del campo ${index + 1}"></td>
-      <td><button class="table-icon-button danger" type="button" data-delete-field="${index}" aria-label="Eliminar campo ${field.name}" title="Eliminar"><i class="fa-solid fa-trash" aria-hidden="true"></i></button></td>
+      <td><div class="row-actions"><button class="row-action" type="button" data-action="remove" data-delete-field="${index}" aria-label="Eliminar campo ${field.name}" title="Eliminar"><i class="fa-solid fa-trash" aria-hidden="true"></i><span>Eliminar</span></button></div></td>
     </tr>`).join("");
   refs.fieldsCount.textContent = `Total de campos: ${fields.length}`;
 }
@@ -413,7 +411,7 @@ function renderKeyFields() {
 }
 
 function renderManualRecords() {
-  refs.manualBody.innerHTML = state.manualRecords.map((record, index) => `<tr><td>${index + 1}</td><td>${record.code}</td><td>${record.dni}</td><td>${record.name}</td><td>${record.date}</td><td>${record.sex}</td><td>${record.grade}</td><td><button type="button" class="table-icon-button" data-edit-record="${index}" aria-label="Editar registro"><i class="fa-solid fa-pen" aria-hidden="true"></i></button><button type="button" class="table-icon-button danger" data-delete-record="${index}" aria-label="Eliminar registro"><i class="fa-solid fa-trash" aria-hidden="true"></i></button></td></tr>`).join("");
+  refs.manualBody.innerHTML = state.manualRecords.map((record, index) => `<tr><td>${index + 1}</td><td>${record.code}</td><td>${record.dni}</td><td>${record.name}</td><td>${record.date}</td><td>${record.sex}</td><td>${record.grade}</td><td><div class="row-actions"><button type="button" class="row-action" data-action="edit" data-edit-record="${index}" aria-label="Editar registro" title="Editar"><i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span></button><button type="button" class="row-action" data-action="remove" data-delete-record="${index}" aria-label="Eliminar registro" title="Eliminar"><i class="fa-solid fa-trash" aria-hidden="true"></i><span>Eliminar</span></button></div></td></tr>`).join("");
 }
 
 function updateLoadMode() {
@@ -537,12 +535,11 @@ function validateStep(step = state.step) {
     state.draft.name = refs.sourceName.value.trim();
     state.draft.description = refs.sourceDescription.value.trim();
     state.draft.origin = refs.sourceOrigin.value;
-    state.draft.originDetail = refs.sourceOriginDetail.value;
     state.draft.usage = refs.sourceUsage.filter((input) => input.checked).map((input) => input.value);
     refs.nameError.textContent = state.draft.name ? "" : "Ingresa el nombre de la fuente.";
     refs.descriptionError.textContent = state.draft.description ? "" : "Ingresa la descripción de la fuente.";
-    refs.originError.textContent = state.draft.origin && state.draft.originDetail && state.draft.usage.length ? "" : "Completa el origen y selecciona al menos un tipo de uso.";
-    return Boolean(state.draft.name && state.draft.description && state.draft.origin && state.draft.originDetail && state.draft.usage.length);
+    refs.originError.textContent = state.draft.origin && state.draft.usage.length ? "" : "Selecciona un origen y al menos un tipo de uso.";
+    return Boolean(state.draft.name && state.draft.description && state.draft.origin && state.draft.usage.length);
   }
   if (step === 2) {
     const fields = state.draft.fields || [];
@@ -590,6 +587,15 @@ function requestCancel() {
 }
 
 function confirmPendingAction() {
+  if (state.pendingWizardStep) {
+    const targetStep = state.pendingWizardStep;
+    state.pendingWizardStep = null;
+    persistDraft();
+    closeConfirmModal("confirmModal");
+    showToast(getMessage("M3"), "success");
+    showStepAfterSave(targetStep);
+    return;
+  }
   if (state.pendingCancel) {
     state.pendingCancel = false;
     state.pendingAction = null;
@@ -646,6 +652,11 @@ function confirmPendingAction() {
   }
 }
 
+function showStepAfterSave(step) {
+  setWizardStep(step);
+  updateWizardFooter();
+}
+
 function updateDraftField(index, key, value) {
   if (!state.draft?.fields[index]) return;
   state.draft.fields[index][key] = key === "required" ? Boolean(value) : value;
@@ -657,7 +668,6 @@ function updateGeneralDraft() {
   state.draft.name = refs.sourceName.value.trim();
   state.draft.description = refs.sourceDescription.value.trim();
   state.draft.origin = refs.sourceOrigin.value;
-  state.draft.originDetail = refs.sourceOriginDetail.value;
   state.draft.usage = refs.sourceUsage.filter((input) => input.checked).map((input) => input.value);
   state.dirty = true;
 }
@@ -713,6 +723,7 @@ function registerFile(file) {
 
 
 
+
 const $ = (id) => document.getElementById(id);
 
 function showStep(step) {
@@ -720,8 +731,46 @@ function showStep(step) {
   updateWizardFooter();
 }
 
+function requestWizardStep(step) {
+  if (step === state.step) return;
+  if (state.editingIndex !== null && state.dirty) {
+    if (!validateStep(state.step)) { showToast(getMessage("M12"), "warning"); return; }
+    state.pendingWizardStep = step;
+    openConfirmModal("confirmModal", getMessage("M70"));
+    return;
+  }
+  if (state.editingIndex === null && step > state.step) {
+    for (let current = state.step; current < step; current += 1) {
+      if (!validateStep(current)) { showToast(getMessage("M12"), "warning"); return; }
+    }
+  }
+  showStep(step);
+}
+
 function markFormDirty() {
   state.dirty = true;
+}
+
+function discardSourceChanges() {
+  const source = state.editingIndex === null ? null : sources[state.editingIndex];
+  if (!source) return;
+  createDraft(source);
+  state.loadMode = "manual";
+  syncGeneralFields();
+  renderFields();
+  renderKeyFields();
+  renderManualRecords();
+  updateLoadMode();
+  updateWizardFooter();
+}
+
+function rejectWizardStepChange() {
+  if (state.pendingWizardStep === null) return;
+  const targetStep = state.pendingWizardStep;
+  state.pendingWizardStep = null;
+  discardSourceChanges();
+  closeConfirmModal("confirmModal");
+  showStep(targetStep);
 }
 
 refs.filterForm.addEventListener("submit", (event) => {
@@ -750,20 +799,20 @@ $("newSourceBtn").addEventListener("click", () => {
   updateWizardFooter();
 });
 $("cancelBtn").addEventListener("click", requestCancel);
-$("backBtn").addEventListener("click", () => showStep(Math.max(1, state.step - 1)));
+$("backBtn").addEventListener("click", () => requestWizardStep(Math.max(1, state.step - 1)));
 $("saveStepBtn").addEventListener("click", requestSaveStep);
 $("continueBtn").addEventListener("click", () => {
   if (!validateStep()) { showToast(getMessage("M12"), "warning"); return; }
-  showStep(Math.min(4, state.step + 1));
+  requestWizardStep(Math.min(4, state.step + 1));
 });
-$("completeBtn").addEventListener("click", requestComplete);
+$("completeBtn").addEventListener("click", () => state.editingIndex !== null ? requestSaveStep() : requestComplete());
 $("sourceForm").addEventListener("input", (event) => {
   if (event.target.matches("#sourceName, #sourceDescription")) updateGeneralDraft();
   if (event.target.matches("[data-field]")) updateDraftField(Number(event.target.dataset.index), event.target.dataset.field, event.target.value);
   markFormDirty();
 });
 $("sourceForm").addEventListener("change", (event) => {
-  if (event.target.matches("#sourceOrigin, #sourceOriginDetail, [data-usage]")) {
+  if (event.target.matches("#sourceOrigin, [data-usage]")) {
     updateGeneralDraft();
     if (event.target.id === "sourceOrigin") syncGeneralFields();
   }
@@ -778,15 +827,7 @@ $("sourceStatusSwitch").addEventListener("change", (event) => {
   state.pendingStatus = { index: state.editingIndex, next };
   openConfirmModal("confirmModal", `${getMessage(next === "Activa" ? "M5" : "M6")} ${state.draft?.name || "esta fuente"}?`);
 });
-refs.wizardSteps.forEach((button) => button.addEventListener("click", () => {
-  const step = Number(button.dataset.wizardStep);
-  if (step > state.step) {
-    for (let current = state.step; current < step; current += 1) {
-      if (!validateStep(current)) { showToast(getMessage("M12"), "warning"); return; }
-    }
-  }
-  showStep(step);
-}));
+refs.wizardSteps.forEach((button) => button.addEventListener("click", () => requestWizardStep(Number(button.dataset.wizardStep))));
 $("addFieldBtn").addEventListener("click", () => { addField(); renderFields(); markFormDirty(); });
 refs.fieldsBody.addEventListener("click", (event) => {
   const button = event.target.closest("[data-delete-field]");
@@ -821,7 +862,8 @@ refs.sourcesBody.addEventListener("click", handleAction);
 refs.sourcesBody.addEventListener("change", handleAction);
 $("exportBtn").addEventListener("click", () => showToast(getMessage("M67"), "success"));
 $("confirmBtn").addEventListener("click", confirmPendingAction);
-$("confirmModal").addEventListener("hidden.bs.modal", () => { state.pendingAction = null; state.pendingCancel = false; state.pendingStatus = null; });
+refs.confirmModal.querySelector(".modal-footer [data-bs-dismiss='modal']").addEventListener("click", rejectWizardStepChange);
+$("confirmModal").addEventListener("hidden.bs.modal", () => { state.pendingAction = null; state.pendingCancel = false; state.pendingStatus = null; state.pendingWizardStep = null; });
 document.addEventListener("click", (event) => { if (!event.target.closest(".action-menu")) document.querySelectorAll("[data-menu-panel]").forEach((panel) => { panel.hidden = true; }); });
 
 renderManualRecords();

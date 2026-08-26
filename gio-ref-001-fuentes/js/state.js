@@ -7,6 +7,7 @@ export const state = {
   pendingStatus: null,
   pendingAction: null,
   pendingCancel: false,
+  pendingWizardStep: null,
   openMenu: null,
   step: 1,
   sortKey: "id",
@@ -49,6 +50,7 @@ export function resetWizard() {
   state.pendingStatus = null;
   state.pendingAction = null;
   state.pendingCancel = false;
+  state.pendingWizardStep = null;
   state.step = 1;
   state.draft = null;
   state.dirty = false;

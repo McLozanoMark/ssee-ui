@@ -36,7 +36,7 @@ export function setFormStep(step) {
   document.getElementById("backBtn").hidden = step === 1;
   document.getElementById("continueBtn").hidden = step === 2;
   document.getElementById("completeBtn").hidden = step !== 2;
-  document.getElementById("saveStepBtn").hidden = state.editingIndex === null;
+  document.getElementById("saveStepBtn").hidden = state.editingIndex === null || step === 2;
 }
 export function clearErrors() { refs.nameError.textContent = ""; refs.descriptionError.textContent = ""; }
 export { enableTooltips, closeMenus };

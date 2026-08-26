@@ -94,7 +94,8 @@ const MESSAGE_CATALOG = Object.freeze({
   M64: { text: "La fuente de datos fue eliminada correctamente.", type: "Información", scope: "General" },
   M65: { text: "No hay registros disponibles. Haz clic en \"Nuevo\" para empezar.", type: "Información", scope: "General" },
   M66: { text: "Complete los datos del rol para activar esta sección.", type: "Alerta", scope: "Roles" },
-  M67: { text: "Registros exportados correctamente.", type: "Información", scope: "General" }
+  M67: { text: "Registros exportados correctamente.", type: "Información", scope: "General" },
+  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" }
 });
 
 // Confirmed prototype copy pending official codes in the stakeholder workbook.
@@ -264,7 +265,9 @@ const state = {
   pendingEditStatus: null,
   pendingSave: false,
   pendingSaveStep: null,
-  pendingCancel: false
+  pendingCancel: false,
+  pendingWizardStep: null,
+  dirty: false
 };
 
 function resetEditingState() {
@@ -275,6 +278,8 @@ function resetEditingState() {
   state.pendingSave = false;
   state.pendingSaveStep = null;
   state.pendingCancel = false;
+  state.pendingWizardStep = null;
+  state.dirty = false;
 }
 
 function resetPermissionDraft(role = null) {
@@ -388,9 +393,9 @@ function setFormStep(step) {
   refs.stepInfo.classList.toggle("is-complete", !isInfo);
   refs.backButton.hidden = isInfo;
   refs.continueButton.hidden = !isInfo;
-  refs.saveRoleButton.hidden = isInfo || state.editingIndex !== null;
+  refs.saveRoleButton.hidden = isInfo;
   refs.saveStepButtons.forEach((button) => {
-    button.hidden = state.editingIndex === null || button.dataset.saveStep !== step;
+    button.hidden = state.editingIndex === null || step === "permissions" || button.dataset.saveStep !== step;
   });
   if (!isInfo) {
     refs.summaryName.textContent = refs.roleName.value.trim();
@@ -667,6 +672,8 @@ function validateInfo() {
 
 function openRoleForm(role = null, index = null, sourceRequirement = "ALI-REF-001") {
   state.editingIndex = index;
+  state.dirty = false;
+  state.pendingWizardStep = null;
   resetPermissionDraft(role);
   showForm(role, sourceRequirement);
   renderPermissions();
@@ -690,9 +697,13 @@ function commitRoleSave({ stay = false } = {}) {
   const message = getMessage(wasEditing ? "M3" : "M2");
   applyFilters();
   if (stay && wasEditing) {
+    state.dirty = false;
+    state.permissionDirty = false;
     showToast(message, "success");
     return;
   }
+  state.dirty = false;
+  state.permissionDirty = false;
   showList();
   resetEditingState();
   showToast(message, "success");
@@ -720,13 +731,60 @@ function saveRole() {
   openConfirmModal("confirmModal", getMessage("M1"));
 }
 
+function requestRoleStep(step) {
+  const currentStep = refs.infoStep.classList.contains("is-active") ? "info" : "permissions";
+  if (step === currentStep) return;
+  if (state.editingIndex !== null && state.dirty) {
+    const valid = currentStep === "info" ? validateInfo() : hasSelectedPermission();
+    if (!valid) {
+      if (currentStep === "permissions") refs.permissionHint.classList.add("is-error");
+      showToast(getMessage("M12"), "warning");
+      return;
+    }
+    state.pendingWizardStep = step;
+    openConfirmModal("confirmModal", getMessage("M70"));
+    return;
+  }
+  if (step === "permissions" && !validateInfo()) return;
+  setFormStep(step);
+}
+
 function cancelRoleForm() {
   if (state.pendingCancel) return;
   state.pendingCancel = true;
   openConfirmModal("confirmModal", getMessage("M14"));
 }
 
+function discardRoleChanges() {
+  const role = state.editingIndex === null ? null : roles[state.editingIndex];
+  if (!role) return;
+  refs.roleName.value = role.name;
+  refs.roleDescription.value = role.description;
+  resetPermissionDraft(role);
+  state.dirty = false;
+  state.permissionDirty = false;
+  renderPermissions();
+  clearErrors();
+}
+
+function rejectWizardStepChange() {
+  if (state.pendingWizardStep === null) return;
+  const targetStep = state.pendingWizardStep;
+  state.pendingWizardStep = null;
+  discardRoleChanges();
+  closeConfirmModal("confirmModal");
+  setFormStep(targetStep);
+}
+
 function confirmPendingAction() {
+  if (state.pendingWizardStep) {
+    const targetStep = state.pendingWizardStep;
+    state.pendingWizardStep = null;
+    closeConfirmModal("confirmModal");
+    commitRoleSave({ stay: true });
+    setFormStep(targetStep);
+    return;
+  }
   if (state.pendingSaveStep) {
     state.pendingSaveStep = null;
     closeConfirmModal("confirmModal");
@@ -736,7 +794,7 @@ function confirmPendingAction() {
   if (state.pendingSave) {
     state.pendingSave = false;
     closeConfirmModal("confirmModal");
-    commitRoleSave();
+    commitRoleSave({ stay: state.editingIndex !== null });
     return;
   }
   if (state.pendingCancel) {
@@ -759,8 +817,8 @@ refs.filterToggle.addEventListener("click", () => {
   refs.filterToggle.setAttribute("aria-expanded", String(expanded));
   refs.filterToggle.setAttribute("aria-label", expanded ? "Cerrar filtros" : "Abrir filtros");
 });
-refs.stepInfo.addEventListener("click", () => setFormStep("info"));
-refs.stepPerms.addEventListener("click", () => { if (validateInfo()) setFormStep("permissions"); });
+refs.stepInfo.addEventListener("click", () => requestRoleStep("info"));
+refs.stepPerms.addEventListener("click", () => requestRoleStep("permissions"));
 document.getElementById("clearBtn").addEventListener("click", () => {
   refs.filterName.value = "";
   refs.filterDescription.value = "";
@@ -778,20 +836,25 @@ refs.permissionBody.addEventListener("change", (event) => {
   const checkbox = event.target.closest("input[data-row][data-operation]");
   if (!checkbox) return;
   handlePermissionChange(checkbox.dataset.row, checkbox.dataset.operation, checkbox.checked);
+  state.dirty = true;
   renderPermissions();
 });
+refs.roleName.addEventListener("input", () => { state.dirty = true; });
+refs.roleDescription.addEventListener("input", () => { state.dirty = true; });
 refs.editStatusToggles.forEach((toggle) => toggle.addEventListener("change", handleEditStatusToggle));
 document.addEventListener("click", (event) => { if (!event.target.closest(".action-menu")) closeActionMenus(); });
-document.getElementById("continueBtn").addEventListener("click", () => { if (validateInfo()) setFormStep("permissions"); });
-document.getElementById("backBtn").addEventListener("click", () => setFormStep("info"));
+document.getElementById("continueBtn").addEventListener("click", () => requestRoleStep("permissions"));
+document.getElementById("backBtn").addEventListener("click", () => requestRoleStep("info"));
 document.getElementById("cancelInfoBtn").addEventListener("click", cancelRoleForm);
 document.getElementById("saveRoleBtn").addEventListener("click", saveRole);
 refs.saveStepButtons.forEach((button) => button.addEventListener("click", () => saveEditStep(button.dataset.saveStep)));
 document.getElementById("confirmBtn").addEventListener("click", confirmPendingAction);
+refs.confirmModal.querySelector(".modal-footer [data-bs-dismiss='modal']").addEventListener("click", rejectWizardStepChange);
 refs.confirmModal.addEventListener("hidden.bs.modal", () => {
   state.pendingSave = false;
   state.pendingSaveStep = null;
   state.pendingCancel = false;
+  state.pendingWizardStep = null;
   state.pendingEditStatus = null;
   state.pendingStatus = null;
 });

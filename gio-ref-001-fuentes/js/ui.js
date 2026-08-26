@@ -19,7 +19,6 @@ export const refs = {
   sourceName: document.getElementById("sourceName"),
   sourceDescription: document.getElementById("sourceDescription"),
   sourceOrigin: document.getElementById("sourceOrigin"),
-  sourceOriginDetail: document.getElementById("sourceOriginDetail"),
   sourceUsage: [...document.querySelectorAll("[data-usage]")],
   nameError: document.getElementById("nameError"),
   descriptionError: document.getElementById("descriptionError"),
@@ -64,7 +63,7 @@ export function updateWizardFooter() {
   document.getElementById("backBtn").hidden = state.step === 1;
   document.getElementById("continueBtn").hidden = state.step === 4;
   document.getElementById("completeBtn").hidden = state.step !== 4;
-  document.getElementById("saveStepBtn").hidden = !editing;
+  document.getElementById("saveStepBtn").hidden = !editing || state.step === 4;
   document.getElementById("editStatusControl").hidden = !editing;
   sourceStatusSwitchWrap.hidden = !binaryStatus;
   sourceStatusSwitchWrap.dataset.onLabel = "Activa";
@@ -122,10 +121,6 @@ export function syncGeneralFields() {
   refs.sourceName.value = draft.name || "";
   refs.sourceDescription.value = draft.description || "";
   refs.sourceOrigin.value = draft.origin || "";
-  refs.sourceOriginDetail.innerHTML = draft.origin === "Interna"
-    ? "<option value=\"\">Selecciona el sistema institucional</option><option>NEXUS</option><option>ESCALE</option><option>SIAGIE</option>"
-    : "<option value=\"\">Selecciona el tipo de carga</option><option>Manual</option><option>Carga masiva</option>";
-  refs.sourceOriginDetail.value = draft.originDetail || "";
   refs.sourceUsage.forEach((input) => { input.checked = draft.usage?.includes(input.value) || false; });
 }
 
@@ -138,7 +133,7 @@ export function renderFields() {
       <td><select class="form-select form-select-sm" data-field="type" data-index="${index}" aria-label="Tipo de dato ${index + 1}">${["Texto", "Número", "Fecha", "Lista"].map((type) => `<option ${field.type === type ? "selected" : ""}>${type}</option>`).join("")}</select></td>
       <td class="text-center"><input class="form-check-input" type="checkbox" data-field="required" data-index="${index}" ${field.required ? "checked" : ""} aria-label="Campo obligatorio ${index + 1}"></td>
       <td><input class="form-control form-control-sm" data-field="description" data-index="${index}" value="${uiEscapeHtml(field.description)}" aria-label="Descripción del campo ${index + 1}"></td>
-      <td><button class="table-icon-button danger" type="button" data-delete-field="${index}" aria-label="Eliminar campo ${field.name}" title="Eliminar"><i class="fa-solid fa-trash" aria-hidden="true"></i></button></td>
+      <td><div class="row-actions"><button class="row-action" type="button" data-action="remove" data-delete-field="${index}" aria-label="Eliminar campo ${field.name}" title="Eliminar"><i class="fa-solid fa-trash" aria-hidden="true"></i><span>Eliminar</span></button></div></td>
     </tr>`).join("");
   refs.fieldsCount.textContent = `Total de campos: ${fields.length}`;
 }
@@ -152,7 +147,7 @@ export function renderKeyFields() {
 }
 
 export function renderManualRecords() {
-  refs.manualBody.innerHTML = state.manualRecords.map((record, index) => `<tr><td>${index + 1}</td><td>${record.code}</td><td>${record.dni}</td><td>${record.name}</td><td>${record.date}</td><td>${record.sex}</td><td>${record.grade}</td><td><button type="button" class="table-icon-button" data-edit-record="${index}" aria-label="Editar registro"><i class="fa-solid fa-pen" aria-hidden="true"></i></button><button type="button" class="table-icon-button danger" data-delete-record="${index}" aria-label="Eliminar registro"><i class="fa-solid fa-trash" aria-hidden="true"></i></button></td></tr>`).join("");
+  refs.manualBody.innerHTML = state.manualRecords.map((record, index) => `<tr><td>${index + 1}</td><td>${record.code}</td><td>${record.dni}</td><td>${record.name}</td><td>${record.date}</td><td>${record.sex}</td><td>${record.grade}</td><td><div class="row-actions"><button type="button" class="row-action" data-action="edit" data-edit-record="${index}" aria-label="Editar registro" title="Editar"><i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span></button><button type="button" class="row-action" data-action="remove" data-delete-record="${index}" aria-label="Eliminar registro" title="Eliminar"><i class="fa-solid fa-trash" aria-hidden="true"></i><span>Eliminar</span></button></div></td></tr>`).join("");
 }
 
 export function updateLoadMode() {

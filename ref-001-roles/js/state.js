@@ -16,7 +16,9 @@ export const state = {
   pendingEditStatus: null,
   pendingSave: false,
   pendingSaveStep: null,
-  pendingCancel: false
+  pendingCancel: false,
+  pendingWizardStep: null,
+  dirty: false
 };
 
 export function resetEditingState() {
@@ -27,6 +29,8 @@ export function resetEditingState() {
   state.pendingSave = false;
   state.pendingSaveStep = null;
   state.pendingCancel = false;
+  state.pendingWizardStep = null;
+  state.dirty = false;
 }
 
 export function resetPermissionDraft(role = null) {

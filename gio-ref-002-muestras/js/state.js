@@ -7,6 +7,7 @@ export const state = {
   dirty: false,
   pendingAction: null,
   pendingCancel: false,
+  pendingWizardStep: null,
   draft: null
 };
 
@@ -33,5 +34,6 @@ export function resetWizard() {
   state.dirty = false;
   state.pendingAction = null;
   state.pendingCancel = false;
+  state.pendingWizardStep = null;
   state.draft = null;
 }

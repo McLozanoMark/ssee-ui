@@ -66,7 +66,8 @@ const MESSAGE_CATALOG = Object.freeze({
   M64: { text: "La fuente de datos fue eliminada correctamente.", type: "Información", scope: "General" },
   M65: { text: "No hay registros disponibles. Haz clic en \"Nuevo\" para empezar.", type: "Información", scope: "General" },
   M66: { text: "Complete los datos del rol para activar esta sección.", type: "Alerta", scope: "Roles" },
-  M67: { text: "Registros exportados correctamente.", type: "Información", scope: "General" }
+  M67: { text: "Registros exportados correctamente.", type: "Información", scope: "General" },
+  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" }
 });
 
 // Confirmed prototype copy pending official codes in the stakeholder workbook.
@@ -213,7 +214,7 @@ function render() {
       <td>${record.roles.length ? record.roles.map((role) => `<span class="tag">${role}</span>`).join(" ") : '<span class="muted">Pendiente</span>'}</td>
       <td>${record.projects.length ? record.projects.map((project) => `<span class="tag">${project}</span>`).join(" ") : '<span class="muted">Pendiente</span>'}</td>
       <td><span class="status ${record.status === "Activo" ? "active" : "inactive"}">${record.status}</span></td>
-      <td><button class="menu-btn" type="button" data-access-action="open-users" title="Administrar acceso" aria-label="Administrar acceso de ${record.name}"><i class="fa-solid fa-user-gear"></i></button></td></tr>`).join("");
+      <td><div class="row-actions"><button class="row-action" type="button" data-action="roles" data-access-action="open-users" title="Administrar acceso" aria-label="Administrar acceso de ${record.name}"><i class="fa-solid fa-user-gear" aria-hidden="true"></i><span>Administrar acceso</span></button></div></td></tr>`).join("");
   document.getElementById("totalUsers").textContent = visible.length;
   document.getElementById("activeUsers").textContent = visible.filter((record) => record.status === "Activo").length;
   document.getElementById("inactiveUsers").textContent = visible.filter((record) => record.status === "Inactivo").length;

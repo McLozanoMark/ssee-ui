@@ -53,7 +53,7 @@ function render() {
       <td>${record.roles.length ? record.roles.map((role) => `<span class="tag">${role}</span>`).join(" ") : '<span class="muted">Pendiente</span>'}</td>
       <td>${record.projects.length ? record.projects.map((project) => `<span class="tag">${project}</span>`).join(" ") : '<span class="muted">Pendiente</span>'}</td>
       <td><span class="status ${record.status === "Activo" ? "active" : "inactive"}">${record.status}</span></td>
-      <td><button class="menu-btn" type="button" data-access-action="open-users" title="Administrar acceso" aria-label="Administrar acceso de ${record.name}"><i class="fa-solid fa-user-gear"></i></button></td></tr>`).join("");
+      <td><div class="row-actions"><button class="row-action" type="button" data-action="roles" data-access-action="open-users" title="Administrar acceso" aria-label="Administrar acceso de ${record.name}"><i class="fa-solid fa-user-gear" aria-hidden="true"></i><span>Administrar acceso</span></button></div></td></tr>`).join("");
   document.getElementById("totalUsers").textContent = visible.length;
   document.getElementById("activeUsers").textContent = visible.filter((record) => record.status === "Activo").length;
   document.getElementById("inactiveUsers").textContent = visible.filter((record) => record.status === "Inactivo").length;

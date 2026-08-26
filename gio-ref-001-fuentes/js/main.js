@@ -1,8 +1,9 @@
+import { sources } from "./data.js";
 import { state, createDraft } from "./state.js";
 import { refs, showForm, showToast, setWizardStep, syncGeneralFields, renderFields, renderKeyFields, renderManualRecords, updateLoadMode, updateWizardFooter } from "./ui.js";
 import { applyFilters, renderSources, handleAction, handleSort, validateStep, requestSaveStep, requestComplete, requestCancel, confirmPendingAction, updateDraftField, updateGeneralDraft, addField, deleteField, addKeyField, removeKeyField, setKeyType, selectLoadMode, registerFile } from "./sources.js";
 import { getMessage, getPrototypeMessage } from "../../design-system/messages.js";
-import { openConfirmModal } from "../../design-system/interaction.js";
+import { openConfirmModal, closeConfirmModal } from "../../design-system/interaction.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -11,8 +12,46 @@ function showStep(step) {
   updateWizardFooter();
 }
 
+function requestWizardStep(step) {
+  if (step === state.step) return;
+  if (state.editingIndex !== null && state.dirty) {
+    if (!validateStep(state.step)) { showToast(getMessage("M12"), "warning"); return; }
+    state.pendingWizardStep = step;
+    openConfirmModal("confirmModal", getMessage("M70"));
+    return;
+  }
+  if (state.editingIndex === null && step > state.step) {
+    for (let current = state.step; current < step; current += 1) {
+      if (!validateStep(current)) { showToast(getMessage("M12"), "warning"); return; }
+    }
+  }
+  showStep(step);
+}
+
 function markFormDirty() {
   state.dirty = true;
+}
+
+function discardSourceChanges() {
+  const source = state.editingIndex === null ? null : sources[state.editingIndex];
+  if (!source) return;
+  createDraft(source);
+  state.loadMode = "manual";
+  syncGeneralFields();
+  renderFields();
+  renderKeyFields();
+  renderManualRecords();
+  updateLoadMode();
+  updateWizardFooter();
+}
+
+function rejectWizardStepChange() {
+  if (state.pendingWizardStep === null) return;
+  const targetStep = state.pendingWizardStep;
+  state.pendingWizardStep = null;
+  discardSourceChanges();
+  closeConfirmModal("confirmModal");
+  showStep(targetStep);
 }
 
 refs.filterForm.addEventListener("submit", (event) => {
@@ -41,20 +80,20 @@ $("newSourceBtn").addEventListener("click", () => {
   updateWizardFooter();
 });
 $("cancelBtn").addEventListener("click", requestCancel);
-$("backBtn").addEventListener("click", () => showStep(Math.max(1, state.step - 1)));
+$("backBtn").addEventListener("click", () => requestWizardStep(Math.max(1, state.step - 1)));
 $("saveStepBtn").addEventListener("click", requestSaveStep);
 $("continueBtn").addEventListener("click", () => {
   if (!validateStep()) { showToast(getMessage("M12"), "warning"); return; }
-  showStep(Math.min(4, state.step + 1));
+  requestWizardStep(Math.min(4, state.step + 1));
 });
-$("completeBtn").addEventListener("click", requestComplete);
+$("completeBtn").addEventListener("click", () => state.editingIndex !== null ? requestSaveStep() : requestComplete());
 $("sourceForm").addEventListener("input", (event) => {
   if (event.target.matches("#sourceName, #sourceDescription")) updateGeneralDraft();
   if (event.target.matches("[data-field]")) updateDraftField(Number(event.target.dataset.index), event.target.dataset.field, event.target.value);
   markFormDirty();
 });
 $("sourceForm").addEventListener("change", (event) => {
-  if (event.target.matches("#sourceOrigin, #sourceOriginDetail, [data-usage]")) {
+  if (event.target.matches("#sourceOrigin, [data-usage]")) {
     updateGeneralDraft();
     if (event.target.id === "sourceOrigin") syncGeneralFields();
   }
@@ -69,15 +108,7 @@ $("sourceStatusSwitch").addEventListener("change", (event) => {
   state.pendingStatus = { index: state.editingIndex, next };
   openConfirmModal("confirmModal", `${getMessage(next === "Activa" ? "M5" : "M6")} ${state.draft?.name || "esta fuente"}?`);
 });
-refs.wizardSteps.forEach((button) => button.addEventListener("click", () => {
-  const step = Number(button.dataset.wizardStep);
-  if (step > state.step) {
-    for (let current = state.step; current < step; current += 1) {
-      if (!validateStep(current)) { showToast(getMessage("M12"), "warning"); return; }
-    }
-  }
-  showStep(step);
-}));
+refs.wizardSteps.forEach((button) => button.addEventListener("click", () => requestWizardStep(Number(button.dataset.wizardStep))));
 $("addFieldBtn").addEventListener("click", () => { addField(); renderFields(); markFormDirty(); });
 refs.fieldsBody.addEventListener("click", (event) => {
   const button = event.target.closest("[data-delete-field]");
@@ -112,7 +143,8 @@ refs.sourcesBody.addEventListener("click", handleAction);
 refs.sourcesBody.addEventListener("change", handleAction);
 $("exportBtn").addEventListener("click", () => showToast(getMessage("M67"), "success"));
 $("confirmBtn").addEventListener("click", confirmPendingAction);
-$("confirmModal").addEventListener("hidden.bs.modal", () => { state.pendingAction = null; state.pendingCancel = false; state.pendingStatus = null; });
+refs.confirmModal.querySelector(".modal-footer [data-bs-dismiss='modal']").addEventListener("click", rejectWizardStepChange);
+$("confirmModal").addEventListener("hidden.bs.modal", () => { state.pendingAction = null; state.pendingCancel = false; state.pendingStatus = null; state.pendingWizardStep = null; });
 document.addEventListener("click", (event) => { if (!event.target.closest(".action-menu")) document.querySelectorAll("[data-menu-panel]").forEach((panel) => { panel.hidden = true; }); });
 
 renderManualRecords();

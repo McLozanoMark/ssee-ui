@@ -8,9 +8,11 @@
 .sort-button[aria-sort="ascending"] i, .sort-button[aria-sort="descending"] i { color: var(--ssee-primary); }
 .sort-button .fa-arrow-up, .sort-button .fa-arrow-down { font-size: 0.72rem; }
 .description { margin-top: 0.2rem; color: var(--ssee-muted); font-size: 0.78rem; line-height: 1.35; max-width: 22rem; }
-.origin-tag { display: inline-flex; align-items: center; max-width: 14rem; padding: 0.28rem 0.55rem; border: 1px solid #cbd5e1; border-radius: 0.45rem; background: #fff; color: var(--ssee-text); font-size: 0.76rem; }
-.origin-tag.internal { color: #14532d; border-color: #bbf7d0; background: #f0fdf4; }
-.origin-tag.external { color: #1e3a8a; border-color: #bfdbfe; background: #eff6ff; }
+.origin-tag { display: inline-flex; align-items: center; gap: 0.42rem; max-width: 14rem; padding: 0.3rem 0.65rem; border: 1px solid #ccebd9; border-radius: 999px; background: #f1faf5; color: #176b46; font-size: 0.74rem; font-weight: 650; white-space: nowrap; }
+.origin-tag::before { content: ""; width: 0.42rem; height: 0.42rem; flex: 0 0 auto; border-radius: 50%; background: #1b9a5f; }
+.origin-tag.internal { color: #176b46; border-color: #ccebd9; background: #f1faf5; }
+.origin-tag.external { color: #2452a1; border-color: #d3e1ff; background: #f2f6ff; }
+.origin-tag.external::before { background: #3f73e8; }
 .source-actions { min-width: 15rem; }
 .status.draft { color: #92400e; border-color: #fde68a; background: #fffbeb; }
 .status.expired { color: #64748b; background: #f8fafc; }

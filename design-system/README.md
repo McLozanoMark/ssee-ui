@@ -75,10 +75,29 @@ mark, the same rem rhythm as the shell and the responsive size contract from
   confirmation, keeps the user on that step, and shows the success toast.
 - `Continuar` validates and advances. `Atrás` returns to the previous step.
   `Cancelar` exits the wizard and confirms when there are unsaved changes.
+- On the last wizard step, show only the primary `Guardar` action on the right;
+  do not show `Siguiente`. In creation it completes the registration; in edit it
+  saves the current step and keeps the user in the wizard.
+- Wizard footer commands reuse the shared icons: arrow-left for `Atrás`, x-mark
+  for `Cancelar`, floppy-disk for `Guardar`, and arrow-right for `Siguiente`.
+- In every data table, `Acciones` is the final column, sized to its controls and
+  aligned to the right edge. The remaining columns use the available width; no
+  trailing blank area is introduced after the action controls.
+- Data tables use the shared visual treatment: white rows, a subtle grid,
+  compact pill-shaped tags and statuses, and the same compact pagination with
+  the result count at left, page controls centered and page size at right.
+- In edit mode, selecting another step with unsaved changes uses message `M70`:
+  `Sí` saves the current step, shows the standard success toast and then moves
+  to the selected step. `No` discards the unsaved changes and moves to the
+  selected step without a toast. Creation wizards do not use this interception.
 - Every confirmation modal uses exactly `No` for rejection and `Sí` for
   acceptance. Do not append contextual text such as `No, volver`,
   `No, cancelar` or `Sí, continuar`; the action context belongs in the modal
   message, not in the button label.
+- Modal headers use the shared compact treatment: the contextual icon sits
+  before the title, the title and close control are vertically centered, and
+  the header must not introduce oversized empty space. Confirmation icons do
+  not appear in the modal body.
 
 The message catalog was transcribed from Ali's shared workbook screenshot on
 2026-08-19. The original XLSX remains the authoritative source if a wording or
