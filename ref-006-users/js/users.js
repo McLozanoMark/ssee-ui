@@ -113,7 +113,7 @@ export function openRoles(index, mode = "roles") {
   const canEditAny = canEditRoles || canEditSite || canEditValidity;
   const canToggleStatus = ["Documento", "Autoregistro"].includes(roleTarget.auth);
   refs.rolesModalTitle.textContent = mode === "edit" ? "Editar acceso" : "Asignar roles";
-  document.getElementById("saveRolesBtn").textContent = mode === "edit" ? "Guardar" : "Reasignar";
+  document.getElementById("saveRolesBtn").textContent = "Guardar";
   document.getElementById("saveRolesBtn").hidden = !canEditAny;
   refs.rolesModalContext.textContent = mode === "edit"
     ? `Actualiza los datos permitidos para ${roleTarget.name}.`

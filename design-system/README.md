@@ -80,6 +80,11 @@ mark, the same rem rhythm as the shell and the responsive size contract from
   saves the current step and keeps the user in the wizard.
 - Wizard footer commands reuse the shared icons: arrow-left for `Atrás`, x-mark
   for `Cancelar`, floppy-disk for `Guardar`, and arrow-right for `Siguiente`.
+- Any button that commits form data uses the generic label `Guardar`, regardless
+  of the module or business flow. The title and supporting copy may explain the
+  context, but the submit button must not use labels such as `Guardar cambios`,
+  `Guardar rol`, `Guardar fuente`, `Guardar asignación`, `Reasignar`, or
+  `Reemplazar unidad` when those actions are submitting form data.
 - In every data table, `Acciones` is the final column, sized to its controls and
   aligned to the right edge. The remaining columns use the available width; no
   trailing blank area is introduced after the action controls.
