@@ -1,4 +1,32 @@
 
+/* source: design-system/permission-catalog.js */
+const sharedPermissionOperations = ["Consultar", "Registrar", "Modificar", "Eliminar", "Exportar", "Validar"];
+
+const row = (id, level, type, name, parentId, checks, unavailable = []) => ({
+  id,
+  level,
+  type,
+  name,
+  parentId,
+  checks: { ...checks },
+  unavailable: [...unavailable]
+});
+
+// Canonical prototype catalog shared by the role wizard and the REF-002 traceability route.
+const sharedPermissionRows = [
+  row("administracion", 1, "module", "Administración", null, { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }),
+  row("usuarios", 2, "submenu", "Gestión de usuarios", "administracion", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }),
+  row("usuarios-consulta", 3, "functionality", "Consultar usuarios", "usuarios", { Consultar: true, Registrar: false, Modificar: false, Eliminar: false, Exportar: true, Validar: false }, ["Registrar", "Modificar", "Eliminar", "Validar"]),
+  row("usuarios-roles", 3, "functionality", "Asignar roles", "usuarios", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: false, Validar: false }, ["Eliminar", "Exportar", "Validar"]),
+  row("roles", 2, "submenu", "Gestión de roles", "administracion", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }, ["Validar"]),
+  row("roles-permisos", 3, "functionality", "Gestionar permisos de roles", "roles", { Consultar: true, Registrar: false, Modificar: true, Eliminar: false, Exportar: true, Validar: false }, ["Registrar", "Eliminar", "Validar"]),
+  row("instrumentos", 1, "module", "Instrumentos", null, { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: true }),
+  row("instrumentos-gestion", 2, "submenu", "Gestión de instrumentos", "instrumentos", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: true }),
+  row("instrumentos-registro", 3, "functionality", "Registro de instrumentos", "instrumentos-gestion", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }, ["Validar"]),
+  row("instrumentos-validacion", 3, "functionality", "Validación de instrumentos", "instrumentos-gestion", { Consultar: true, Registrar: false, Modificar: true, Eliminar: false, Exportar: false, Validar: true }, ["Eliminar", "Exportar"])
+];
+
+
 /* source: design-system/messages.js */
 const MESSAGE_CATALOG = Object.freeze({
   M1: { text: "¿Está seguro que desea guardar esta información?", type: "Confirmación", scope: "General" },
@@ -158,7 +186,9 @@ function closeConfirmModal(id) {
 
 
 /* source: ref-002-permisos/js/data.js */
-const operations = ["Consultar", "Registrar", "Modificar", "Eliminar", "Exportar", "Validar"];
+
+
+const operations = sharedPermissionOperations;
 
 const roles = [
   { id: "admin", name: "Administrador USE", description: "Gestiona configuración general del sistema.", status: "Activo" },
@@ -166,20 +196,7 @@ const roles = [
   { id: "evaluator", name: "Evaluador", description: "Registra y revisa información de evaluación.", status: "Activo" }
 ];
 
-const row = (id, level, type, name, parentId, checks, unavailable = []) => ({ id, level, type, name, parentId, checks: { ...checks }, unavailable });
-
-const permissionRows = [
-  row("administracion", 1, "module", "Administración", null, { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }),
-  row("usuarios", 2, "submenu", "Gestión de usuarios", "administracion", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }),
-  row("usuarios-consulta", 3, "functionality", "Consultar usuarios", "usuarios", { Consultar: true, Registrar: false, Modificar: false, Eliminar: false, Exportar: true, Validar: false }, ["Registrar", "Modificar", "Eliminar", "Validar"]),
-  row("usuarios-roles", 3, "functionality", "Asignar roles", "usuarios", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: false, Validar: false }, ["Eliminar", "Exportar", "Validar"]),
-  row("roles", 2, "submenu", "Gestión de roles", "administracion", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }, ["Validar"]),
-  row("roles-permisos", 3, "functionality", "Gestionar permisos de roles", "roles", { Consultar: true, Registrar: false, Modificar: true, Eliminar: false, Exportar: true, Validar: false }, ["Registrar", "Eliminar", "Validar"]),
-  row("instrumentos", 1, "module", "Instrumentos", null, { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: true }),
-  row("instrumentos-gestion", 2, "submenu", "Gestión de instrumentos", "instrumentos", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: true }),
-  row("instrumentos-registro", 3, "functionality", "Registro de instrumentos", "instrumentos-gestion", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }, ["Validar"]),
-  row("instrumentos-validacion", 3, "functionality", "Validación de instrumentos", "instrumentos-gestion", { Consultar: true, Registrar: false, Modificar: true, Eliminar: false, Exportar: false, Validar: true }, ["Eliminar", "Exportar"])
-];
+const permissionRows = sharedPermissionRows;
 
 
 /* source: ref-002-permisos/js/state.js */

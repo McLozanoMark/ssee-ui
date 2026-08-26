@@ -1,27 +1,14 @@
 import { state, createDraft } from "./state.js";
-import { refs, showForm, showToast, setWizardStep, syncGeneralFields, renderFields, renderKeyFields, renderManualRecords, updateLoadMode } from "./ui.js";
+import { refs, showForm, showToast, setWizardStep, syncGeneralFields, renderFields, renderKeyFields, renderManualRecords, updateLoadMode, updateWizardFooter } from "./ui.js";
 import { applyFilters, renderSources, handleAction, handleSort, validateStep, requestSaveStep, requestComplete, requestCancel, confirmPendingAction, updateDraftField, updateGeneralDraft, addField, deleteField, addKeyField, removeKeyField, setKeyType, selectLoadMode, registerFile } from "./sources.js";
 import { getMessage, getPrototypeMessage } from "../../design-system/messages.js";
 import { openConfirmModal } from "../../design-system/interaction.js";
 
 const $ = (id) => document.getElementById(id);
 
-function updateFooter() {
-  const editing = state.editingIndex !== null;
-  $("backBtn").hidden = state.step === 1;
-  $("continueBtn").hidden = state.step === 4;
-  $("completeBtn").hidden = state.step !== 4;
-  $("saveStepBtn").hidden = !editing;
-  $("editStatusControl").hidden = !editing;
-  if (editing && state.draft) {
-    $("sourceStatusSwitch").checked = state.draft.status === "Activa";
-    $("sourceStatusLabel").textContent = state.draft.status;
-  }
-}
-
 function showStep(step) {
   setWizardStep(step);
-  updateFooter();
+  updateWizardFooter();
 }
 
 function markFormDirty() {
@@ -51,7 +38,7 @@ $("newSourceBtn").addEventListener("click", () => {
   state.editingIndex = null;
   createDraft();
   showForm();
-  updateFooter();
+  updateWizardFooter();
 });
 $("cancelBtn").addEventListener("click", requestCancel);
 $("backBtn").addEventListener("click", () => showStep(Math.max(1, state.step - 1)));
@@ -122,6 +109,7 @@ refs.manualBody.addEventListener("click", (event) => {
 });
 document.querySelectorAll("[data-sort]").forEach((button) => button.addEventListener("click", () => handleSort(button.dataset.sort)));
 refs.sourcesBody.addEventListener("click", handleAction);
+refs.sourcesBody.addEventListener("change", handleAction);
 $("exportBtn").addEventListener("click", () => showToast(getMessage("M67"), "success"));
 $("confirmBtn").addEventListener("click", confirmPendingAction);
 $("confirmModal").addEventListener("hidden.bs.modal", () => { state.pendingAction = null; state.pendingCancel = false; state.pendingStatus = null; });
@@ -129,4 +117,4 @@ document.addEventListener("click", (event) => { if (!event.target.closest(".acti
 
 renderManualRecords();
 renderSources();
-updateFooter();
+updateWizardFooter();

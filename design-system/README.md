@@ -9,6 +9,14 @@ Requirement screens may add only their own fields, data, states and actions.
 They must not create a second shell, a second spacing scale, or a parallel
 component vocabulary.
 
+All management trays are homologated. Every tray uses the same page heading,
+global search and filter area, filter action group, table structure, row-action
+anatomy, status treatment, pagination and footer rhythm from this system. A
+module may change only its column names, filter fields, data and business
+actions; it must not invent alternative button labels, sizes, placements or
+interaction patterns. Any improvement agreed for one tray is a shared-system
+change and must be checked across every tray before delivery.
+
 - `tokens.css`: shared color, spacing, radius and shadow tokens.
 - `components.css`: reusable technical navigation, toast and status helpers.
 - `app.css`: canonical S.S.E.E. shell and CRUD layout.
@@ -46,6 +54,11 @@ mark, the same rem rhythm as the shell and the responsive size contract from
   short visible label. No module may create a smaller local action-button
   variant. A status switch is a state control and stays in the `Estado` column
   when that column supports binary activation.
+- Any activation or inactivation action uses the shared toggle switch. The
+  checked state represents `Activo`/`Activa` and the unchecked state represents
+  `Inactivo`/`Inactiva`; never render `ON` or `OFF` as visible text. States that
+  are not binary, such as `Borrador`, `Por vencer`, `Vencido` or `Anulada`,
+  remain status tags.
 - Row-action icons use the shared semantic color map while their labels retain
   the normal text color. Disabled action icons use the shared darker gray
   `--ssee-action-disabled` so the disabled state remains legible. Modules must
@@ -62,6 +75,10 @@ mark, the same rem rhythm as the shell and the responsive size contract from
   confirmation, keeps the user on that step, and shows the success toast.
 - `Continuar` validates and advances. `Atrás` returns to the previous step.
   `Cancelar` exits the wizard and confirms when there are unsaved changes.
+- Every confirmation modal uses exactly `No` for rejection and `Sí` for
+  acceptance. Do not append contextual text such as `No, volver`,
+  `No, cancelar` or `Sí, continuar`; the action context belongs in the modal
+  message, not in the button label.
 
 The message catalog was transcribed from Ali's shared workbook screenshot on
 2026-08-19. The original XLSX remains the authoritative source if a wording or

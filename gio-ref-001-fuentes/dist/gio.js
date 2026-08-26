@@ -317,6 +317,27 @@ function showList() {
   refs.formView.classList.remove("is-active");
 }
 
+function updateWizardFooter() {
+  const editing = state.editingIndex !== null;
+  const binaryStatus = ["Activa", "Inactiva"].includes(state.draft?.status);
+  const sourceStatusSwitchWrap = document.getElementById("sourceStatusSwitchWrap");
+  const sourceStatusLabel = document.getElementById("sourceStatusLabel");
+  document.getElementById("backBtn").hidden = state.step === 1;
+  document.getElementById("continueBtn").hidden = state.step === 4;
+  document.getElementById("completeBtn").hidden = state.step !== 4;
+  document.getElementById("saveStepBtn").hidden = !editing;
+  document.getElementById("editStatusControl").hidden = !editing;
+  sourceStatusSwitchWrap.hidden = !binaryStatus;
+  sourceStatusSwitchWrap.dataset.onLabel = "Activa";
+  sourceStatusSwitchWrap.dataset.offLabel = "Inactiva";
+  sourceStatusLabel.hidden = binaryStatus;
+  if (editing && state.draft) {
+    document.getElementById("sourceStatusSwitch").checked = state.draft.status === "Activa";
+    sourceStatusLabel.className = `status ${binaryStatus ? (state.draft.status === "Activa" ? "active" : "inactive") : (state.draft.status === "Borrador" ? "draft" : "expired")}`;
+    sourceStatusLabel.textContent = state.draft.status;
+  }
+}
+
 function showForm(source = null) {
   refs.listView.classList.remove("is-active");
   refs.formView.classList.add("is-active");
@@ -325,6 +346,7 @@ function showForm(source = null) {
   refs.sourceForm.reset();
   syncGeneralFields();
   setWizardStep(1);
+  updateWizardFooter();
   clearErrors();
 }
 
@@ -433,7 +455,9 @@ function renderSources() {
       <td><div class="row-actions source-actions">
         <button type="button" class="row-action" data-action="view" data-index="${index}" title="Ver detalle"><i class="fa-regular fa-eye" aria-hidden="true"></i><span>Ver detalle</span></button>
         <button type="button" class="row-action" data-action="edit" data-index="${index}" title="Editar"><i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span></button>
-        <button type="button" class="row-action ${canToggle ? "" : "is-disabled"}" data-action="toggle" data-next-state="${nextAction}" data-index="${index}" title="${canToggle ? nextAction : "No disponible para este estado"}" ${canToggle ? "" : "disabled"}><i class="fa-solid fa-power-off" aria-hidden="true"></i><span>${nextAction}</span></button>
+        <label class="form-check form-switch switch row-state-toggle ${canToggle ? "" : "is-disabled"}" data-on-label="Activa" data-off-label="Inactiva" title="${canToggle ? `${nextAction} fuente` : "No disponible para este estado"}">
+          <input class="form-check-input" type="checkbox" data-action="toggle" data-next-state="${nextAction}" data-index="${index}" ${source.status === "Activa" ? "checked" : ""} ${canToggle ? "" : "disabled"} aria-label="${nextAction} ${source.name}">
+        </label>
       </div></td>
     </tr>`;
   }).join("");
@@ -486,6 +510,7 @@ function handleSort(key) {
 function handleAction(event) {
   const action = event.target.closest("[data-action]");
   if (!action) return;
+  if (event.type === "click" && action.dataset.action === "toggle") return;
   const source = sources[Number(action.dataset.index)];
   if (action.dataset.action === "view") {
     showToast(`${source.name}: ${source.records} registros en estado ${source.status}.`, "info");
@@ -495,10 +520,14 @@ function handleAction(event) {
     state.editingIndex = sources.indexOf(source);
     createDraft(source);
     showForm(source);
+    state.editingIndex = sources.indexOf(source);
+    updateWizardFooter();
     return;
   }
   if (action.dataset.action === "toggle") {
+    if (action.disabled) return;
     state.pendingStatus = { index: sources.indexOf(source), next: source.status === "Activa" ? "Inactiva" : "Activa" };
+    action.checked = source.status === "Activa";
     openConfirmModal("confirmModal", `${getMessage(state.pendingStatus.next === "Activa" ? "M5" : "M6")} ${source.name}?`);
   }
 }
@@ -686,22 +715,9 @@ function registerFile(file) {
 
 const $ = (id) => document.getElementById(id);
 
-function updateFooter() {
-  const editing = state.editingIndex !== null;
-  $("backBtn").hidden = state.step === 1;
-  $("continueBtn").hidden = state.step === 4;
-  $("completeBtn").hidden = state.step !== 4;
-  $("saveStepBtn").hidden = !editing;
-  $("editStatusControl").hidden = !editing;
-  if (editing && state.draft) {
-    $("sourceStatusSwitch").checked = state.draft.status === "Activa";
-    $("sourceStatusLabel").textContent = state.draft.status;
-  }
-}
-
 function showStep(step) {
   setWizardStep(step);
-  updateFooter();
+  updateWizardFooter();
 }
 
 function markFormDirty() {
@@ -731,7 +747,7 @@ $("newSourceBtn").addEventListener("click", () => {
   state.editingIndex = null;
   createDraft();
   showForm();
-  updateFooter();
+  updateWizardFooter();
 });
 $("cancelBtn").addEventListener("click", requestCancel);
 $("backBtn").addEventListener("click", () => showStep(Math.max(1, state.step - 1)));
@@ -802,6 +818,7 @@ refs.manualBody.addEventListener("click", (event) => {
 });
 document.querySelectorAll("[data-sort]").forEach((button) => button.addEventListener("click", () => handleSort(button.dataset.sort)));
 refs.sourcesBody.addEventListener("click", handleAction);
+refs.sourcesBody.addEventListener("change", handleAction);
 $("exportBtn").addEventListener("click", () => showToast(getMessage("M67"), "success"));
 $("confirmBtn").addEventListener("click", confirmPendingAction);
 $("confirmModal").addEventListener("hidden.bs.modal", () => { state.pendingAction = null; state.pendingCancel = false; state.pendingStatus = null; });
@@ -809,4 +826,4 @@ document.addEventListener("click", (event) => { if (!event.target.closest(".acti
 
 renderManualRecords();
 renderSources();
-updateFooter();
+updateWizardFooter();

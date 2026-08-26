@@ -1,30 +1,70 @@
-import { permissionRows } from "./data.js";
+import { operations } from "./data.js";
+import { state } from "./state.js";
 import { refs } from "./ui.js";
 
+function descendants(rowId) {
+  const result = [];
+  const queue = [rowId];
+  while (queue.length) {
+    const parentId = queue.shift();
+    state.permissionRows
+      .filter((row) => row.parentId === parentId)
+      .forEach((child) => { result.push(child); queue.push(child.id); });
+  }
+  return result;
+}
+
+function rowById(rowId) {
+  return state.permissionRows.find((row) => row.id === rowId);
+}
+
+function setRowOperation(row, operation, checked) {
+  if (row.unavailable.includes(operation)) return;
+  if (operation === "Consultar" && !checked) {
+    row.checks.Consultar = false;
+    operations.filter((item) => item !== "Consultar").forEach((item) => { row.checks[item] = false; });
+    return;
+  }
+  row.checks[operation] = checked;
+  if (checked && operation !== "Consultar") row.checks.Consultar = true;
+}
+
+export function isDisabled(row, operation) {
+  return row.unavailable.includes(operation) || (operation !== "Consultar" && !row.checks.Consultar);
+}
+
+export function handlePermissionChange(rowId, operation, checked) {
+  const source = rowById(rowId);
+  if (!source || source.unavailable.includes(operation)) return;
+  setRowOperation(source, operation, checked);
+  descendants(rowId).forEach((child) => setRowOperation(child, operation, checked));
+  state.permissionDirty = true;
+}
+
 export function renderPermissions() {
-  refs.permissionBody.innerHTML = permissionRows.map((row, rowIndex) => {
-    const checks = row.checks.map((checked, checkIndex) => `
-      <td>${row.level < 3 ? '<span class="permission-scope" aria-label="No aplica">-</span>' : `<input type="checkbox" data-permission="${rowIndex}-${checkIndex}" ${checked ? "checked" : ""} aria-label="${row.name} permiso ${checkIndex + 1}">`}</td>
-    `).join("");
-    const icon = row.level < 3 ? "fa-folder-open" : "fa-file-lines";
-    return `
-      <tr>
-        <td><span class="permission-name level-${row.level}"><i class="fa-regular ${icon}" aria-hidden="true"></i>${row.name}</span></td>
-        ${checks}
-      </tr>
-    `;
-  }).join("");
+  refs.permissionBody.innerHTML = state.permissionRows.map((row) => `
+    <tr class="is-${row.type}" data-row-id="${row.id}">
+      <td><span class="permission-name level-${row.level}"><i class="fa-solid ${row.type === "functionality" ? "fa-file-lines" : "fa-folder-open"}" aria-hidden="true"></i>${row.name}</span></td>
+      ${operations.map((operation) => {
+        const disabled = isDisabled(row, operation);
+        const unavailable = row.unavailable.includes(operation);
+        const title = unavailable ? "Operación no aplicable para esta funcionalidad" : (disabled ? "Selecciona Consultar para habilitar esta operación" : "");
+        return `<td><input class="form-check-input${unavailable ? " is-not-applicable" : ""}" type="checkbox" data-row="${row.id}" data-operation="${operation}" ${row.checks[operation] ? "checked" : ""} ${disabled ? "disabled" : ""} aria-label="${operation} en ${row.name}"${title ? ` title="${title}" data-bs-toggle="tooltip"` : ""}></td>`;
+      }).join("")}
+    </tr>
+  `).join("");
+  if (window.bootstrap) {
+    document.querySelectorAll("[data-bs-toggle='tooltip']").forEach((element) => bootstrap.Tooltip.getOrCreateInstance(element));
+  }
 }
 
 export function hasSelectedPermission() {
-  return [...refs.permissionBody.querySelectorAll("input[type='checkbox']")]
-    .some((checkbox) => checkbox.checked);
+  return state.permissionRows.some((row) => Object.values(row.checks).some(Boolean));
 }
 
 export function selectedPermissionLabels() {
-  return permissionRows
-    .filter((_, rowIndex) => [...refs.permissionBody.querySelectorAll(`[data-permission^='${rowIndex}-']`)]
-      .some((checkbox) => checkbox.checked))
+  return state.permissionRows
+    .filter((row) => row.type === "functionality" && Object.values(row.checks).some(Boolean))
     .slice(0, 2)
     .map((row) => row.name);
 }

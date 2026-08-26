@@ -123,6 +123,6 @@
 .action-menu .dropdown-menu { min-width: 12rem; padding: 0.4rem; }
 .action-menu .dropdown-item { display: flex; align-items: center; gap: 0.65rem; min-height: 2.2rem; padding: 0.45rem 0.65rem; }
 .action-menu .dropdown-item i { width: 1rem; text-align: center; }
-.dropdown-switch .switch { min-height: 1.4rem; }
+.dropdown-switch .switch { min-height: 1.8rem; }
 .status-action-danger i { color: #dc3545; }
 .status-action-success i { color: #198754; }

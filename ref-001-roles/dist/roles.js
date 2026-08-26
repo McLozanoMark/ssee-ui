@@ -1,4 +1,32 @@
 
+/* source: design-system/permission-catalog.js */
+const sharedPermissionOperations = ["Consultar", "Registrar", "Modificar", "Eliminar", "Exportar", "Validar"];
+
+const row = (id, level, type, name, parentId, checks, unavailable = []) => ({
+  id,
+  level,
+  type,
+  name,
+  parentId,
+  checks: { ...checks },
+  unavailable: [...unavailable]
+});
+
+// Canonical prototype catalog shared by the role wizard and the REF-002 traceability route.
+const sharedPermissionRows = [
+  row("administracion", 1, "module", "Administración", null, { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }),
+  row("usuarios", 2, "submenu", "Gestión de usuarios", "administracion", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }),
+  row("usuarios-consulta", 3, "functionality", "Consultar usuarios", "usuarios", { Consultar: true, Registrar: false, Modificar: false, Eliminar: false, Exportar: true, Validar: false }, ["Registrar", "Modificar", "Eliminar", "Validar"]),
+  row("usuarios-roles", 3, "functionality", "Asignar roles", "usuarios", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: false, Validar: false }, ["Eliminar", "Exportar", "Validar"]),
+  row("roles", 2, "submenu", "Gestión de roles", "administracion", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }, ["Validar"]),
+  row("roles-permisos", 3, "functionality", "Gestionar permisos de roles", "roles", { Consultar: true, Registrar: false, Modificar: true, Eliminar: false, Exportar: true, Validar: false }, ["Registrar", "Eliminar", "Validar"]),
+  row("instrumentos", 1, "module", "Instrumentos", null, { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: true }),
+  row("instrumentos-gestion", 2, "submenu", "Gestión de instrumentos", "instrumentos", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: true }),
+  row("instrumentos-registro", 3, "functionality", "Registro de instrumentos", "instrumentos-gestion", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }, ["Validar"]),
+  row("instrumentos-validacion", 3, "functionality", "Validación de instrumentos", "instrumentos-gestion", { Consultar: true, Registrar: false, Modificar: true, Eliminar: false, Exportar: false, Validar: true }, ["Eliminar", "Exportar"])
+];
+
+
 /* source: design-system/messages.js */
 const MESSAGE_CATALOG = Object.freeze({
   M1: { text: "¿Está seguro que desea guardar esta información?", type: "Confirmación", scope: "General" },
@@ -158,8 +186,11 @@ function closeConfirmModal(id) {
 
 
 /* source: ref-001-roles/js/data.js */
+
+
 const roles = [
   {
+    id: "admin",
     name: "Administrador USE",
     description: "Gestiona configuración general del sistema.",
     permissions: ["Usuarios", "Configuración", "+8 adicionales"],
@@ -169,6 +200,7 @@ const roles = [
     updated: "15/05/2024 10:30"
   },
   {
+    id: "supervisor",
     name: "Supervisor de Seguimiento",
     description: "Consulta y supervisa avances de seguimiento.",
     permissions: ["Seguimiento", "Reportes", "+3 adicionales"],
@@ -178,6 +210,7 @@ const roles = [
     updated: "14/05/2024 16:45"
   },
   {
+    id: "evaluator",
     name: "Evaluador",
     description: "Registra y revisa información de evaluación.",
     permissions: ["Evaluación", "Instrumentos", "+2 adicionales"],
@@ -187,6 +220,7 @@ const roles = [
     updated: "13/05/2024 09:15"
   },
   {
+    id: "registrador",
     name: "Registrador",
     description: "Ingresa información operativa del sistema.",
     permissions: ["Registro", "Consulta"],
@@ -196,6 +230,7 @@ const roles = [
     updated: "10/05/2024 11:20"
   },
   {
+    id: "consulta",
     name: "Consulta Estratégica",
     description: "Accede a reportes y tableros de seguimiento.",
     permissions: ["Visualización", "Reportes"],
@@ -206,25 +241,23 @@ const roles = [
   }
 ];
 
-const permissionRows = [
-  { level: 1, name: "Administración", checks: [false, false, false, false, false, false] },
-  { level: 2, name: "Gestión de usuarios", checks: [false, false, false, false, false, false] },
-  { level: 3, name: "Consultar usuarios", checks: [true, false, false, false, false, false] },
-  { level: 3, name: "Editar usuarios", checks: [true, false, true, false, false, false] },
-  { level: 3, name: "Asignar roles", checks: [true, true, true, false, false, false] },
-  { level: 3, name: "Sincronizar Passport", checks: [true, false, true, false, false, false] },
-  { level: 1, name: "Seguimiento", checks: [false, false, false, false, false, false] },
-  { level: 2, name: "Gestión de seguimiento", checks: [false, false, false, false, false, false] },
-  { level: 3, name: "Crear seguimiento", checks: [true, true, false, false, false, false] },
-  { level: 3, name: "Editar seguimiento", checks: [true, false, true, false, false, false] }
-];
+const operations = sharedPermissionOperations;
+const permissionRows = sharedPermissionRows;
 
 
 /* source: ref-001-roles/js/state.js */
 
 
+const clonePermissionRows = () => permissionRows.map((row) => ({
+  ...row,
+  checks: { ...row.checks },
+  unavailable: [...row.unavailable]
+}));
+
 const state = {
   filteredRoles: [...roles],
+  permissionRows: clonePermissionRows(),
+  permissionDirty: false,
   editingIndex: null,
   openActionMenu: null,
   pendingStatus: null,
@@ -242,6 +275,16 @@ function resetEditingState() {
   state.pendingSave = false;
   state.pendingSaveStep = null;
   state.pendingCancel = false;
+}
+
+function resetPermissionDraft(role = null) {
+  state.permissionRows = clonePermissionRows();
+  if (!role) {
+    state.permissionRows.forEach((row) => {
+      Object.keys(row.checks).forEach((operation) => { row.checks[operation] = false; });
+    });
+  }
+  state.permissionDirty = false;
 }
 
 
@@ -283,6 +326,7 @@ const refs = {
   confirmModal: document.getElementById("confirmModal"),
   editStatusControls: [...document.querySelectorAll("[data-edit-status-control]")],
   editStatusToggles: [...document.querySelectorAll("[data-edit-status-toggle]")],
+  editStatusLabels: [...document.querySelectorAll("[data-edit-status-label]")],
   saveStepButtons: [...document.querySelectorAll("[data-save-step]")]
 };
 
@@ -311,14 +355,14 @@ function showList() {
   refs.formView.classList.remove("is-active");
 }
 
-function showForm(role = null) {
+function showForm(role = null, sourceRequirement = "ALI-REF-001") {
   refs.listView.classList.remove("is-active");
   refs.formView.classList.add("is-active");
   refs.roleName.value = role?.name || "";
   refs.roleDescription.value = role?.description || "";
   const label = role ? "Editar rol" : "Registrar rol";
   refs.formTitle.textContent = role ? "Editar rol" : "Registrar rol";
-  refs.formBreadcrumb.innerHTML = `<a href="../index.html">Índice de requerimientos</a> / ALI-REF-001 / Gestión de roles / ${label}`;
+  refs.formBreadcrumb.innerHTML = `<a href="../index.html">Índice de requerimientos</a> / ${sourceRequirement} / Gestión de roles / ${label}`;
   refs.editStatusControls.forEach((control) => { control.hidden = !role; });
   const statusBlocked = Boolean(role && role.users > 0);
   refs.editStatusToggles.forEach((toggle) => {
@@ -330,6 +374,7 @@ function showForm(role = null) {
       switchLabel.title = statusBlocked ? "No disponible: el rol tiene usuarios asociados." : "";
     }
   });
+  refs.editStatusLabels.forEach((label) => { label.textContent = role?.status || "Activo"; });
   setFormStep("info");
   clearErrors();
 }
@@ -343,7 +388,7 @@ function setFormStep(step) {
   refs.stepInfo.classList.toggle("is-complete", !isInfo);
   refs.backButton.hidden = isInfo;
   refs.continueButton.hidden = !isInfo;
-  refs.saveRoleButton.hidden = isInfo;
+  refs.saveRoleButton.hidden = isInfo || state.editingIndex !== null;
   refs.saveStepButtons.forEach((button) => {
     button.hidden = state.editingIndex === null || button.dataset.saveStep !== step;
   });
@@ -365,30 +410,70 @@ function clearErrors() {
 
 
 
+
+function descendants(rowId) {
+  const result = [];
+  const queue = [rowId];
+  while (queue.length) {
+    const parentId = queue.shift();
+    state.permissionRows
+      .filter((row) => row.parentId === parentId)
+      .forEach((child) => { result.push(child); queue.push(child.id); });
+  }
+  return result;
+}
+
+function rowById(rowId) {
+  return state.permissionRows.find((row) => row.id === rowId);
+}
+
+function setRowOperation(row, operation, checked) {
+  if (row.unavailable.includes(operation)) return;
+  if (operation === "Consultar" && !checked) {
+    row.checks.Consultar = false;
+    operations.filter((item) => item !== "Consultar").forEach((item) => { row.checks[item] = false; });
+    return;
+  }
+  row.checks[operation] = checked;
+  if (checked && operation !== "Consultar") row.checks.Consultar = true;
+}
+
+function isDisabled(row, operation) {
+  return row.unavailable.includes(operation) || (operation !== "Consultar" && !row.checks.Consultar);
+}
+
+function handlePermissionChange(rowId, operation, checked) {
+  const source = rowById(rowId);
+  if (!source || source.unavailable.includes(operation)) return;
+  setRowOperation(source, operation, checked);
+  descendants(rowId).forEach((child) => setRowOperation(child, operation, checked));
+  state.permissionDirty = true;
+}
+
 function renderPermissions() {
-  refs.permissionBody.innerHTML = permissionRows.map((row, rowIndex) => {
-    const checks = row.checks.map((checked, checkIndex) => `
-      <td>${row.level < 3 ? '<span class="permission-scope" aria-label="No aplica">-</span>' : `<input type="checkbox" data-permission="${rowIndex}-${checkIndex}" ${checked ? "checked" : ""} aria-label="${row.name} permiso ${checkIndex + 1}">`}</td>
-    `).join("");
-    const icon = row.level < 3 ? "fa-folder-open" : "fa-file-lines";
-    return `
-      <tr>
-        <td><span class="permission-name level-${row.level}"><i class="fa-regular ${icon}" aria-hidden="true"></i>${row.name}</span></td>
-        ${checks}
-      </tr>
-    `;
-  }).join("");
+  refs.permissionBody.innerHTML = state.permissionRows.map((row) => `
+    <tr class="is-${row.type}" data-row-id="${row.id}">
+      <td><span class="permission-name level-${row.level}"><i class="fa-solid ${row.type === "functionality" ? "fa-file-lines" : "fa-folder-open"}" aria-hidden="true"></i>${row.name}</span></td>
+      ${operations.map((operation) => {
+        const disabled = isDisabled(row, operation);
+        const unavailable = row.unavailable.includes(operation);
+        const title = unavailable ? "Operación no aplicable para esta funcionalidad" : (disabled ? "Selecciona Consultar para habilitar esta operación" : "");
+        return `<td><input class="form-check-input${unavailable ? " is-not-applicable" : ""}" type="checkbox" data-row="${row.id}" data-operation="${operation}" ${row.checks[operation] ? "checked" : ""} ${disabled ? "disabled" : ""} aria-label="${operation} en ${row.name}"${title ? ` title="${title}" data-bs-toggle="tooltip"` : ""}></td>`;
+      }).join("")}
+    </tr>
+  `).join("");
+  if (window.bootstrap) {
+    document.querySelectorAll("[data-bs-toggle='tooltip']").forEach((element) => bootstrap.Tooltip.getOrCreateInstance(element));
+  }
 }
 
 function hasSelectedPermission() {
-  return [...refs.permissionBody.querySelectorAll("input[type='checkbox']")]
-    .some((checkbox) => checkbox.checked);
+  return state.permissionRows.some((row) => Object.values(row.checks).some(Boolean));
 }
 
 function selectedPermissionLabels() {
-  return permissionRows
-    .filter((_, rowIndex) => [...refs.permissionBody.querySelectorAll(`[data-permission^='${rowIndex}-']`)]
-      .some((checkbox) => checkbox.checked))
+  return state.permissionRows
+    .filter((row) => row.type === "functionality" && Object.values(row.checks).some(Boolean))
     .slice(0, 2)
     .map((row) => row.name);
 }
@@ -423,7 +508,7 @@ function renderRoles() {
         <td>
           <div class="status-cell">
             <span class="status ${role.status === "Activo" ? "active" : "inactive"}">${role.status}</span>
-            <label class="form-check form-switch switch ${hasUsers ? "is-disabled" : ""}" data-state="${originalIndex}" title="${hasUsers ? "No disponible: el rol tiene usuarios asociados." : ""}">
+            <label class="form-check form-switch switch ${hasUsers ? "is-disabled" : ""}" data-state="${originalIndex}" data-on-label="Activo" data-off-label="Inactivo" title="${hasUsers ? "No disponible: el rol tiene usuarios asociados." : ""}">
               <input class="form-check-input" type="checkbox" ${role.status === "Activo" ? "checked" : ""} ${hasUsers ? "disabled" : ""} aria-label="${role.status === "Activo" ? "Inactivar" : "Activar"} ${role.name}">
             </label>
           </div>
@@ -531,6 +616,7 @@ function confirmStatus() {
     roles[index].updated = "18/08/2026 09:00";
     state.pendingEditStatus = null;
     refs.editStatusToggles.forEach((toggle) => { toggle.checked = next === "Activo"; });
+    refs.editStatusLabels.forEach((label) => { label.textContent = next; });
     closeConfirmModal("confirmModal");
     applyFilters();
     showToast(getMessage(next === "Activo" ? "M7" : "M8"), "success");
@@ -579,14 +665,17 @@ function validateInfo() {
   return valid;
 }
 
-function openRoleForm(role = null, index = null) {
+function openRoleForm(role = null, index = null, sourceRequirement = "ALI-REF-001") {
   state.editingIndex = index;
-  showForm(role);
+  resetPermissionDraft(role);
+  showForm(role, sourceRequirement);
+  renderPermissions();
 }
 
 function commitRoleSave({ stay = false } = {}) {
   const selectedLabels = selectedPermissionLabels();
   const savedRole = {
+    id: state.editingIndex === null ? `role-${Date.now()}` : roles[state.editingIndex].id,
     name: refs.roleName.value.trim(),
     description: refs.roleDescription.value.trim(),
     permissions: selectedLabels.length ? [...selectedLabels, "+1 adicional"] : ["Consulta"],
@@ -685,6 +774,12 @@ document.getElementById("clearBtn").addEventListener("click", () => {
 document.getElementById("newRoleBtn").addEventListener("click", () => openRoleForm());
 document.getElementById("exportBtn").addEventListener("click", () => showToast(getMessage("M67"), "success"));
 refs.rolesBody.addEventListener("click", (event) => handleRoleAction(event, openRoleForm));
+refs.permissionBody.addEventListener("change", (event) => {
+  const checkbox = event.target.closest("input[data-row][data-operation]");
+  if (!checkbox) return;
+  handlePermissionChange(checkbox.dataset.row, checkbox.dataset.operation, checkbox.checked);
+  renderPermissions();
+});
 refs.editStatusToggles.forEach((toggle) => toggle.addEventListener("change", handleEditStatusToggle));
 document.addEventListener("click", (event) => { if (!event.target.closest(".action-menu")) closeActionMenus(); });
 document.getElementById("continueBtn").addEventListener("click", () => { if (validateInfo()) setFormStep("permissions"); });
@@ -703,3 +798,12 @@ refs.confirmModal.addEventListener("hidden.bs.modal", () => {
 
 renderPermissions();
 renderRoles();
+
+const deepLink = new URLSearchParams(window.location.search);
+if (deepLink.get("step") === "permissions" && deepLink.get("role")) {
+  const roleIndex = roles.findIndex((role) => role.id === deepLink.get("role"));
+  if (roleIndex >= 0) {
+    openRoleForm(roles[roleIndex], roleIndex, deepLink.get("source") || "ALI-REF-002");
+    setFormStep("permissions");
+  }
+}

@@ -26,7 +26,7 @@ export function renderRoles() {
         <td>
           <div class="status-cell">
             <span class="status ${role.status === "Activo" ? "active" : "inactive"}">${role.status}</span>
-            <label class="form-check form-switch switch ${hasUsers ? "is-disabled" : ""}" data-state="${originalIndex}" title="${hasUsers ? "No disponible: el rol tiene usuarios asociados." : ""}">
+            <label class="form-check form-switch switch ${hasUsers ? "is-disabled" : ""}" data-state="${originalIndex}" data-on-label="Activo" data-off-label="Inactivo" title="${hasUsers ? "No disponible: el rol tiene usuarios asociados." : ""}">
               <input class="form-check-input" type="checkbox" ${role.status === "Activo" ? "checked" : ""} ${hasUsers ? "disabled" : ""} aria-label="${role.status === "Activo" ? "Inactivar" : "Activar"} ${role.name}">
             </label>
           </div>
@@ -134,6 +134,7 @@ export function confirmStatus() {
     roles[index].updated = "18/08/2026 09:00";
     state.pendingEditStatus = null;
     refs.editStatusToggles.forEach((toggle) => { toggle.checked = next === "Activo"; });
+    refs.editStatusLabels.forEach((label) => { label.textContent = next; });
     closeConfirmModal("confirmModal");
     applyFilters();
     showToast(getMessage(next === "Activo" ? "M7" : "M8"), "success");

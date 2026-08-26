@@ -1,7 +1,7 @@
 import { roles } from "./data.js";
-import { state, resetEditingState } from "./state.js";
+import { state, resetEditingState, resetPermissionDraft } from "./state.js";
 import { refs, clearErrors, closeActionMenus, setFormStep, showForm, showList, showToast } from "./ui.js";
-import { renderPermissions, hasSelectedPermission, selectedPermissionLabels } from "./permissions.js";
+import { renderPermissions, handlePermissionChange, hasSelectedPermission, selectedPermissionLabels } from "./permissions.js";
 import { applyFilters, handleRoleAction, renderRoles, confirmStatus, handleEditStatusToggle } from "./roles.js";
 import { getMessage, getPrototypeMessage } from "../../design-system/messages.js";
 import { openConfirmModal, closeConfirmModal } from "../../design-system/interaction.js";
@@ -29,14 +29,17 @@ function validateInfo() {
   return valid;
 }
 
-function openRoleForm(role = null, index = null) {
+function openRoleForm(role = null, index = null, sourceRequirement = "ALI-REF-001") {
   state.editingIndex = index;
-  showForm(role);
+  resetPermissionDraft(role);
+  showForm(role, sourceRequirement);
+  renderPermissions();
 }
 
 function commitRoleSave({ stay = false } = {}) {
   const selectedLabels = selectedPermissionLabels();
   const savedRole = {
+    id: state.editingIndex === null ? `role-${Date.now()}` : roles[state.editingIndex].id,
     name: refs.roleName.value.trim(),
     description: refs.roleDescription.value.trim(),
     permissions: selectedLabels.length ? [...selectedLabels, "+1 adicional"] : ["Consulta"],
@@ -135,6 +138,12 @@ document.getElementById("clearBtn").addEventListener("click", () => {
 document.getElementById("newRoleBtn").addEventListener("click", () => openRoleForm());
 document.getElementById("exportBtn").addEventListener("click", () => showToast(getMessage("M67"), "success"));
 refs.rolesBody.addEventListener("click", (event) => handleRoleAction(event, openRoleForm));
+refs.permissionBody.addEventListener("change", (event) => {
+  const checkbox = event.target.closest("input[data-row][data-operation]");
+  if (!checkbox) return;
+  handlePermissionChange(checkbox.dataset.row, checkbox.dataset.operation, checkbox.checked);
+  renderPermissions();
+});
 refs.editStatusToggles.forEach((toggle) => toggle.addEventListener("change", handleEditStatusToggle));
 document.addEventListener("click", (event) => { if (!event.target.closest(".action-menu")) closeActionMenus(); });
 document.getElementById("continueBtn").addEventListener("click", () => { if (validateInfo()) setFormStep("permissions"); });
@@ -153,3 +162,12 @@ refs.confirmModal.addEventListener("hidden.bs.modal", () => {
 
 renderPermissions();
 renderRoles();
+
+const deepLink = new URLSearchParams(window.location.search);
+if (deepLink.get("step") === "permissions" && deepLink.get("role")) {
+  const roleIndex = roles.findIndex((role) => role.id === deepLink.get("role"));
+  if (roleIndex >= 0) {
+    openRoleForm(roles[roleIndex], roleIndex, deepLink.get("source") || "ALI-REF-002");
+    setFormStep("permissions");
+  }
+}

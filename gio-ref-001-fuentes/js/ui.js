@@ -56,6 +56,27 @@ export function showList() {
   refs.formView.classList.remove("is-active");
 }
 
+export function updateWizardFooter() {
+  const editing = state.editingIndex !== null;
+  const binaryStatus = ["Activa", "Inactiva"].includes(state.draft?.status);
+  const sourceStatusSwitchWrap = document.getElementById("sourceStatusSwitchWrap");
+  const sourceStatusLabel = document.getElementById("sourceStatusLabel");
+  document.getElementById("backBtn").hidden = state.step === 1;
+  document.getElementById("continueBtn").hidden = state.step === 4;
+  document.getElementById("completeBtn").hidden = state.step !== 4;
+  document.getElementById("saveStepBtn").hidden = !editing;
+  document.getElementById("editStatusControl").hidden = !editing;
+  sourceStatusSwitchWrap.hidden = !binaryStatus;
+  sourceStatusSwitchWrap.dataset.onLabel = "Activa";
+  sourceStatusSwitchWrap.dataset.offLabel = "Inactiva";
+  sourceStatusLabel.hidden = binaryStatus;
+  if (editing && state.draft) {
+    document.getElementById("sourceStatusSwitch").checked = state.draft.status === "Activa";
+    sourceStatusLabel.className = `status ${binaryStatus ? (state.draft.status === "Activa" ? "active" : "inactive") : (state.draft.status === "Borrador" ? "draft" : "expired")}`;
+    sourceStatusLabel.textContent = state.draft.status;
+  }
+}
+
 export function showForm(source = null) {
   refs.listView.classList.remove("is-active");
   refs.formView.classList.add("is-active");
@@ -64,6 +85,7 @@ export function showForm(source = null) {
   refs.sourceForm.reset();
   syncGeneralFields();
   setWizardStep(1);
+  updateWizardFooter();
   clearErrors();
 }
 

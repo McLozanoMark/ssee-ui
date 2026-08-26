@@ -1,6 +1,6 @@
 import { sources } from "./data.js";
 import { state, createDraft, resetWizard } from "./state.js";
-import { refs, initTooltips, showToast, showForm, showList, setWizardStep, syncGeneralFields } from "./ui.js";
+import { refs, initTooltips, showToast, showForm, showList, setWizardStep, syncGeneralFields, updateWizardFooter } from "./ui.js";
 import { openConfirmModal, closeConfirmModal } from "../../design-system/interaction.js";
 import { getMessage } from "../../design-system/messages.js";
 
@@ -29,7 +29,9 @@ export function renderSources() {
       <td><div class="row-actions source-actions">
         <button type="button" class="row-action" data-action="view" data-index="${index}" title="Ver detalle"><i class="fa-regular fa-eye" aria-hidden="true"></i><span>Ver detalle</span></button>
         <button type="button" class="row-action" data-action="edit" data-index="${index}" title="Editar"><i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span></button>
-        <button type="button" class="row-action ${canToggle ? "" : "is-disabled"}" data-action="toggle" data-next-state="${nextAction}" data-index="${index}" title="${canToggle ? nextAction : "No disponible para este estado"}" ${canToggle ? "" : "disabled"}><i class="fa-solid fa-power-off" aria-hidden="true"></i><span>${nextAction}</span></button>
+        <label class="form-check form-switch switch row-state-toggle ${canToggle ? "" : "is-disabled"}" data-on-label="Activa" data-off-label="Inactiva" title="${canToggle ? `${nextAction} fuente` : "No disponible para este estado"}">
+          <input class="form-check-input" type="checkbox" data-action="toggle" data-next-state="${nextAction}" data-index="${index}" ${source.status === "Activa" ? "checked" : ""} ${canToggle ? "" : "disabled"} aria-label="${nextAction} ${source.name}">
+        </label>
       </div></td>
     </tr>`;
   }).join("");
@@ -82,6 +84,7 @@ export function handleSort(key) {
 export function handleAction(event) {
   const action = event.target.closest("[data-action]");
   if (!action) return;
+  if (event.type === "click" && action.dataset.action === "toggle") return;
   const source = sources[Number(action.dataset.index)];
   if (action.dataset.action === "view") {
     showToast(`${source.name}: ${source.records} registros en estado ${source.status}.`, "info");
@@ -91,10 +94,14 @@ export function handleAction(event) {
     state.editingIndex = sources.indexOf(source);
     createDraft(source);
     showForm(source);
+    state.editingIndex = sources.indexOf(source);
+    updateWizardFooter();
     return;
   }
   if (action.dataset.action === "toggle") {
+    if (action.disabled) return;
     state.pendingStatus = { index: sources.indexOf(source), next: source.status === "Activa" ? "Inactiva" : "Activa" };
+    action.checked = source.status === "Activa";
     openConfirmModal("confirmModal", `${getMessage(state.pendingStatus.next === "Activa" ? "M5" : "M6")} ${source.name}?`);
   }
 }

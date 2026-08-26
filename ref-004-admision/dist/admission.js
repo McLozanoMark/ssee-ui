@@ -203,7 +203,7 @@ function resetForm() {
 function confirmAdmission() {
   const modal = document.createElement("div");
   modal.className = "modal fade";
-  modal.innerHTML = `<div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content admission-modal"><div class="modal-header"><div><span class="modal-eyebrow">Confirmar admisión</span><h2 class="modal-title">Confirmar acción</h2></div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div><div class="modal-body"><p>${getMessage("M1")}</p><p>Se creará el acceso con el proyecto y los roles seleccionados.</p></div><div class="modal-footer"><button type="button" class="btn btn-outline-ssee button button-secondary" data-bs-dismiss="modal">No, cancelar</button><button type="button" class="btn btn-ssee button button-primary" data-confirm="admission">Sí, continuar</button></div></div></div>`;
+  modal.innerHTML = `<div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content admission-modal"><div class="modal-header"><div><span class="modal-eyebrow">Confirmar admisión</span><h2 class="modal-title">Confirmar acción</h2></div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div><div class="modal-body"><p>${getMessage("M1")}</p><p>Se creará el acceso con el proyecto y los roles seleccionados.</p></div><div class="modal-footer"><button type="button" class="btn btn-outline-ssee button button-secondary" data-bs-dismiss="modal">No</button><button type="button" class="btn btn-ssee button button-primary" data-confirm="admission">Sí</button></div></div></div>`;
   document.body.append(modal);
   const instance = new bootstrap.Modal(modal);
   modal.addEventListener("click", (event) => {

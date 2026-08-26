@@ -35,6 +35,7 @@ export const refs = {
   confirmModal: document.getElementById("confirmModal"),
   editStatusControls: [...document.querySelectorAll("[data-edit-status-control]")],
   editStatusToggles: [...document.querySelectorAll("[data-edit-status-toggle]")],
+  editStatusLabels: [...document.querySelectorAll("[data-edit-status-label]")],
   saveStepButtons: [...document.querySelectorAll("[data-save-step]")]
 };
 
@@ -63,14 +64,14 @@ export function showList() {
   refs.formView.classList.remove("is-active");
 }
 
-export function showForm(role = null) {
+export function showForm(role = null, sourceRequirement = "ALI-REF-001") {
   refs.listView.classList.remove("is-active");
   refs.formView.classList.add("is-active");
   refs.roleName.value = role?.name || "";
   refs.roleDescription.value = role?.description || "";
   const label = role ? "Editar rol" : "Registrar rol";
   refs.formTitle.textContent = role ? "Editar rol" : "Registrar rol";
-  refs.formBreadcrumb.innerHTML = `<a href="../index.html">Índice de requerimientos</a> / ALI-REF-001 / Gestión de roles / ${label}`;
+  refs.formBreadcrumb.innerHTML = `<a href="../index.html">Índice de requerimientos</a> / ${sourceRequirement} / Gestión de roles / ${label}`;
   refs.editStatusControls.forEach((control) => { control.hidden = !role; });
   const statusBlocked = Boolean(role && role.users > 0);
   refs.editStatusToggles.forEach((toggle) => {
@@ -82,6 +83,7 @@ export function showForm(role = null) {
       switchLabel.title = statusBlocked ? "No disponible: el rol tiene usuarios asociados." : "";
     }
   });
+  refs.editStatusLabels.forEach((label) => { label.textContent = role?.status || "Activo"; });
   setFormStep("info");
   clearErrors();
 }
@@ -95,7 +97,7 @@ export function setFormStep(step) {
   refs.stepInfo.classList.toggle("is-complete", !isInfo);
   refs.backButton.hidden = isInfo;
   refs.continueButton.hidden = !isInfo;
-  refs.saveRoleButton.hidden = isInfo;
+  refs.saveRoleButton.hidden = isInfo || state.editingIndex !== null;
   refs.saveStepButtons.forEach((button) => {
     button.hidden = state.editingIndex === null || button.dataset.saveStep !== step;
   });
