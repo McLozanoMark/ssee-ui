@@ -22,6 +22,7 @@ async function bundle(name, files) {
 }
 
 await bundle("ref-001-roles/dist/roles.js", [
+  "design-system/permission-catalog.js",
   "design-system/messages.js",
   "design-system/interaction.js",
   "ref-001-roles/js/data.js",
@@ -33,6 +34,7 @@ await bundle("ref-001-roles/dist/roles.js", [
 ]);
 
 await bundle("ref-002-permisos/dist/permissions.js", [
+  "design-system/permission-catalog.js",
   "design-system/messages.js",
   "design-system/interaction.js",
   "ref-002-permisos/js/data.js",
