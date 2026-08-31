@@ -31,6 +31,11 @@ function renderToast(element, message, type = "info") {
 }
 
 function enableTooltips() {
+  document.querySelectorAll(".filter-toggle").forEach((element) => {
+    element.setAttribute("title", "Filtro Personalizado");
+    element.setAttribute("data-bs-title", "Filtro Personalizado");
+    element.setAttribute("data-bs-toggle", "tooltip");
+  });
   if (!window.bootstrap) return;
   document.querySelectorAll("[data-bs-toggle='tooltip']").forEach((element) => {
     bootstrap.Tooltip.getOrCreateInstance(element);
@@ -101,6 +106,7 @@ const MESSAGE_CATALOG = Object.freeze({
   M35: { text: "Si existe una cuenta asociada al correo ingresado, recibirá un enlace para recuperar su contraseña.", type: "Información", scope: "General" },
   M36: { text: "El enlace de recuperación ha expirado. Solicite uno nuevo.", type: "Alerta", scope: "General" },
   M37: { text: "La contraseña se ha restablecido correctamente.", type: "Información", scope: "General" },
+  M38: { text: "No fue posible restablecer la contraseña. Intente nuevamente.", type: "Alerta", scope: "General" },
   M39: { text: "No tiene proyectos asignados para visualizar.", type: "Información", scope: "General" },
   M40: { text: "No tiene instrumentos pendientes de atención.", type: "Información", scope: "General" },
   M41: { text: "Tiene %s instrumentos asignados.", type: "Información", scope: "General" },
@@ -155,6 +161,58 @@ function getMessage(code, values = []) {
 
 function getPrototypeMessage(key) {
   return PROTOTYPE_MESSAGES[key] || "";
+}
+
+
+/* source: design-system/table-sort.js */
+const collator = new Intl.Collator("es", { numeric: true, sensitivity: "base" });
+
+function normalize(value, type) {
+  const text = String(value || "").trim();
+  if (type === "number") return Number(text.replace(/[^0-9.-]/g, "")) || 0;
+  if (type === "date") {
+    const parts = text.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+    return parts ? new Date(`${parts[3]}-${parts[2]}-${parts[1]}`).getTime() : 0;
+  }
+  return text;
+}
+
+function attachTableSorting(table) {
+  if (!table) return;
+  const buttons = [...table.querySelectorAll("[data-sort-key]")];
+  const state = { key: null, direction: null };
+
+  buttons.forEach((button) => button.addEventListener("click", () => {
+    const key = button.dataset.sortKey;
+    state.direction = state.key === key && state.direction === "ascending" ? "descending" : "ascending";
+    state.key = key;
+    const header = button.closest("th");
+    const columnIndex = [...header.parentElement.children].indexOf(header);
+    const type = button.dataset.sortType || "text";
+    const body = table.tBodies[0];
+    if (!body) return;
+
+    [...body.rows]
+      .sort((left, right) => {
+        const comparison = type === "number" || type === "date"
+          ? normalize(left.cells[columnIndex]?.textContent, type) - normalize(right.cells[columnIndex]?.textContent, type)
+          : collator.compare(normalize(left.cells[columnIndex]?.textContent, type), normalize(right.cells[columnIndex]?.textContent, type));
+        return state.direction === "ascending" ? comparison : -comparison;
+      })
+      .forEach((row) => body.append(row));
+
+    buttons.forEach((item) => {
+      const itemHeader = item.closest("th");
+      const active = item === button;
+      itemHeader?.setAttribute("aria-sort", active ? state.direction : "none");
+      const icon = item.querySelector("i");
+      if (icon) {
+        icon.classList.toggle("fa-arrow-up", active && state.direction === "ascending");
+        icon.classList.toggle("fa-arrow-down", active && state.direction === "descending");
+        icon.classList.toggle("fa-arrow-down-up", !active);
+      }
+    });
+  }));
 }
 
 
@@ -266,16 +324,18 @@ const escapeHtml = (value = "") => String(value).replace(/[&<>'"]/g, (character)
 function statusClass(status) { return status === "Publicada" ? "active" : status === "Anulada" ? "expired" : status === "Configurada" ? "draft" : status === "Cerrada" ? "inactive" : ""; }
 
 function renderSamples() {
+  const header = refs.samplesBody.closest("table")?.querySelector("thead tr");
+  if (header && !header.querySelector("[data-column='row-number']")) header.insertAdjacentHTML("afterbegin", '<th data-column="row-number">N.°</th>');
   refs.samplesBody.innerHTML = state.filteredSamples.map((sample) => {
     const index = samples.indexOf(sample);
-    return `<tr><td><strong>${escapeHtml(sample.id)}</strong></td><td><strong>${escapeHtml(sample.name)}</strong><div class="description">${escapeHtml(sample.description)}</div></td><td>${escapeHtml(sample.intervention)}</td><td>${escapeHtml(sample.period)}</td><td>${escapeHtml(sample.source)}</td><td>${escapeHtml(sample.units)}</td><td><span class="status ${statusClass(sample.status)}">${escapeHtml(sample.status)}</span></td><td><div class="row-actions"><button class="row-action" type="button" data-action="view" data-index="${index}" title="Ver detalle"><i class="fa-regular fa-eye" aria-hidden="true"></i><span>Ver detalle</span></button><button class="row-action" type="button" data-action="edit" data-index="${index}" title="Editar"><i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span></button><button class="row-action" type="button" data-action="clone" data-index="${index}" title="Clonar"><i class="fa-regular fa-copy" aria-hidden="true"></i><span>Clonar</span></button></div></td></tr>`;
+    return `<tr><td>${index + 1}</td><td><strong>${escapeHtml(sample.id)}</strong></td><td><strong>${escapeHtml(sample.name)}</strong><div class="description">${escapeHtml(sample.description)}</div></td><td>${escapeHtml(sample.intervention)}</td><td>${escapeHtml(sample.period)}</td><td>${escapeHtml(sample.source)}</td><td>${escapeHtml(sample.units)}</td><td><span class="status ${statusClass(sample.status)}">${escapeHtml(sample.status)}</span></td><td><div class="row-actions"><button class="row-action" type="button" data-action="view" data-index="${index}" title="Ver detalle"><i class="fa-regular fa-eye" aria-hidden="true"></i><span>Ver detalle</span></button><button class="row-action" type="button" data-action="edit" data-index="${index}" title="Editar"><i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span></button><button class="row-action" type="button" data-action="clone" data-index="${index}" title="Clonar"><i class="fa-regular fa-copy" aria-hidden="true"></i><span>Clonar</span></button></div></td></tr>`;
   }).join("");
   refs.emptyState.hidden = state.filteredSamples.length > 0;
   refs.pageSummary.textContent = state.filteredSamples.length ? `Mostrando 1 a ${state.filteredSamples.length} de ${state.filteredSamples.length} registros` : "Mostrando 0 registros";
   refs.sampleCount.textContent = `${samples.length} muestras registradas`;
   enableTooltips();
 }
-function applyFilters() { const query = refs.filterQuery.value.trim().toLowerCase(); const id = document.getElementById("filterId").value.trim().toLowerCase(); const description = document.getElementById("filterDescription").value.trim().toLowerCase(); const source = document.getElementById("filterSource").value.trim().toLowerCase(); const status = refs.filterStatus.value; const period = refs.filterPeriod.value; const intervention = refs.filterIntervention.value; const units = document.getElementById("filterUnits").value; state.filteredSamples = samples.filter((sample) => { const searchable = [sample.id, sample.name, sample.description, sample.intervention, sample.period, sample.source, sample.units, sample.status].join(" ").toLowerCase(); const unitCount = Number(String(sample.units).replace(/,/g, "")); const unitsMatch = units === "Todos" || (units === "0" && unitCount === 0) || (units === "1-500" && unitCount >= 1 && unitCount <= 500) || (units === "501-1000" && unitCount > 500 && unitCount <= 1000) || (units === "1000+" && unitCount > 1000); return searchable.includes(query) && sample.id.toLowerCase().includes(id) && sample.description.toLowerCase().includes(description) && sample.source.toLowerCase().includes(source) && (status === "Todos" || sample.status === status) && (period === "Todos" || sample.period === period) && (intervention === "Todos" || sample.intervention === intervention) && unitsMatch; }); renderSamples(); }
+function applyFilters() { const query = refs.filterQuery.value.trim().toLowerCase(); const id = document.getElementById("filterId").value.trim().toLowerCase(); const description = document.getElementById("filterDescription").value.trim().toLowerCase(); const source = document.getElementById("filterSource").value.trim().toLowerCase(); const status = refs.filterStatus.value; const period = refs.filterPeriod.value; const intervention = refs.filterIntervention.value; const units = document.getElementById("filterUnits").value; state.filteredSamples = samples.filter((sample) => { const searchable = [samples.indexOf(sample) + 1, sample.id, sample.name, sample.description, sample.intervention, sample.period, sample.source, sample.units, sample.status].join(" ").toLowerCase(); const unitCount = Number(String(sample.units).replace(/,/g, "")); const unitsMatch = units === "Todos" || (units === "0" && unitCount === 0) || (units === "1-500" && unitCount >= 1 && unitCount <= 500) || (units === "501-1000" && unitCount > 500 && unitCount <= 1000) || (units === "1000+" && unitCount > 1000); return searchable.includes(query) && sample.id.toLowerCase().includes(id) && sample.description.toLowerCase().includes(description) && sample.source.toLowerCase().includes(source) && (status === "Todos" || sample.status === status) && (period === "Todos" || sample.period === period) && (intervention === "Todos" || sample.intervention === intervention) && unitsMatch; }); renderSamples(); }
 function handleAction(event) { const action = event.target.closest("[data-action]"); if (!action) return; const sample = samples[Number(action.dataset.index)]; if (action.dataset.action === "edit") { state.editingIndex = samples.indexOf(sample); state.dirty = false; state.draft = { id: sample.id, name: sample.name, description: sample.description, source: sample.source, instrument: sample.instrument || "Instrumento de seguimiento", intervention: sample.intervention, period: sample.period, units: sample.units, status: sample.status }; showForm(sample); } else if (action.dataset.action === "clone") { samples.unshift({ ...sample, id: `MST-${String(samples.length + 1).padStart(3, "0")}`, name: `${sample.name} - copia`, status: "Borrador", updated: "21/08/2026 09:00" }); applyFilters(); showToast("Muestra clonada como borrador.", "success"); } else { showToast(`${sample.name}: ${sample.units} unidades en estado ${sample.status}.`, "info"); } }
 function validateStep(step = state.step) { if (step === 1) { clearErrors(); const validName = refs.sampleName.value.trim(); const validDescription = refs.sampleDescription.value.trim(); refs.nameError.textContent = validName ? "" : "Ingresa el nombre de la muestra."; refs.descriptionError.textContent = validDescription ? "" : "Ingresa la descripción de la muestra."; return Boolean(validName && validDescription && refs.sampleSource.value && refs.sampleIntervention.value && refs.samplePeriod.value); } return true; }
 function persistDraft() { const previous = state.editingIndex === null ? null : samples[state.editingIndex]; if (!previous) return; Object.assign(previous, state.draft, { updated: "21/08/2026 09:00" }); state.dirty = false; applyFilters(); }
@@ -294,23 +354,14 @@ function updateSampleField() { updateDraft(); }
 
 
 
+
 const $ = (id) => document.getElementById(id);
 function moveStep(step) { setFormStep(step); }
 
-function discardSampleChanges() {
-  const sample = state.editingIndex === null ? null : samples[state.editingIndex];
-  if (!sample) return;
-  createDraft(sample);
-  syncFormFields();
-}
-
 function rejectWizardStepChange() {
   if (state.pendingWizardStep === null) return;
-  const targetStep = state.pendingWizardStep;
   state.pendingWizardStep = null;
-  discardSampleChanges();
   closeConfirmModal("confirmModal");
-  moveStep(targetStep);
 }
 
 function requestWizardStep(step) {
@@ -344,3 +395,4 @@ refs.confirmModal.querySelector(".modal-footer [data-bs-dismiss='modal']").addEv
 $("confirmModal").addEventListener("hidden.bs.modal", () => { state.pendingAction = null; state.pendingCancel = false; state.pendingWizardStep = null; });
 document.addEventListener("click", (event) => { if (!event.target.closest(".action-menu")) document.querySelectorAll("[data-menu-panel]").forEach((panel) => { panel.hidden = true; }); });
 renderSamples();
+attachTableSorting(document.querySelector(".ssee-table"));

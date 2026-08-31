@@ -22,7 +22,8 @@ export function renderPermissions() {
         const disabled = isDisabled(row, operation);
         const unavailable = row.unavailable.includes(operation);
         const title = unavailable ? "Operación no aplicable para esta funcionalidad" : (disabled ? "Selecciona Consultar para habilitar esta operación" : "");
-        return `<td><input class="form-check-input${unavailable ? " is-not-applicable" : ""}" type="checkbox" data-row="${row.id}" data-operation="${operation}" ${row.checks[operation] ? "checked" : ""} ${disabled ? "disabled" : ""} aria-label="${operation} en ${row.name}"${title ? ` title="${title}" data-bs-toggle="tooltip"` : ""}></td>`;
+        if (unavailable) return `<td><span class="permission-na" title="${title}" data-bs-toggle="tooltip"><i class="fa-solid fa-ban" aria-hidden="true"></i><span>N/A</span></span></td>`;
+        return `<td><input class="form-check-input" type="checkbox" data-row="${row.id}" data-operation="${operation}" ${row.checks[operation] ? "checked" : ""} ${disabled ? "disabled" : ""} aria-label="${operation} en ${row.name}"${title ? ` title="${title}" data-bs-toggle="tooltip"` : ""}></td>`;
       }).join("")}
     </tr>
   `).join("");

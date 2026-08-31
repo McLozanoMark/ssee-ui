@@ -38,6 +38,7 @@ const MESSAGE_CATALOG = Object.freeze({
   M35: { text: "Si existe una cuenta asociada al correo ingresado, recibirá un enlace para recuperar su contraseña.", type: "Información", scope: "General" },
   M36: { text: "El enlace de recuperación ha expirado. Solicite uno nuevo.", type: "Alerta", scope: "General" },
   M37: { text: "La contraseña se ha restablecido correctamente.", type: "Información", scope: "General" },
+  M38: { text: "No fue posible restablecer la contraseña. Intente nuevamente.", type: "Alerta", scope: "General" },
   M39: { text: "No tiene proyectos asignados para visualizar.", type: "Información", scope: "General" },
   M40: { text: "No tiene instrumentos pendientes de atención.", type: "Información", scope: "General" },
   M41: { text: "Tiene %s instrumentos asignados.", type: "Información", scope: "General" },
@@ -127,6 +128,11 @@ function renderToast(element, message, type = "info") {
 }
 
 function enableTooltips() {
+  document.querySelectorAll(".filter-toggle").forEach((element) => {
+    element.setAttribute("title", "Filtro Personalizado");
+    element.setAttribute("data-bs-title", "Filtro Personalizado");
+    element.setAttribute("data-bs-toggle", "tooltip");
+  });
   if (!window.bootstrap) return;
   document.querySelectorAll("[data-bs-toggle='tooltip']").forEach((element) => {
     bootstrap.Tooltip.getOrCreateInstance(element);
@@ -158,6 +164,58 @@ function closeConfirmModal(id) {
 }
 
 
+/* source: design-system/table-sort.js */
+const collator = new Intl.Collator("es", { numeric: true, sensitivity: "base" });
+
+function normalize(value, type) {
+  const text = String(value || "").trim();
+  if (type === "number") return Number(text.replace(/[^0-9.-]/g, "")) || 0;
+  if (type === "date") {
+    const parts = text.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+    return parts ? new Date(`${parts[3]}-${parts[2]}-${parts[1]}`).getTime() : 0;
+  }
+  return text;
+}
+
+function attachTableSorting(table) {
+  if (!table) return;
+  const buttons = [...table.querySelectorAll("[data-sort-key]")];
+  const state = { key: null, direction: null };
+
+  buttons.forEach((button) => button.addEventListener("click", () => {
+    const key = button.dataset.sortKey;
+    state.direction = state.key === key && state.direction === "ascending" ? "descending" : "ascending";
+    state.key = key;
+    const header = button.closest("th");
+    const columnIndex = [...header.parentElement.children].indexOf(header);
+    const type = button.dataset.sortType || "text";
+    const body = table.tBodies[0];
+    if (!body) return;
+
+    [...body.rows]
+      .sort((left, right) => {
+        const comparison = type === "number" || type === "date"
+          ? normalize(left.cells[columnIndex]?.textContent, type) - normalize(right.cells[columnIndex]?.textContent, type)
+          : collator.compare(normalize(left.cells[columnIndex]?.textContent, type), normalize(right.cells[columnIndex]?.textContent, type));
+        return state.direction === "ascending" ? comparison : -comparison;
+      })
+      .forEach((row) => body.append(row));
+
+    buttons.forEach((item) => {
+      const itemHeader = item.closest("th");
+      const active = item === button;
+      itemHeader?.setAttribute("aria-sort", active ? state.direction : "none");
+      const icon = item.querySelector("i");
+      if (icon) {
+        icon.classList.toggle("fa-arrow-up", active && state.direction === "ascending");
+        icon.classList.toggle("fa-arrow-down", active && state.direction === "descending");
+        icon.classList.toggle("fa-arrow-down-up", !active);
+      }
+    });
+  }));
+}
+
+
 /* source: ref-006-users/js/data.js */
 const users = [
   {
@@ -179,6 +237,8 @@ const users = [
     name: "Juan Castro",
     email: "juan.castro@ejemplo.gob.pe",
     auth: "Documento",
+    documentNumber: "87654321",
+    birthDate: "12/09/1986",
     site: "Unidad de Seguimiento y Evaluación",
     roles: ["Supervisor de Seguimiento"],
     projects: ["Evaluación 2026"],
@@ -193,6 +253,8 @@ const users = [
     name: "Ana Paredes",
     email: "ana.paredes@ejemplo.gob.pe",
     auth: "Documento",
+    documentNumber: "74125896",
+    birthDate: "15/04/1988",
     site: "Oficina de Operaciones",
     roles: [],
     projects: [],
@@ -264,6 +326,14 @@ const refs = {
   validityField: document.getElementById("validityField"),
   accessEditNote: document.getElementById("accessEditNote"),
   roleModalFeedback: document.getElementById("roleModalFeedback"),
+  reniecModal: document.getElementById("reniecModal"),
+  reniecModalContext: document.getElementById("reniecModalContext"),
+  reniecDocument: document.getElementById("reniecDocument"),
+  reniecResult: document.getElementById("reniecResult"),
+  reniecName: document.getElementById("reniecName"),
+  reniecBirth: document.getElementById("reniecBirth"),
+  consultReniecBtn: document.getElementById("consultReniecBtn"),
+  saveReniecBtn: document.getElementById("saveReniecBtn"),
   confirmRolesModal: document.getElementById("confirmRolesModal"),
   confirmRolesMessage: document.getElementById("confirmRolesMessage"),
   editUserStatusControl: document.getElementById("editUserStatusControl"),
@@ -291,6 +361,8 @@ function showDetail(user) {
       <div class="detail-field"><span>Tipo de autenticación</span><strong>${user.auth}</strong></div>
       <div class="detail-field"><span>Sede</span><strong>${user.site || "-"}</strong></div>
       <div class="detail-field"><span>Nombres y apellidos</span><strong>${user.name}</strong></div>
+      <div class="detail-field"><span>Documento</span><strong>${user.documentNumber || "-"}</strong></div>
+      <div class="detail-field"><span>Fecha de nacimiento</span><strong>${user.birthDate || "-"}</strong></div>
       <div class="detail-field"><span>Correo</span><strong>${user.email}</strong></div>
       <div class="detail-field"><span>Estado</span><strong>${user.status}</strong></div>
       <div class="detail-field"><span>Último acceso</span><strong>${user.lastAccess}</strong></div>
@@ -299,6 +371,7 @@ function showDetail(user) {
     </div>
     <div class="detail-section"><h2>Roles asignados</h2><div class="user-role-tags">${roleTags}</div></div>
     <div class="detail-section"><h2>Proyectos asignados</h2><div class="user-role-tags">${projectTags}</div></div>
+    ${user.auth === "Documento" ? '<div class="detail-actions"><button class="btn btn-outline-ssee button button-secondary" type="button" data-detail-action="reniec"><i class="fa-solid fa-id-card" aria-hidden="true"></i>Actualizar datos RENIEC</button></div>' : ""}
   `;
 }
 
@@ -314,16 +387,53 @@ const availableSites = ["Unidad de Seguimiento y Evaluación", "Oficina de Opera
 let roleTarget = null;
 let pendingRoles = null;
 let pendingStatus = null;
+let pendingRenewal = null;
+let reniecTarget = null;
+let pendingReniec = null;
 let pendingCancel = false;
-function matchesTray(user) {
+
+const reniecRecords = {
+  jcastro: { documentNumber: "87654321", name: "Juan Carlos Castro Fernández", birthDate: "12/09/1986" },
+  aparedes: { documentNumber: "74125896", name: "Ana María Paredes García", birthDate: "15/04/1988" },
+};
+
+function syncValidityState() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  users.forEach((user) => {
+    if (user.expires === "-") return;
+    const [day, month, year] = user.expires.split("/").map(Number);
+    const expiry = new Date(year, month - 1, day);
+    const daysRemaining = Math.ceil((expiry - today) / 86400000);
+    if (daysRemaining < 0) {
+      user.status = "Inactivo";
+      user.expiresSoon = false;
+    } else {
+      user.expiresSoon = daysRemaining <= 30;
+    }
+  });
+}
+
+function calculateExpiry(validity) {
+  if (validity === "Sin fecha de vencimiento") return "-";
+  const days = validity === "30 días" ? 30 : validity === "90 días" ? 90 : 365;
+  const expiry = new Date();
+  expiry.setHours(0, 0, 0, 0);
+  expiry.setDate(expiry.getDate() + days);
+  return expiry.toLocaleDateString("es-PE");
+}
+function matchesTray(user, tray = state.tray) {
   return (
-    state.tray === "Todos" ||
-    (state.tray === "Pendientes de rol" && !user.roles.length) ||
-    (state.tray === "Sin proyecto" && !user.projects?.length) ||
-    (state.tray === "Por vencer" && user.expiresSoon)
+    tray === "Todos" ||
+    (tray === "Pendientes de rol" && !user.roles.length) ||
+    (tray === "Sin proyecto" && !user.projects?.length) ||
+    (tray === "Por vencer" && user.expiresSoon)
   );
 }
 function applyFilters() {
+  syncValidityState();
+  const tray = document.getElementById("filterTray").value;
+  state.tray = tray;
   const q = document.getElementById("filterName").value.trim().toLowerCase(),
     username = document.getElementById("filterUsername").value.trim().toLowerCase(),
     description = document
@@ -339,10 +449,10 @@ function applyFilters() {
     lastAccess = document.getElementById("filterLastAccess").value;
   state.filteredUsers = users.filter(
     (user) =>
-      matchesTray(user) &&
+      matchesTray(user, tray) &&
       (!username || user.username.toLowerCase().includes(username)) &&
       (!q ||
-        [user.username, user.name, user.email, user.auth, user.status, user.expires, user.lastAccess, ...user.roles, ...(user.projects || [])]
+        [users.indexOf(user) + 1, user.username, user.name, user.email, user.auth, user.status, user.expires, user.lastAccess, ...user.roles, ...(user.projects || [])]
           .join(" ")
           .toLowerCase()
           .includes(q)) &&
@@ -355,12 +465,15 @@ function applyFilters() {
       (validity === "Todos"
         || (validity === "Sin vencimiento" && user.expires === "-")
         || (validity === "Por vencer" && user.expiresSoon)
-        || (validity === "Vencido" && user.expires !== "-" && !user.expiresSoon)) &&
+        ) &&
       (!lastAccess || user.lastAccess.slice(0, 10).split("/").reverse().join("-") === lastAccess),
   );
   renderUsers();
 }
 function renderUsers() {
+  syncValidityState();
+  const header = refs.usersBody.closest("table")?.querySelector("thead tr");
+  if (header && !header.querySelector("[data-column='row-number']")) header.insertAdjacentHTML("afterbegin", '<th data-column="row-number">N.°</th>');
   refs.usersBody.innerHTML = state.filteredUsers
     .map((user, index) => {
       const roleTags = user.roles.length
@@ -369,24 +482,25 @@ function renderUsers() {
       const statusClass = user.status === "Activo" ? "active" : "inactive";
       const canToggleStatus = ["Documento", "Autoregistro"].includes(user.auth);
       const statusControl = `<span class="status ${statusClass}">${user.status}</span>`;
-      const actionMenu = `
-        <div class="dropdown action-menu">
-          <button class="menu-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Acciones de ${user.name}"><i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i></button>
-          <ul class="dropdown-menu dropdown-menu-end">
-            <li><button class="dropdown-item" type="button" data-user="${index}" data-user-action="detail"><i class="fa-regular fa-eye" aria-hidden="true"></i><span>Ver detalle</span></button></li>
-            <li><button class="dropdown-item" type="button" data-user="${index}" data-user-action="edit"><i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span></button></li>
-            <li><button class="dropdown-item" type="button" data-user="${index}" data-user-action="roles"><i class="fa-solid fa-user-tag" aria-hidden="true"></i><span>Asignar rol</span></button></li>
-            <li><button class="dropdown-item" type="button" data-user="${index}" data-user-action="renew"><i class="fa-solid fa-calendar-plus" aria-hidden="true"></i><span>Renovar vigencia</span></button></li>
-            <li><div class="dropdown-switch ${canToggleStatus ? "" : "is-disabled"} ${user.status === "Activo" ? "will-deactivate" : "will-activate"}"><span><i class="fa-solid fa-power-off" aria-hidden="true"></i>${user.status === "Activo" ? "Inactivar" : "Activar"}</span><label class="form-check form-switch switch ${canToggleStatus ? "" : "is-disabled"}" data-on-label="Activo" data-off-label="Inactivo" title="${canToggleStatus ? "" : "Estado administrado por Passport"}"><input class="form-check-input" type="checkbox" data-user="${index}" data-user-action="toggle-status" ${user.status === "Activo" ? "checked" : ""} ${canToggleStatus ? "" : "disabled"} aria-label="${user.status === "Activo" ? "Inactivar" : "Activar"} ${user.name}"></label></div></li>
-          </ul>
-        </div>`;
+      const nextStatus = user.status === "Activo" ? "Inactivo" : "Activo";
+      const actionMenu = `<div class="row-actions user-actions">
+        <button class="row-action" type="button" data-action="view" data-user="${index}" data-user-action="detail" title="Ver detalle">
+          <i class="fa-regular fa-eye" aria-hidden="true"></i><span>Ver detalle</span>
+        </button>
+        <button class="row-action" type="button" data-action="roles" data-user="${index}" data-user-action="roles" title="Asignar">
+          <i class="fa-solid fa-user-tag" aria-hidden="true"></i><span>Asignar</span>
+        </button>
+        <label class="form-check form-switch switch row-state-toggle ${canToggleStatus ? "" : "is-disabled"}" data-user="${index}" data-user-action="toggle-status" data-next-state="${nextStatus}" data-on-label="Activo" data-off-label="Inactivo" title="${canToggleStatus ? nextStatus : "Estado administrado por Passport"}">
+          <input class="form-check-input" type="checkbox" ${user.status === "Activo" ? "checked" : ""} ${canToggleStatus ? "" : "disabled"} aria-label="${canToggleStatus ? `${nextStatus} ${user.name}` : `Estado administrado por Passport para ${user.name}`}" />
+        </label>
+      </div>`;
       const projectTags = user.projects?.length
         ? user.projects.map((project) => `<span class="tag">${project}</span>`).join("")
         : '<span class="muted">Pendiente</span>';
       return `
       <tr>
-        <td><strong>${user.username}</strong></td><td>${user.name}</td><td>${user.email}</td><td>${user.auth}</td>
-        <td><div class="user-role-tags">${roleTags}${["Passport", "Documento"].includes(user.auth) ? `<button class="tag tag-add" type="button" data-role-action="open" data-user="${index}" aria-label="Asignar roles a ${user.name}"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>` : ""}</div></td>
+        <td>${users.indexOf(user) + 1}</td><td><strong>${user.username}</strong></td><td>${user.name}</td><td>${user.email}</td><td>${user.auth}</td>
+        <td><div class="user-role-tags">${roleTags}</div></td>
         <td><div class="user-role-tags">${projectTags}</div></td>
         <td>${user.expires}</td><td>${statusControl}</td><td>${user.lastAccess}</td>
         <td>${actionMenu}</td>
@@ -412,22 +526,21 @@ function openSelected(index) {
 function openRoles(index, mode = "roles") {
   roleTarget = state.filteredUsers[index];
   if (!roleTarget) return;
-  const canEditRoles = ["Passport", "Documento"].includes(roleTarget.auth);
-  const canEditProjects = canEditRoles;
+  const canEditRoles = true;
+  const canEditProjects = true;
   const canEditSite = roleTarget.auth === "Documento";
   const canEditValidity = roleTarget.auth === "Documento";
   const canEditAny = canEditRoles || canEditSite || canEditValidity;
   const canToggleStatus = ["Documento", "Autoregistro"].includes(roleTarget.auth);
-  refs.rolesModalTitle.textContent = mode === "edit" ? "Editar acceso" : "Asignar roles";
+  refs.rolesModalTitle.textContent = "Asignar roles";
   document.getElementById("saveRolesBtn").textContent = "Guardar";
   document.getElementById("saveRolesBtn").hidden = !canEditAny;
   refs.rolesModalContext.textContent = mode === "edit"
     ? `Actualiza los datos permitidos para ${roleTarget.name}.`
     : `Selecciona los roles y proyectos activos de ${roleTarget.name}.`;
-  refs.accessEditNote.hidden = canEditAny;
-  refs.accessEditNote.textContent = "Para Autoregistro solo está permitida la modificación del estado del usuario.";
+  refs.accessEditNote.hidden = true;
   refs.sitePicker.innerHTML = canEditSite ? `<label class="modal-label" for="siteSelect">Sede<select class="form-select" id="siteSelect">${availableSites.map((site) => `<option ${site === roleTarget.site ? "selected" : ""}>${site}</option>`).join("")}</select></label>` : "";
-  refs.rolePicker.innerHTML = canEditRoles ? availableRoles.map((role) => `<label class="role-option"><span class="role-avatar">${role.charAt(0)}</span><span class="role-option-name">${role}</span><input type="checkbox" value="${role}" ${roleTarget.roles.includes(role) ? "checked" : ""}></label>`).join("") : "";
+  refs.rolePicker.innerHTML = canEditRoles ? `<span class="modal-label-text">Roles</span>${availableRoles.map((role) => `<label class="role-option"><span class="role-avatar">${role.charAt(0)}</span><span class="role-option-name">${role}</span><input type="checkbox" value="${role}" ${roleTarget.roles.includes(role) ? "checked" : ""}></label>`).join("")}` : "";
   refs.projectPicker.innerHTML = canEditProjects ? `<span class="modal-label-text">Proyectos</span>${availableProjects.map((project) => `<label class="role-option project-option"><span class="role-avatar">${project.charAt(0)}</span><span class="role-option-name">${project}</span><input type="checkbox" value="${project}" ${roleTarget.projects?.includes(project) ? "checked" : ""}></label>`).join("")}` : "";
   refs.validityField.hidden = !canEditValidity;
   refs.validitySelect.value = roleTarget.expires === "-" ? "Sin fecha de vencimiento" : "90 días";
@@ -436,9 +549,44 @@ function openRoles(index, mode = "roles") {
   refs.roleModalFeedback.hidden = true;
   bootstrap.Modal.getOrCreateInstance(refs.rolesModal).show();
 }
+
+function openReniecUpdate(index) {
+  reniecTarget = state.filteredUsers[index];
+  if (!reniecTarget || reniecTarget.auth !== "Documento") return;
+  pendingReniec = null;
+  refs.reniecModalContext.textContent = `Usuario: ${reniecTarget.name}`;
+  refs.reniecDocument.value = reniecTarget.documentNumber || "";
+  refs.reniecName.textContent = "";
+  refs.reniecBirth.textContent = "";
+  refs.reniecResult.hidden = true;
+  refs.saveReniecBtn.disabled = true;
+  bootstrap.Modal.getOrCreateInstance(refs.reniecModal).show();
+}
+
+function consultReniec() {
+  if (!reniecTarget) return;
+  const result = reniecRecords[reniecTarget.username] || {
+    documentNumber: reniecTarget.documentNumber || "00000000",
+    name: reniecTarget.name,
+    birthDate: reniecTarget.birthDate || "-",
+  };
+  refs.reniecDocument.value = result.documentNumber;
+  refs.reniecName.textContent = result.name;
+  refs.reniecBirth.textContent = result.birthDate;
+  refs.reniecResult.hidden = false;
+  pendingReniec = result;
+  refs.saveReniecBtn.disabled = false;
+  showToast(getPrototypeMessage("identityLookupSuccess"), "success");
+}
+
+function saveReniec() {
+  if (!reniecTarget || !pendingReniec) return;
+  roleTarget = reniecTarget;
+  refs.confirmRolesMessage.textContent = getMessage("M1");
+  bootstrap.Modal.getOrCreateInstance(refs.confirmRolesModal).show();
+}
 function saveRoles() {
   if (!roleTarget) return;
-  if (roleTarget.auth === "Autoregistro") return;
   const selected = [...refs.rolePicker.querySelectorAll("input:checked")].map((input) => input.value);
   const projects = [...refs.projectPicker.querySelectorAll("input:checked")].map((input) => input.value);
   const validity = roleTarget.auth === "Documento" ? refs.validitySelect.value : "Sin fecha de vencimiento";
@@ -451,7 +599,7 @@ function saveRoles() {
   }
   const currentValidity = roleTarget.expires === "-" ? "Sin fecha de vencimiento" : "90 días";
   const changed = selected.join("|") !== roleTarget.roles.join("|") || projects.join("|") !== (roleTarget.projects || []).join("|") || validity !== currentValidity || site !== roleTarget.site;
-  pendingRoles = { roles: selected, projects, validity, site };
+  pendingRoles = { roles: selected, projects, validity, site, preserveValidity: validity === currentValidity };
   refs.confirmRolesMessage.textContent = changed
     ? `${getMessage("M1")} El cambio puede afectar los permisos y el acceso de ${roleTarget.name}.`
     : `${getMessage("M1")} No se detectaron cambios en el acceso de ${roleTarget.name}.`;
@@ -462,6 +610,7 @@ function toggleStatus(index) {
   if (!user || !["Documento", "Autoregistro"].includes(user.auth) || !["Activo", "Inactivo"].includes(user.status)) return;
   const next = user.status === "Activo" ? "Inactivo" : "Activo";
   pendingStatus = { user, next };
+  renderUsers();
   refs.confirmRolesMessage.textContent = `${getMessage(next === "Activo" ? "M5" : "M6")} ${user.name}?`;
   bootstrap.Modal.getOrCreateInstance(refs.confirmRolesModal).show();
 }
@@ -471,6 +620,13 @@ function toggleEditedUserStatus(event) {
   refs.editUserStatusToggle.checked = roleTarget.status === "Activo";
   pendingStatus = { user: roleTarget, next };
   refs.confirmRolesMessage.textContent = `${getMessage(next === "Activo" ? "M5" : "M6")} ${roleTarget.name}?`;
+  bootstrap.Modal.getOrCreateInstance(refs.confirmRolesModal).show();
+}
+function renewValidity(index) {
+  const user = state.filteredUsers[index];
+  if (!user || user.auth !== "Documento" || user.expires === "-") return;
+  pendingRenewal = { user };
+  refs.confirmRolesMessage.textContent = `${getMessage("M1")} Se ampliará la vigencia de ${user.name}.`;
   bootstrap.Modal.getOrCreateInstance(refs.confirmRolesModal).show();
 }
 function cancelRoleEdit() {
@@ -483,6 +639,9 @@ function confirmRoles() {
     pendingCancel = false;
     pendingRoles = null;
     pendingStatus = null;
+    pendingRenewal = null;
+    pendingReniec = null;
+    reniecTarget = null;
     bootstrap.Modal.getOrCreateInstance(refs.confirmRolesModal).hide();
     bootstrap.Modal.getOrCreateInstance(refs.rolesModal).hide();
     return;
@@ -497,6 +656,27 @@ function confirmRoles() {
     showToast(getMessage(next === "Activo" ? "M7" : "M8"), "success");
     return;
   }
+  if (pendingRenewal) {
+    pendingRenewal.user.expires = "12/09/2027";
+    pendingRenewal.user.expiresSoon = false;
+    pendingRenewal = null;
+    bootstrap.Modal.getOrCreateInstance(refs.confirmRolesModal).hide();
+    renderUsers();
+    showToast(getMessage("M3"), "success");
+    return;
+  }
+  if (pendingReniec && reniecTarget) {
+    reniecTarget.documentNumber = pendingReniec.documentNumber;
+    reniecTarget.name = pendingReniec.name;
+    reniecTarget.birthDate = pendingReniec.birthDate;
+    pendingReniec = null;
+    reniecTarget = null;
+    bootstrap.Modal.getOrCreateInstance(refs.confirmRolesModal).hide();
+    bootstrap.Modal.getOrCreateInstance(refs.reniecModal).hide();
+    renderUsers();
+    showToast(getMessage("M3"), "success");
+    return;
+  }
   if (!roleTarget || !pendingRoles) return;
   applyRoles(pendingRoles);
   pendingRoles = null;
@@ -506,7 +686,7 @@ function applyRoles(selected) {
   roleTarget.roles = selected.roles;
   roleTarget.projects = selected.projects;
   roleTarget.site = selected.site;
-  roleTarget.expires = selected.validity === "Sin fecha de vencimiento" ? "-" : selected.validity;
+  if (!selected.preserveValidity) roleTarget.expires = calculateExpiry(selected.validity);
   renderUsers();
   bootstrap.Modal.getOrCreateInstance(refs.rolesModal).hide();
   showToast(getMessage("M3"), "success");
@@ -515,12 +695,23 @@ function exportUsers() {
   showToast(getMessage("M67"), "success");
 }
 
+function dismissPendingConfirmation() {
+  pendingRoles = null;
+  pendingStatus = null;
+  pendingRenewal = null;
+  pendingReniec = null;
+  pendingCancel = false;
+}
+
 
 /* source: ref-006-users/js/main.js */
 
 
 
 
+
+
+document.getElementById("confirmRolesModal")?.querySelector(".modal-header")?.insertAdjacentHTML("afterbegin", '<span class="modal-title-icon" aria-hidden="true"><i class="fa-solid fa-circle-question"></i></span>');
 document.getElementById("filterForm").addEventListener("submit", (event) => {
   event.preventDefault();
   applyFilters();
@@ -562,27 +753,35 @@ document.getElementById("clearBtn").addEventListener("click", () => {
   showToast(getPrototypeMessage("filtersCleared"), "info");
 });
 refs.usersBody.addEventListener("click", (event) => {
-  const roleButton = event.target.closest("[data-role-action='open']");
-  if (roleButton) return openRoles(Number(roleButton.dataset.user));
   const action = event.target.closest("[data-user-action]");
   if (action) {
     if (action.dataset.userAction === "detail") openSelected(Number(action.dataset.user));
     if (action.dataset.userAction === "roles") openRoles(Number(action.dataset.user));
-    if (action.dataset.userAction === "edit") openRoles(Number(action.dataset.user), "edit");
     if (action.dataset.userAction === "toggle-status") toggleStatus(Number(action.dataset.user));
-    if (action.dataset.userAction === "renew") showToast("Renovar vigencia queda pendiente de confirmación del flujo.", "info");
+    if (action.dataset.userAction === "reniec") openReniecUpdate(Number(action.dataset.user));
     return;
   }
-  const button = event.target.closest("[data-user]");
-  if (button) {
-    openSelected(Number(button.dataset.user));
-    showToast("Detalle de usuario abierto.", "info");
-  }
+});
+refs.detailCard.addEventListener("click", (event) => {
+  if (!event.target.closest("[data-detail-action='reniec']")) return;
+  const index = state.filteredUsers.indexOf(state.selectedUser);
+  if (index >= 0) openReniecUpdate(index);
 });
 document.getElementById("backBtn").addEventListener("click", showList);
 document.getElementById("exportBtn").addEventListener("click", exportUsers);
 document.getElementById("saveRolesBtn").addEventListener("click", saveRoles);
 document.getElementById("confirmRolesBtn").addEventListener("click", confirmRoles);
+document.getElementById("confirmRolesModal").addEventListener("hidden.bs.modal", dismissPendingConfirmation);
 refs.editUserStatusToggle.addEventListener("change", toggleEditedUserStatus);
 document.getElementById("cancelRolesBtn").addEventListener("click", cancelRoleEdit);
+refs.consultReniecBtn.addEventListener("click", consultReniec);
+refs.saveReniecBtn.addEventListener("click", saveReniec);
 renderUsers();
+attachTableSorting(document.querySelector(".ssee-table"));
+enableTooltips();
+
+const accessName = new URLSearchParams(window.location.search).get("accessName");
+if (accessName) {
+  const userIndex = state.filteredUsers.findIndex((user) => user.name === accessName);
+  if (userIndex >= 0) openRoles(userIndex);
+}

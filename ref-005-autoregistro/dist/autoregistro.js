@@ -38,6 +38,7 @@ const MESSAGE_CATALOG = Object.freeze({
   M35: { text: "Si existe una cuenta asociada al correo ingresado, recibirá un enlace para recuperar su contraseña.", type: "Información", scope: "General" },
   M36: { text: "El enlace de recuperación ha expirado. Solicite uno nuevo.", type: "Alerta", scope: "General" },
   M37: { text: "La contraseña se ha restablecido correctamente.", type: "Información", scope: "General" },
+  M38: { text: "No fue posible restablecer la contraseña. Intente nuevamente.", type: "Alerta", scope: "General" },
   M39: { text: "No tiene proyectos asignados para visualizar.", type: "Información", scope: "General" },
   M40: { text: "No tiene instrumentos pendientes de atención.", type: "Información", scope: "General" },
   M41: { text: "Tiene %s instrumentos asignados.", type: "Información", scope: "General" },
@@ -127,6 +128,11 @@ function renderToast(element, message, type = "info") {
 }
 
 function enableTooltips() {
+  document.querySelectorAll(".filter-toggle").forEach((element) => {
+    element.setAttribute("title", "Filtro Personalizado");
+    element.setAttribute("data-bs-title", "Filtro Personalizado");
+    element.setAttribute("data-bs-toggle", "tooltip");
+  });
   if (!window.bootstrap) return;
   document.querySelectorAll("[data-bs-toggle='tooltip']").forEach((element) => {
     bootstrap.Tooltip.getOrCreateInstance(element);
@@ -243,7 +249,8 @@ function passwordIsValid(value) {
 function openConfirmation() {
   const modal = document.createElement("div");
   modal.className = "modal fade";
-  modal.innerHTML = `<div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content admission-modal"><div class="modal-header"><div><span class="modal-eyebrow">Confirmar registro</span><h2 class="modal-title">Crear cuenta</h2></div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div><div class="modal-body"><p>${getMessage("M1")}</p><p>La cuenta se registrará como Autoregistro y recibirá el rol predeterminado del proceso.</p></div><div class="modal-footer"><button type="button" class="btn btn-outline-ssee button button-secondary" data-bs-dismiss="modal">No</button><button type="button" class="btn btn-ssee button button-primary" data-confirm="registration">Sí</button></div></div></div>`;
+  modal.innerHTML = `<div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content admission-modal"><div class="modal-header"><div><span class="modal-eyebrow">Confirmar registro</span><h2 class="modal-title">Crear cuenta</h2></div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div><div class="modal-body"><p>${getMessage("M1")}</p></div><div class="modal-footer"><button type="button" class="btn btn-outline-ssee button button-secondary" data-bs-dismiss="modal">No</button><button type="button" class="btn btn-ssee button button-primary" data-confirm="registration">Sí</button></div></div></div>`;
+  modal.querySelector(".modal-header")?.insertAdjacentHTML("afterbegin", '<span class="modal-title-icon" aria-hidden="true"><i class="fa-solid fa-circle-question"></i></span>');
   document.body.append(modal);
   const instance = new bootstrap.Modal(modal);
   modal.addEventListener("click", (event) => {

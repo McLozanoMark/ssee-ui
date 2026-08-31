@@ -78,6 +78,16 @@
 .detail-section h2 {
   font-size: 1rem;
 }
+.detail-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ssee-line);
+}
+.user-actions {
+  justify-content: flex-end;
+}
 .status.warning {
   color: #8a5a00;
   background: #fff4d6;
@@ -126,3 +136,8 @@
 .dropdown-switch .switch { min-height: 1.8rem; }
 .status-action-danger i { color: #dc3545; }
 .status-action-success i { color: #198754; }
+.reniec-consult { margin-top: 1rem; }
+.reniec-result { display: grid; gap: 0.7rem; margin-top: 1rem; padding: 0.8rem; border: 1px solid #b8e2d1; border-radius: 0.5rem; background: #f1fbf6; }
+.reniec-result div { display: grid; gap: 0.15rem; }
+.reniec-result span { color: var(--ssee-muted); font-size: 0.72rem; }
+.reniec-result strong { color: var(--ssee-ink); font-size: 0.82rem; }

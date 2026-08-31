@@ -32,26 +32,10 @@ function markFormDirty() {
   state.dirty = true;
 }
 
-function discardSourceChanges() {
-  const source = state.editingIndex === null ? null : sources[state.editingIndex];
-  if (!source) return;
-  createDraft(source);
-  state.loadMode = "manual";
-  syncGeneralFields();
-  renderFields();
-  renderKeyFields();
-  renderManualRecords();
-  updateLoadMode();
-  updateWizardFooter();
-}
-
 function rejectWizardStepChange() {
   if (state.pendingWizardStep === null) return;
-  const targetStep = state.pendingWizardStep;
   state.pendingWizardStep = null;
-  discardSourceChanges();
   closeConfirmModal("confirmModal");
-  showStep(targetStep);
 }
 
 refs.filterForm.addEventListener("submit", (event) => {

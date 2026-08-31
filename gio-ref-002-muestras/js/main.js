@@ -1,27 +1,18 @@
 import { samples } from "./data.js";
 import { state, createDraft } from "./state.js";
-import { refs, showForm, showToast, setFormStep, syncFormFields, updateDraft } from "./ui.js";
+import { refs, showForm, showToast, setFormStep, updateDraft } from "./ui.js";
 import { applyFilters, renderSamples, handleAction, validateStep, requestSaveStep, requestComplete, requestCancel, confirmPendingAction } from "./samples.js";
 import { getMessage, getPrototypeMessage } from "../../design-system/messages.js";
 import { openConfirmModal, closeConfirmModal } from "../../design-system/interaction.js";
+import { attachTableSorting } from "../../design-system/table-sort.js";
 
 const $ = (id) => document.getElementById(id);
 function moveStep(step) { setFormStep(step); }
 
-function discardSampleChanges() {
-  const sample = state.editingIndex === null ? null : samples[state.editingIndex];
-  if (!sample) return;
-  createDraft(sample);
-  syncFormFields();
-}
-
 function rejectWizardStepChange() {
   if (state.pendingWizardStep === null) return;
-  const targetStep = state.pendingWizardStep;
   state.pendingWizardStep = null;
-  discardSampleChanges();
   closeConfirmModal("confirmModal");
-  moveStep(targetStep);
 }
 
 function requestWizardStep(step) {
@@ -55,3 +46,4 @@ refs.confirmModal.querySelector(".modal-footer [data-bs-dismiss='modal']").addEv
 $("confirmModal").addEventListener("hidden.bs.modal", () => { state.pendingAction = null; state.pendingCancel = false; state.pendingWizardStep = null; });
 document.addEventListener("click", (event) => { if (!event.target.closest(".action-menu")) document.querySelectorAll("[data-menu-panel]").forEach((panel) => { panel.hidden = true; }); });
 renderSamples();
+attachTableSorting(document.querySelector(".ssee-table"));

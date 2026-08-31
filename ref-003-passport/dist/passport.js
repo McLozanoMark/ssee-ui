@@ -38,6 +38,7 @@ const MESSAGE_CATALOG = Object.freeze({
   M35: { text: "Si existe una cuenta asociada al correo ingresado, recibirá un enlace para recuperar su contraseña.", type: "Información", scope: "General" },
   M36: { text: "El enlace de recuperación ha expirado. Solicite uno nuevo.", type: "Alerta", scope: "General" },
   M37: { text: "La contraseña se ha restablecido correctamente.", type: "Información", scope: "General" },
+  M38: { text: "No fue posible restablecer la contraseña. Intente nuevamente.", type: "Alerta", scope: "General" },
   M39: { text: "No tiene proyectos asignados para visualizar.", type: "Información", scope: "General" },
   M40: { text: "No tiene instrumentos pendientes de atención.", type: "Información", scope: "General" },
   M41: { text: "Tiene %s instrumentos asignados.", type: "Información", scope: "General" },
@@ -127,6 +128,11 @@ function renderToast(element, message, type = "info") {
 }
 
 function enableTooltips() {
+  document.querySelectorAll(".filter-toggle").forEach((element) => {
+    element.setAttribute("title", "Filtro Personalizado");
+    element.setAttribute("data-bs-title", "Filtro Personalizado");
+    element.setAttribute("data-bs-toggle", "tooltip");
+  });
   if (!window.bootstrap) return;
   document.querySelectorAll("[data-bs-toggle='tooltip']").forEach((element) => {
     bootstrap.Tooltip.getOrCreateInstance(element);
@@ -158,7 +164,60 @@ function closeConfirmModal(id) {
 }
 
 
+/* source: design-system/table-sort.js */
+const collator = new Intl.Collator("es", { numeric: true, sensitivity: "base" });
+
+function normalize(value, type) {
+  const text = String(value || "").trim();
+  if (type === "number") return Number(text.replace(/[^0-9.-]/g, "")) || 0;
+  if (type === "date") {
+    const parts = text.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+    return parts ? new Date(`${parts[3]}-${parts[2]}-${parts[1]}`).getTime() : 0;
+  }
+  return text;
+}
+
+function attachTableSorting(table) {
+  if (!table) return;
+  const buttons = [...table.querySelectorAll("[data-sort-key]")];
+  const state = { key: null, direction: null };
+
+  buttons.forEach((button) => button.addEventListener("click", () => {
+    const key = button.dataset.sortKey;
+    state.direction = state.key === key && state.direction === "ascending" ? "descending" : "ascending";
+    state.key = key;
+    const header = button.closest("th");
+    const columnIndex = [...header.parentElement.children].indexOf(header);
+    const type = button.dataset.sortType || "text";
+    const body = table.tBodies[0];
+    if (!body) return;
+
+    [...body.rows]
+      .sort((left, right) => {
+        const comparison = type === "number" || type === "date"
+          ? normalize(left.cells[columnIndex]?.textContent, type) - normalize(right.cells[columnIndex]?.textContent, type)
+          : collator.compare(normalize(left.cells[columnIndex]?.textContent, type), normalize(right.cells[columnIndex]?.textContent, type));
+        return state.direction === "ascending" ? comparison : -comparison;
+      })
+      .forEach((row) => body.append(row));
+
+    buttons.forEach((item) => {
+      const itemHeader = item.closest("th");
+      const active = item === button;
+      itemHeader?.setAttribute("aria-sort", active ? state.direction : "none");
+      const icon = item.querySelector("i");
+      if (icon) {
+        icon.classList.toggle("fa-arrow-up", active && state.direction === "ascending");
+        icon.classList.toggle("fa-arrow-down", active && state.direction === "descending");
+        icon.classList.toggle("fa-arrow-down-up", !active);
+      }
+    });
+  }));
+}
+
+
 /* source: ref-003-passport/js/main.js */
+
 
 
 
@@ -172,6 +231,8 @@ const records = [
 const body = document.getElementById("usersBody");
 const toast = document.getElementById("toast");
 const typeFilter = document.createElement("select");
+let automaticSyncTimer;
+let syncRunning = false;
 
 function showToast(message, type = "info") {
   renderToast(toast, message, type);
@@ -182,15 +243,17 @@ function configureView() {
   document.querySelector(".location-card strong").textContent = "Sede";
   document.querySelector(".account-copy strong").textContent = "Administrador";
   document.querySelector(".location-card").insertAdjacentHTML("beforeend", '<i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>');
-  document.querySelector(".account").innerHTML = '<button class="bell" type="button" aria-label="Notificaciones"><i class="fa-regular fa-bell"></i></button><div class="account-separator" aria-hidden="true"></div><div class="account-copy"><strong>Administrador</strong><span>Superadmin</span></div><div class="avatar" aria-hidden="true">A</div><i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>';
+  document.querySelector(".account").innerHTML = '<button class="bell" type="button" aria-label="Notificaciones"><i class="fa-regular fa-bell"></i></button><div class="account-separator" aria-hidden="true"></div><div class="account-copy"><strong>Administrador</strong><span>Superadministrador</span></div><div class="avatar" aria-hidden="true">A</div><i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>';
   document.querySelector(".breadcrumb").innerHTML = '<a href="../index.html">Índice de requerimientos</a> / ALI-REF-003 / Sincronización Passport';
   document.querySelector("h1").textContent = "Gestión de usuarios";
   document.querySelector(".page-subtitle").textContent = "Bandeja general de usuarios y sincronización con Passport.";
-  document.getElementById("syncBtn").innerHTML = '<i class="fa-solid fa-rotate"></i> Sincronizar Passport';
+  document.getElementById("syncBtn").innerHTML = '<i class="fa-solid fa-rotate"></i> Sincronizar usuarios';
   document.querySelector(".source-notice span").textContent = "La sincronización automática mantiene los datos de Passport actualizados. Este botón permite forzarla de inmediato.";
+  document.querySelector(".sync-status > div:first-child span").textContent = "Última sincronización con Passport";
   document.querySelector(".table-heading h2").textContent = "Bandeja general de usuarios";
   document.querySelector(".table-heading .muted").remove();
-  document.querySelector(".ssee-table thead tr").innerHTML = "<th>Usuario</th><th>Nombres y apellidos</th><th>Tipo de autenticación</th><th>Roles</th><th>Proyectos</th><th>Estado</th><th>Acciones</th>";
+  document.querySelector(".ssee-table thead tr").innerHTML = '<th aria-sort="none"><button class="sort-button" type="button" data-sort-key="username" data-sort-type="text">Usuario <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th><th aria-sort="none"><button class="sort-button" type="button" data-sort-key="name" data-sort-type="text">Nombres y apellidos <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th><th aria-sort="none"><button class="sort-button" type="button" data-sort-key="type" data-sort-type="text">Tipo de autenticación <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th><th aria-sort="none"><button class="sort-button" type="button" data-sort-key="roles" data-sort-type="text">Roles <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th><th aria-sort="none"><button class="sort-button" type="button" data-sort-key="projects" data-sort-type="text">Proyectos <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th><th aria-sort="none"><button class="sort-button" type="button" data-sort-key="status" data-sort-type="text">Estado <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th><th>Acciones</th>';
+  document.querySelector(".ssee-table thead tr").insertAdjacentHTML("afterbegin", '<th data-column="row-number">N.°</th>');
   document.querySelector(".result-grid").innerHTML = `
     <div class="result-card"><i class="fa-solid fa-users"></i><div><span>Total de usuarios</span><strong id="totalUsers">0</strong></div></div>
     <div class="result-card"><i class="fa-solid fa-user-check"></i><div><span>Activos</span><strong id="activeUsers">0</strong></div></div>
@@ -210,11 +273,11 @@ function render() {
   const type = typeFilter.value || "Todos";
   const visible = records.filter((record) => type === "Todos" || record.type === type);
   body.innerHTML = visible.map((record) => `
-    <tr><td><strong>${record.username}</strong></td><td>${record.name}</td><td>${record.type}</td>
+    <tr><td>${records.indexOf(record) + 1}</td><td><strong>${record.username}</strong></td><td>${record.name}</td><td>${record.type}</td>
       <td>${record.roles.length ? record.roles.map((role) => `<span class="tag">${role}</span>`).join(" ") : '<span class="muted">Pendiente</span>'}</td>
       <td>${record.projects.length ? record.projects.map((project) => `<span class="tag">${project}</span>`).join(" ") : '<span class="muted">Pendiente</span>'}</td>
       <td><span class="status ${record.status === "Activo" ? "active" : "inactive"}">${record.status}</span></td>
-      <td><div class="row-actions"><button class="row-action" type="button" data-action="roles" data-access-action="open-users" title="Administrar acceso" aria-label="Administrar acceso de ${record.name}"><i class="fa-solid fa-user-gear" aria-hidden="true"></i><span>Administrar acceso</span></button></div></td></tr>`).join("");
+      <td><div class="row-actions"><button class="row-action" type="button" data-action="roles" data-access-action="open-users" data-user-name="${record.name}" title="Asignar" aria-label="Asignar a ${record.name}"><i class="fa-solid fa-user-gear" aria-hidden="true"></i><span>Asignar</span></button></div></td></tr>`).join("");
   document.getElementById("totalUsers").textContent = visible.length;
   document.getElementById("activeUsers").textContent = visible.filter((record) => record.status === "Activo").length;
   document.getElementById("inactiveUsers").textContent = visible.filter((record) => record.status === "Inactivo").length;
@@ -222,9 +285,13 @@ function render() {
 }
 
 configureView();
-document.getElementById("syncBtn").addEventListener("click", () => {
+attachTableSorting(document.querySelector(".ssee-table"));
+
+function runSync() {
+  if (syncRunning) return;
   const button = document.getElementById("syncBtn");
   const syncState = document.getElementById("syncState");
+  syncRunning = true;
   button.disabled = true;
   syncState.textContent = "En proceso";
   syncState.className = "status warning";
@@ -235,13 +302,21 @@ document.getElementById("syncBtn").addEventListener("click", () => {
     document.getElementById("lastSync").textContent = "18/08/2026 09:00";
     document.getElementById("processed").textContent = "28";
     button.disabled = false;
+    syncRunning = false;
     showToast(getMessage("M22"), "success");
   }, 1200);
+}
+
+document.getElementById("syncBtn").addEventListener("click", () => {
+  window.clearTimeout(automaticSyncTimer);
+  runSync();
 });
 
 render();
+automaticSyncTimer = window.setTimeout(runSync, 3500);
 body.addEventListener("click", (event) => {
   if (event.target.closest("[data-access-action='open-users']")) {
-    window.location.href = "../ref-006-users/index.html";
+    const button = event.target.closest("[data-access-action='open-users']");
+    window.location.href = `../ref-006-users/index.html?accessName=${encodeURIComponent(button.dataset.userName)}`;
   }
 });

@@ -23,20 +23,16 @@ export function renderRoles() {
         <td><div class="description">${role.description}</div></td>
         <td><div class="tags">${permissionTags}</div></td>
         <td><span class="users-count"><i class="fa-regular fa-user user-icon" aria-hidden="true"></i>${role.users}</span></td>
-        <td>
-          <div class="status-cell">
-            <span class="status ${role.status === "Activo" ? "active" : "inactive"}">${role.status}</span>
-            <label class="form-check form-switch switch ${hasUsers ? "is-disabled" : ""}" data-state="${originalIndex}" data-on-label="Activo" data-off-label="Inactivo" title="${hasUsers ? "No disponible: el rol tiene usuarios asociados." : ""}">
-              <input class="form-check-input" type="checkbox" ${role.status === "Activo" ? "checked" : ""} ${hasUsers ? "disabled" : ""} aria-label="${role.status === "Activo" ? "Inactivar" : "Activar"} ${role.name}">
-            </label>
-          </div>
-        </td>
+        <td><span class="status ${role.status === "Activo" ? "active" : "inactive"}">${role.status}</span></td>
         <td>${role.updated}</td>
         <td>
           <div class="row-actions">
             <button type="button" class="row-action" data-action="edit" data-edit="${originalIndex}" aria-label="Editar ${role.name}" title="Editar">
               <i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span>
             </button>
+            <label class="form-check form-switch switch row-state-toggle ${hasUsers ? "is-disabled" : ""}" data-state="${originalIndex}" data-on-label="Activo" data-off-label="Inactivo" title="${hasUsers ? "No disponible: el rol tiene usuarios asociados." : ""}">
+              <input class="form-check-input" type="checkbox" ${role.status === "Activo" ? "checked" : ""} ${hasUsers ? "disabled" : ""} aria-label="${role.status === "Activo" ? "Inactivar" : "Activar"} ${role.name}">
+            </label>
           </div>
         </td>
       </tr>
@@ -54,23 +50,17 @@ export function renderRoles() {
 
 export function applyFilters() {
   const query = refs.filterName.value.trim().toLowerCase();
-  const description = refs.filterDescription.value.trim().toLowerCase();
-  const permission = document.getElementById("filterPermission").value.trim().toLowerCase();
-  const users = document.getElementById("filterUsers").value;
+  const nameAdvanced = refs.filterNameAdvanced.value;
+  const permission = document.getElementById("filterPermission").value;
   const updated = document.getElementById("filterUpdated").value;
   const status = refs.filterStatus.value;
   state.filteredRoles = roles.filter((role) => {
-    const searchable = [role.name, role.description, role.status, ...role.permissions].join(" ").toLowerCase();
-    const updatedIso = role.updated.slice(0, 10).split("/").reverse().join("-");
-    const usersMatch = users === "Todos"
-      || (users === "0" && role.users === 0)
-      || (users === "1-3" && role.users >= 1 && role.users <= 3)
-      || (users === "4+" && role.users >= 4);
+    const originalIndex = roles.findIndex((item) => item.id === role.id);
+    const searchable = [originalIndex + 1, role.name, role.description, role.status, ...role.permissions].join(" ").toLowerCase();
     return searchable.includes(query)
-      && role.description.toLowerCase().includes(description)
-      && role.permissions.join(" ").toLowerCase().includes(permission)
-      && usersMatch
-      && (!updated || updatedIso === updated)
+      && (nameAdvanced === "Todos" || role.name === nameAdvanced)
+      && (permission === "Todos" || role.permissions.includes(permission))
+      && (updated === "Todos" || role.updated === updated)
       && (status === "Todos" || role.status === status);
   });
   renderRoles();
@@ -109,6 +99,7 @@ export function handleRoleAction(event, onEdit) {
       return;
     }
     state.pendingStatus = { index: Number(stateControl.dataset.state), next: role.status === "Activo" ? "Inactivo" : "Activo" };
+    prepareInactivationReason(state.pendingStatus.next === "Inactivo");
     openConfirmModal("confirmModal", getMessage(state.pendingStatus.next === "Activo" ? "M5" : "M6"));
   }
 }
@@ -124,13 +115,27 @@ export function handleEditStatusToggle(event) {
   const next = event.target.checked ? "Activo" : "Inactivo";
   refs.editStatusToggles.forEach((toggle) => { toggle.checked = role.status === "Activo"; });
   state.pendingEditStatus = { index: state.editingIndex, next };
+  prepareInactivationReason(next === "Inactivo");
   openConfirmModal("confirmModal", getMessage(next === "Activo" ? "M5" : "M6"));
 }
 
+function prepareInactivationReason(required) {
+  refs.inactivationReasonWrap.hidden = !required;
+  refs.inactivationReason.value = "";
+  refs.inactivationReasonError.textContent = "";
+}
+
 export function confirmStatus() {
+  const pending = state.pendingEditStatus || state.pendingStatus;
+  if (pending?.next === "Inactivo" && !refs.inactivationReason.value.trim()) {
+    refs.inactivationReasonError.textContent = "Ingresa el motivo de inactivación.";
+    refs.inactivationReason.focus();
+    return;
+  }
   if (state.pendingEditStatus) {
     const { index, next } = state.pendingEditStatus;
     roles[index].status = next;
+    roles[index].inactivationReason = refs.inactivationReason.value.trim();
     roles[index].updated = "18/08/2026 09:00";
     state.pendingEditStatus = null;
     refs.editStatusToggles.forEach((toggle) => { toggle.checked = next === "Activo"; });
@@ -143,6 +148,7 @@ export function confirmStatus() {
   if (!state.pendingStatus) return;
   const { index, next } = state.pendingStatus;
   roles[index].status = next;
+  roles[index].inactivationReason = refs.inactivationReason.value.trim();
   roles[index].updated = "18/08/2026 09:00";
   state.pendingStatus = null;
   closeConfirmModal("confirmModal");

@@ -1,4 +1,5 @@
-@import url("../design-system/app.css?v=20260825-wizard");
+@import url("../design-system/app.css?v=20260827-form-controls");
 
 .wizard-card.role-form { padding: 1.25rem; }
 .wizard-card .form-step { min-height: 20rem; }
+.confirm-reason{margin-top:1rem;padding-top:1rem;border-top:1px solid var(--ssee-line)}.confirm-reason label{display:block;margin-bottom:.35rem;font-size:.78rem;font-weight:700;color:var(--ssee-ink)}.confirm-reason label span{color:var(--ssee-danger)}.confirm-reason textarea{font-size:.82rem}.field-error{display:block;margin-top:.3rem;color:var(--ssee-danger);font-size:.75rem}

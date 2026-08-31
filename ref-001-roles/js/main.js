@@ -5,6 +5,7 @@ import { renderPermissions, handlePermissionChange, hasSelectedPermission, selec
 import { applyFilters, handleRoleAction, renderRoles, confirmStatus, handleEditStatusToggle } from "./roles.js";
 import { getMessage, getPrototypeMessage } from "../../design-system/messages.js";
 import { openConfirmModal, closeConfirmModal } from "../../design-system/interaction.js";
+import { attachTableSorting } from "../../design-system/table-sort.js";
 
 function validateInfo() {
   clearErrors();
@@ -114,25 +115,10 @@ function cancelRoleForm() {
   openConfirmModal("confirmModal", getMessage("M14"));
 }
 
-function discardRoleChanges() {
-  const role = state.editingIndex === null ? null : roles[state.editingIndex];
-  if (!role) return;
-  refs.roleName.value = role.name;
-  refs.roleDescription.value = role.description;
-  resetPermissionDraft(role);
-  state.dirty = false;
-  state.permissionDirty = false;
-  renderPermissions();
-  clearErrors();
-}
-
 function rejectWizardStepChange() {
   if (state.pendingWizardStep === null) return;
-  const targetStep = state.pendingWizardStep;
   state.pendingWizardStep = null;
-  discardRoleChanges();
   closeConfirmModal("confirmModal");
-  setFormStep(targetStep);
 }
 
 function confirmPendingAction() {
@@ -180,10 +166,9 @@ refs.stepInfo.addEventListener("click", () => requestRoleStep("info"));
 refs.stepPerms.addEventListener("click", () => requestRoleStep("permissions"));
 document.getElementById("clearBtn").addEventListener("click", () => {
   refs.filterName.value = "";
-  refs.filterDescription.value = "";
-  document.getElementById("filterPermission").value = "";
-  document.getElementById("filterUsers").value = "Todos";
-  document.getElementById("filterUpdated").value = "";
+  refs.filterNameAdvanced.value = "Todos";
+  document.getElementById("filterPermission").value = "Todos";
+  document.getElementById("filterUpdated").value = "Todos";
   refs.filterStatus.value = "Todos";
   applyFilters();
   showToast(getPrototypeMessage("filtersCleared"), "info");
@@ -210,6 +195,9 @@ refs.saveStepButtons.forEach((button) => button.addEventListener("click", () => 
 document.getElementById("confirmBtn").addEventListener("click", confirmPendingAction);
 refs.confirmModal.querySelector(".modal-footer [data-bs-dismiss='modal']").addEventListener("click", rejectWizardStepChange);
 refs.confirmModal.addEventListener("hidden.bs.modal", () => {
+  refs.inactivationReasonWrap.hidden = true;
+  refs.inactivationReason.value = "";
+  refs.inactivationReasonError.textContent = "";
   state.pendingSave = false;
   state.pendingSaveStep = null;
   state.pendingCancel = false;
@@ -220,6 +208,7 @@ refs.confirmModal.addEventListener("hidden.bs.modal", () => {
 
 renderPermissions();
 renderRoles();
+attachTableSorting(document.querySelector("#listView .ssee-table"));
 
 const deepLink = new URLSearchParams(window.location.search);
 if (deepLink.get("step") === "permissions" && deepLink.get("role")) {

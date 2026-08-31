@@ -21,7 +21,17 @@ change and must be checked across every tray before delivery.
 - `components.css`: reusable technical navigation, toast and status helpers.
 - `app.css`: canonical S.S.E.E. shell and CRUD layout.
 - `interaction.js`: shared toast, tooltip, menu and confirmation behavior.
+- `table-sort.js`: shared sortable-table behavior and accessibility state.
 - `messages.js`: shared analyst message catalog and parameter substitution.
+
+The supporting decision register and requirement traceability matrix are kept
+with the demos so that an analyst observation becomes one explicit system rule
+and its affected screens are visible before implementation:
+
+- `DECISION-REGISTER.md`: approved cross-module decisions and documented
+  exceptions.
+- `../qa/traceability/TRACEABILITY-MATRIX.md`: requirement, source, affected
+  demos, implementation status and verification evidence.
 
 All CRUD list filters use the same contract: one global search field, one
 filter-toggle control, labelled advanced fields, and a shared action group with
@@ -52,13 +62,20 @@ mark, the same rem rhythm as the shell and the responsive size contract from
   three actions are available for that row, use the shared dropdown pattern.
 - Direct row actions use the shared action anatomy: Font Awesome icon above a
   short visible label. No module may create a smaller local action-button
-  variant. A status switch is a state control and stays in the `Estado` column
-  when that column supports binary activation.
+  variant. Table action buttons have no permanent border or shadow; their
+  compact hover state uses a subtle surface lift and shadow. The `Estado` column is informational and uses a status tag. A binary
+  toggle belongs only in `Acciones` when the activation action is available;
+  never place a switch in the `Estado` column.
 - Any activation or inactivation action uses the shared toggle switch. The
   checked state represents `Activo`/`Activa` and the unchecked state represents
   `Inactivo`/`Inactiva`; never render `ON` or `OFF` as visible text. States that
   are not binary, such as `Borrador`, `Por vencer`, `Vencido` or `Anulada`,
   remain status tags.
+- An enabled unchecked switch uses the semantic danger tint to represent an
+  available inactivation state. A disabled switch uses a neutral outlined
+  silhouette with no thumb shadow and no visible `Activo`/`Inactivo` label, so
+  it cannot be confused with an actionable inactive control. The row status
+  remains visible in the informational `Estado` tag.
 - Row-action icons use the shared semantic color map while their labels retain
   the normal text color. Disabled action icons use the shared darker gray
   `--ssee-action-disabled` so the disabled state remains legible. Modules must
@@ -91,6 +108,12 @@ mark, the same rem rhythm as the shell and the responsive size contract from
 - Data tables use the shared visual treatment: white rows, a subtle grid,
   compact pill-shaped tags and statuses, and the same compact pagination with
   the result count at left, page controls centered and page size at right.
+- Every sortable data table uses the shared column-sort contract: sortable
+  headers expose a visible sort indicator, toggle ascending/descending order,
+  update `aria-sort`, and apply the correct type for text, numbers, dates and
+  statuses. `Acciones` is excluded from sorting. A non-tabular matrix or an
+  operational tray may be an exception only when it is recorded in the
+  decision register.
 - In edit mode, selecting another step with unsaved changes uses message `M70`:
   `Sí` saves the current step, shows the standard success toast and then moves
   to the selected step. `No` discards the unsaved changes and moves to the
@@ -99,6 +122,8 @@ mark, the same rem rhythm as the shell and the responsive size contract from
   acceptance. Do not append contextual text such as `No, volver`,
   `No, cancelar` or `Sí, continuar`; the action context belongs in the modal
   message, not in the button label.
+- Every custom-filter toggle uses the exact tooltip `Filtro Personalizado` and
+  keeps its accessible action label for opening or closing the advanced filters.
 - Modal headers use the shared compact treatment: the contextual icon sits
   before the title, the title and close control are vertically centered, and
   the header must not introduce oversized empty space. Confirmation icons do

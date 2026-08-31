@@ -15,15 +15,14 @@ const row = (id, level, type, name, parentId, checks, unavailable = []) => ({
 // Canonical prototype catalog shared by the role wizard and the REF-002 traceability route.
 const sharedPermissionRows = [
   row("administracion", 1, "module", "Administración", null, { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }),
-  row("usuarios", 2, "submenu", "Gestión de usuarios", "administracion", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }),
+  row("usuarios", 2, "submenu", "Usuarios", "administracion", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }),
   row("usuarios-consulta", 3, "functionality", "Consultar usuarios", "usuarios", { Consultar: true, Registrar: false, Modificar: false, Eliminar: false, Exportar: true, Validar: false }, ["Registrar", "Modificar", "Eliminar", "Validar"]),
   row("usuarios-roles", 3, "functionality", "Asignar roles", "usuarios", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: false, Validar: false }, ["Eliminar", "Exportar", "Validar"]),
-  row("roles", 2, "submenu", "Gestión de roles", "administracion", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }, ["Validar"]),
+  row("roles", 2, "submenu", "Roles", "administracion", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }, ["Validar"]),
   row("roles-permisos", 3, "functionality", "Gestionar permisos de roles", "roles", { Consultar: true, Registrar: false, Modificar: true, Eliminar: false, Exportar: true, Validar: false }, ["Registrar", "Eliminar", "Validar"]),
-  row("instrumentos", 1, "module", "Instrumentos", null, { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: true }),
-  row("instrumentos-gestion", 2, "submenu", "Gestión de instrumentos", "instrumentos", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: true }),
-  row("instrumentos-registro", 3, "functionality", "Registro de instrumentos", "instrumentos-gestion", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }, ["Validar"]),
-  row("instrumentos-validacion", 3, "functionality", "Validación de instrumentos", "instrumentos-gestion", { Consultar: true, Registrar: false, Modificar: true, Eliminar: false, Exportar: false, Validar: true }, ["Eliminar", "Exportar"])
+  row("registro", 1, "module", "Registro", null, { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: true }, ["Eliminar"]),
+  row("registro-instrumento", 2, "submenu", "Registro de instrumento", "registro", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }, ["Eliminar", "Validar"]),
+  row("registro-validacion", 3, "functionality", "Validación de instrumento", "registro-instrumento", { Consultar: true, Registrar: false, Modificar: false, Eliminar: false, Exportar: false, Validar: true }, ["Registrar", "Modificar", "Eliminar", "Exportar"])
 ];
 
 
@@ -66,6 +65,7 @@ const MESSAGE_CATALOG = Object.freeze({
   M35: { text: "Si existe una cuenta asociada al correo ingresado, recibirá un enlace para recuperar su contraseña.", type: "Información", scope: "General" },
   M36: { text: "El enlace de recuperación ha expirado. Solicite uno nuevo.", type: "Alerta", scope: "General" },
   M37: { text: "La contraseña se ha restablecido correctamente.", type: "Información", scope: "General" },
+  M38: { text: "No fue posible restablecer la contraseña. Intente nuevamente.", type: "Alerta", scope: "General" },
   M39: { text: "No tiene proyectos asignados para visualizar.", type: "Información", scope: "General" },
   M40: { text: "No tiene instrumentos pendientes de atención.", type: "Información", scope: "General" },
   M41: { text: "Tiene %s instrumentos asignados.", type: "Información", scope: "General" },
@@ -155,6 +155,11 @@ function renderToast(element, message, type = "info") {
 }
 
 function enableTooltips() {
+  document.querySelectorAll(".filter-toggle").forEach((element) => {
+    element.setAttribute("title", "Filtro Personalizado");
+    element.setAttribute("data-bs-title", "Filtro Personalizado");
+    element.setAttribute("data-bs-toggle", "tooltip");
+  });
   if (!window.bootstrap) return;
   document.querySelectorAll("[data-bs-toggle='tooltip']").forEach((element) => {
     bootstrap.Tooltip.getOrCreateInstance(element);
@@ -183,6 +188,58 @@ function openConfirmModal(id, message) {
 function closeConfirmModal(id) {
   const modal = document.getElementById(id);
   if (modal && window.bootstrap) bootstrap.Modal.getOrCreateInstance(modal).hide();
+}
+
+
+/* source: design-system/table-sort.js */
+const collator = new Intl.Collator("es", { numeric: true, sensitivity: "base" });
+
+function normalize(value, type) {
+  const text = String(value || "").trim();
+  if (type === "number") return Number(text.replace(/[^0-9.-]/g, "")) || 0;
+  if (type === "date") {
+    const parts = text.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+    return parts ? new Date(`${parts[3]}-${parts[2]}-${parts[1]}`).getTime() : 0;
+  }
+  return text;
+}
+
+function attachTableSorting(table) {
+  if (!table) return;
+  const buttons = [...table.querySelectorAll("[data-sort-key]")];
+  const state = { key: null, direction: null };
+
+  buttons.forEach((button) => button.addEventListener("click", () => {
+    const key = button.dataset.sortKey;
+    state.direction = state.key === key && state.direction === "ascending" ? "descending" : "ascending";
+    state.key = key;
+    const header = button.closest("th");
+    const columnIndex = [...header.parentElement.children].indexOf(header);
+    const type = button.dataset.sortType || "text";
+    const body = table.tBodies[0];
+    if (!body) return;
+
+    [...body.rows]
+      .sort((left, right) => {
+        const comparison = type === "number" || type === "date"
+          ? normalize(left.cells[columnIndex]?.textContent, type) - normalize(right.cells[columnIndex]?.textContent, type)
+          : collator.compare(normalize(left.cells[columnIndex]?.textContent, type), normalize(right.cells[columnIndex]?.textContent, type));
+        return state.direction === "ascending" ? comparison : -comparison;
+      })
+      .forEach((row) => body.append(row));
+
+    buttons.forEach((item) => {
+      const itemHeader = item.closest("th");
+      const active = item === button;
+      itemHeader?.setAttribute("aria-sort", active ? state.direction : "none");
+      const icon = item.querySelector("i");
+      if (icon) {
+        icon.classList.toggle("fa-arrow-up", active && state.direction === "ascending");
+        icon.classList.toggle("fa-arrow-down", active && state.direction === "descending");
+        icon.classList.toggle("fa-arrow-down-up", !active);
+      }
+    });
+  }));
 }
 
 
@@ -305,7 +362,7 @@ const refs = {
   pageSummary: document.getElementById("pageSummary"),
   filterForm: document.getElementById("filterForm"),
   filterName: document.getElementById("filterName"),
-  filterDescription: document.getElementById("filterDescription"),
+  filterNameAdvanced: document.getElementById("filterNameAdvanced"),
   filterStatus: document.getElementById("filterStatus"),
   filterToggle: document.getElementById("filterToggle"),
   roleCount: document.getElementById("roleCount"),
@@ -329,6 +386,9 @@ const refs = {
   formBreadcrumb: document.getElementById("formBreadcrumb"),
   toast: document.getElementById("toast"),
   confirmModal: document.getElementById("confirmModal"),
+  inactivationReasonWrap: document.getElementById("inactivationReasonWrap"),
+  inactivationReason: document.getElementById("inactivationReason"),
+  inactivationReasonError: document.getElementById("inactivationReasonError"),
   editStatusControls: [...document.querySelectorAll("[data-edit-status-control]")],
   editStatusToggles: [...document.querySelectorAll("[data-edit-status-toggle]")],
   editStatusLabels: [...document.querySelectorAll("[data-edit-status-label]")],
@@ -463,7 +523,8 @@ function renderPermissions() {
         const disabled = isDisabled(row, operation);
         const unavailable = row.unavailable.includes(operation);
         const title = unavailable ? "Operación no aplicable para esta funcionalidad" : (disabled ? "Selecciona Consultar para habilitar esta operación" : "");
-        return `<td><input class="form-check-input${unavailable ? " is-not-applicable" : ""}" type="checkbox" data-row="${row.id}" data-operation="${operation}" ${row.checks[operation] ? "checked" : ""} ${disabled ? "disabled" : ""} aria-label="${operation} en ${row.name}"${title ? ` title="${title}" data-bs-toggle="tooltip"` : ""}></td>`;
+        if (unavailable) return `<td><span class="permission-na" title="${title}" data-bs-toggle="tooltip"><i class="fa-solid fa-ban" aria-hidden="true"></i><span>N/A</span></span></td>`;
+        return `<td><input class="form-check-input" type="checkbox" data-row="${row.id}" data-operation="${operation}" ${row.checks[operation] ? "checked" : ""} ${disabled ? "disabled" : ""} aria-label="${operation} en ${row.name}"${title ? ` title="${title}" data-bs-toggle="tooltip"` : ""}></td>`;
       }).join("")}
     </tr>
   `).join("");
@@ -510,20 +571,16 @@ function renderRoles() {
         <td><div class="description">${role.description}</div></td>
         <td><div class="tags">${permissionTags}</div></td>
         <td><span class="users-count"><i class="fa-regular fa-user user-icon" aria-hidden="true"></i>${role.users}</span></td>
-        <td>
-          <div class="status-cell">
-            <span class="status ${role.status === "Activo" ? "active" : "inactive"}">${role.status}</span>
-            <label class="form-check form-switch switch ${hasUsers ? "is-disabled" : ""}" data-state="${originalIndex}" data-on-label="Activo" data-off-label="Inactivo" title="${hasUsers ? "No disponible: el rol tiene usuarios asociados." : ""}">
-              <input class="form-check-input" type="checkbox" ${role.status === "Activo" ? "checked" : ""} ${hasUsers ? "disabled" : ""} aria-label="${role.status === "Activo" ? "Inactivar" : "Activar"} ${role.name}">
-            </label>
-          </div>
-        </td>
+        <td><span class="status ${role.status === "Activo" ? "active" : "inactive"}">${role.status}</span></td>
         <td>${role.updated}</td>
         <td>
           <div class="row-actions">
             <button type="button" class="row-action" data-action="edit" data-edit="${originalIndex}" aria-label="Editar ${role.name}" title="Editar">
               <i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span>
             </button>
+            <label class="form-check form-switch switch row-state-toggle ${hasUsers ? "is-disabled" : ""}" data-state="${originalIndex}" data-on-label="Activo" data-off-label="Inactivo" title="${hasUsers ? "No disponible: el rol tiene usuarios asociados." : ""}">
+              <input class="form-check-input" type="checkbox" ${role.status === "Activo" ? "checked" : ""} ${hasUsers ? "disabled" : ""} aria-label="${role.status === "Activo" ? "Inactivar" : "Activar"} ${role.name}">
+            </label>
           </div>
         </td>
       </tr>
@@ -541,23 +598,17 @@ function renderRoles() {
 
 function applyFilters() {
   const query = refs.filterName.value.trim().toLowerCase();
-  const description = refs.filterDescription.value.trim().toLowerCase();
-  const permission = document.getElementById("filterPermission").value.trim().toLowerCase();
-  const users = document.getElementById("filterUsers").value;
+  const nameAdvanced = refs.filterNameAdvanced.value;
+  const permission = document.getElementById("filterPermission").value;
   const updated = document.getElementById("filterUpdated").value;
   const status = refs.filterStatus.value;
   state.filteredRoles = roles.filter((role) => {
-    const searchable = [role.name, role.description, role.status, ...role.permissions].join(" ").toLowerCase();
-    const updatedIso = role.updated.slice(0, 10).split("/").reverse().join("-");
-    const usersMatch = users === "Todos"
-      || (users === "0" && role.users === 0)
-      || (users === "1-3" && role.users >= 1 && role.users <= 3)
-      || (users === "4+" && role.users >= 4);
+    const originalIndex = roles.findIndex((item) => item.id === role.id);
+    const searchable = [originalIndex + 1, role.name, role.description, role.status, ...role.permissions].join(" ").toLowerCase();
     return searchable.includes(query)
-      && role.description.toLowerCase().includes(description)
-      && role.permissions.join(" ").toLowerCase().includes(permission)
-      && usersMatch
-      && (!updated || updatedIso === updated)
+      && (nameAdvanced === "Todos" || role.name === nameAdvanced)
+      && (permission === "Todos" || role.permissions.includes(permission))
+      && (updated === "Todos" || role.updated === updated)
       && (status === "Todos" || role.status === status);
   });
   renderRoles();
@@ -596,6 +647,7 @@ function handleRoleAction(event, onEdit) {
       return;
     }
     state.pendingStatus = { index: Number(stateControl.dataset.state), next: role.status === "Activo" ? "Inactivo" : "Activo" };
+    prepareInactivationReason(state.pendingStatus.next === "Inactivo");
     openConfirmModal("confirmModal", getMessage(state.pendingStatus.next === "Activo" ? "M5" : "M6"));
   }
 }
@@ -611,13 +663,27 @@ function handleEditStatusToggle(event) {
   const next = event.target.checked ? "Activo" : "Inactivo";
   refs.editStatusToggles.forEach((toggle) => { toggle.checked = role.status === "Activo"; });
   state.pendingEditStatus = { index: state.editingIndex, next };
+  prepareInactivationReason(next === "Inactivo");
   openConfirmModal("confirmModal", getMessage(next === "Activo" ? "M5" : "M6"));
 }
 
+function prepareInactivationReason(required) {
+  refs.inactivationReasonWrap.hidden = !required;
+  refs.inactivationReason.value = "";
+  refs.inactivationReasonError.textContent = "";
+}
+
 function confirmStatus() {
+  const pending = state.pendingEditStatus || state.pendingStatus;
+  if (pending?.next === "Inactivo" && !refs.inactivationReason.value.trim()) {
+    refs.inactivationReasonError.textContent = "Ingresa el motivo de inactivación.";
+    refs.inactivationReason.focus();
+    return;
+  }
   if (state.pendingEditStatus) {
     const { index, next } = state.pendingEditStatus;
     roles[index].status = next;
+    roles[index].inactivationReason = refs.inactivationReason.value.trim();
     roles[index].updated = "18/08/2026 09:00";
     state.pendingEditStatus = null;
     refs.editStatusToggles.forEach((toggle) => { toggle.checked = next === "Activo"; });
@@ -630,6 +696,7 @@ function confirmStatus() {
   if (!state.pendingStatus) return;
   const { index, next } = state.pendingStatus;
   roles[index].status = next;
+  roles[index].inactivationReason = refs.inactivationReason.value.trim();
   roles[index].updated = "18/08/2026 09:00";
   state.pendingStatus = null;
   closeConfirmModal("confirmModal");
@@ -639,6 +706,7 @@ function confirmStatus() {
 
 
 /* source: ref-001-roles/js/main.js */
+
 
 
 
@@ -755,25 +823,10 @@ function cancelRoleForm() {
   openConfirmModal("confirmModal", getMessage("M14"));
 }
 
-function discardRoleChanges() {
-  const role = state.editingIndex === null ? null : roles[state.editingIndex];
-  if (!role) return;
-  refs.roleName.value = role.name;
-  refs.roleDescription.value = role.description;
-  resetPermissionDraft(role);
-  state.dirty = false;
-  state.permissionDirty = false;
-  renderPermissions();
-  clearErrors();
-}
-
 function rejectWizardStepChange() {
   if (state.pendingWizardStep === null) return;
-  const targetStep = state.pendingWizardStep;
   state.pendingWizardStep = null;
-  discardRoleChanges();
   closeConfirmModal("confirmModal");
-  setFormStep(targetStep);
 }
 
 function confirmPendingAction() {
@@ -821,10 +874,9 @@ refs.stepInfo.addEventListener("click", () => requestRoleStep("info"));
 refs.stepPerms.addEventListener("click", () => requestRoleStep("permissions"));
 document.getElementById("clearBtn").addEventListener("click", () => {
   refs.filterName.value = "";
-  refs.filterDescription.value = "";
-  document.getElementById("filterPermission").value = "";
-  document.getElementById("filterUsers").value = "Todos";
-  document.getElementById("filterUpdated").value = "";
+  refs.filterNameAdvanced.value = "Todos";
+  document.getElementById("filterPermission").value = "Todos";
+  document.getElementById("filterUpdated").value = "Todos";
   refs.filterStatus.value = "Todos";
   applyFilters();
   showToast(getPrototypeMessage("filtersCleared"), "info");
@@ -851,6 +903,9 @@ refs.saveStepButtons.forEach((button) => button.addEventListener("click", () => 
 document.getElementById("confirmBtn").addEventListener("click", confirmPendingAction);
 refs.confirmModal.querySelector(".modal-footer [data-bs-dismiss='modal']").addEventListener("click", rejectWizardStepChange);
 refs.confirmModal.addEventListener("hidden.bs.modal", () => {
+  refs.inactivationReasonWrap.hidden = true;
+  refs.inactivationReason.value = "";
+  refs.inactivationReasonError.textContent = "";
   state.pendingSave = false;
   state.pendingSaveStep = null;
   state.pendingCancel = false;
@@ -861,6 +916,7 @@ refs.confirmModal.addEventListener("hidden.bs.modal", () => {
 
 renderPermissions();
 renderRoles();
+attachTableSorting(document.querySelector("#listView .ssee-table"));
 
 const deepLink = new URLSearchParams(window.location.search);
 if (deepLink.get("step") === "permissions" && deepLink.get("role")) {

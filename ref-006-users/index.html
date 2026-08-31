@@ -12,7 +12,7 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     />
-    <link rel="stylesheet" href="../design-system/app.css?v=20260826-homologation" />
+    <link rel="stylesheet" href="../design-system/app.css?v=20260827-form-controls" />
     <link rel="stylesheet" href="styles.css?v=20260824-inter" />
   </head>
   <body>
@@ -70,7 +70,7 @@
             </button>
             <div class="account-separator" aria-hidden="true"></div>
             <div class="account-copy">
-              <strong>Administrador</strong><span>Superadmin</span>
+              <strong>Administrador</strong><span>Superadministrador</span>
             </div>
             <div class="avatar" aria-hidden="true">A</div>
             <i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>
@@ -123,7 +123,6 @@
               id="filterToggle"
               aria-label="Abrir filtros"
               aria-expanded="false"
-              title="Filtro personalizado"
             >
               <span></span><span></span><span></span>
             </button>
@@ -167,7 +166,7 @@
                 </select>
               </label>
               <label class="filter-field">
-                <span>Autenticación</span>
+                <span>Tipo de autenticación</span>
                 <select class="form-select" id="filterAuth" aria-label="Autenticación">
                   <option>Todos</option>
                   <option>Passport</option>
@@ -185,7 +184,6 @@
                   <option>Todos</option>
                   <option>Sin vencimiento</option>
                   <option>Por vencer</option>
-                  <option>Vencido</option>
                 </select>
               </label>
               <label class="filter-field">
@@ -207,15 +205,15 @@
               <table class="table align-middle mb-0 ssee-table">
                 <thead>
                   <tr>
-                    <th>Usuario</th>
-                    <th>Nombres y apellidos</th>
-                    <th>Correo</th>
-                    <th>Tipo de autenticación</th>
-                    <th>Roles</th>
-                    <th>Proyectos</th>
-                    <th>Vigencia</th>
-                    <th>Estado</th>
-                    <th>Último acceso</th>
+                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="username" data-sort-type="text">Usuario <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="name" data-sort-type="text">Nombres y apellidos <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="email" data-sort-type="text">Correo <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="auth" data-sort-type="text">Tipo de autenticación <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="roles" data-sort-type="text">Roles <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="projects" data-sort-type="text">Proyectos <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="validity" data-sort-type="text">Vigencia <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="status" data-sort-type="text">Estado <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="lastAccess" data-sort-type="date">Último acceso <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
@@ -281,7 +279,7 @@
       <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content role-modal">
           <div class="modal-header">
-            <div><span class="modal-eyebrow">Gestión de acceso</span><h2 class="modal-title" id="rolesModalTitle">Asignar roles</h2></div>
+            <div><span class="modal-eyebrow">Asignación</span><h2 class="modal-title" id="rolesModalTitle">Asignar roles</h2></div>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
           <div class="modal-body"><p class="modal-context" id="rolesModalContext"></p><div class="access-edit-note" id="accessEditNote" hidden></div><div class="site-picker" id="sitePicker"></div><div class="role-picker" id="rolePicker"></div><div class="project-picker" id="projectPicker"></div><label class="modal-label" id="validityField" for="validitySelect">Vigencia<select class="form-select" id="validitySelect"><option>Sin fecha de vencimiento</option><option>30 días</option><option>90 días</option><option>1 año</option></select></label><p class="modal-feedback" id="roleModalFeedback" hidden></p></div>
@@ -296,6 +294,29 @@
               <button type="button" class="btn btn-outline-ssee button button-secondary" id="cancelRolesBtn">Cancelar</button>
               <button type="button" class="btn btn-ssee button button-primary" id="saveRolesBtn">Guardar</button>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="reniecModal" tabindex="-1" aria-labelledby="reniecModalTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content role-modal reniec-modal">
+          <div class="modal-header">
+            <div><span class="modal-eyebrow">Actualizar información</span><h2 class="modal-title" id="reniecModalTitle">Actualizar datos RENIEC</h2></div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <p class="modal-context" id="reniecModalContext"></p>
+            <label class="modal-label" for="reniecDocument">Número de documento<input class="form-control" id="reniecDocument" type="text" readonly></label>
+            <button class="btn btn-outline-ssee button button-secondary reniec-consult" type="button" id="consultReniecBtn"><i class="fa-solid fa-magnifying-glass icon" aria-hidden="true"></i>Consultar</button>
+            <div class="reniec-result" id="reniecResult" hidden>
+              <div><span>Nombres y apellidos</span><strong id="reniecName"></strong></div>
+              <div><span>Fecha de nacimiento</span><strong id="reniecBirth"></strong></div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-ssee button button-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-ssee button button-primary" id="saveReniecBtn" disabled>Guardar</button>
           </div>
         </div>
       </div>

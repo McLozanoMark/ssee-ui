@@ -16,14 +16,16 @@ function sortValue(source, key) {
 }
 
 export function renderSources() {
+  const header = refs.sourcesBody.closest("table")?.querySelector("thead tr");
+  if (header && !header.querySelector("[data-column='row-number']")) header.insertAdjacentHTML("afterbegin", '<th data-column="row-number">N.°</th>');
   refs.sourcesBody.innerHTML = state.filteredSources.map((source) => {
     const index = sources.indexOf(source);
     const canToggle = ["Activa", "Inactiva"].includes(source.status);
     const nextAction = source.status === "Activa" ? "Inactivar" : "Activar";
     return `<tr>
-      <td><strong>${escapeHtml(source.id)}</strong></td>
+      <td>${index + 1}</td><td><strong>${escapeHtml(source.id)}</strong></td>
       <td><strong>${escapeHtml(source.name)}</strong><div class="description">${escapeHtml(source.description)}</div></td>
-      <td><span class="origin-tag ${source.origin === "Interna" ? "internal" : "external"}">${escapeHtml(source.origin)}${source.originDetail ? ` · ${escapeHtml(source.originDetail)}` : ""}</span></td>
+      <td><span class="origin-tag ${source.origin === "Interna" ? "internal" : "external"}">${escapeHtml(source.origin)}</span></td>
       <td>${escapeHtml(source.records)}</td>
       <td><span class="status ${statusClass(source.status)}">${escapeHtml(source.status)}</span></td>
       <td><div class="row-actions source-actions">
@@ -48,7 +50,7 @@ export function applyFilters() {
   const status = refs.filterStatus.value;
   const records = document.getElementById("filterRecords").value;
   state.filteredSources = sources.filter((source) => {
-    const searchable = [source.id, source.name, source.description, source.origin, source.originDetail, source.status].join(" ").toLowerCase();
+    const searchable = [sources.indexOf(source) + 1, source.id, source.name, source.description, source.origin, source.originDetail, source.status].join(" ").toLowerCase();
     const recordCount = Number(String(source.records).replace(/,/g, ""));
     const recordsMatch = records === "Todos"
       || (records === "0" && recordCount === 0)

@@ -1,4 +1,4 @@
-@import url("../design-system/app.css?v=20260825-wizard");
+@import url("../design-system/app.css?v=20260827-form-controls");
 
 .sample-form { display: grid; gap: 1rem; }
 .sample-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }

@@ -31,6 +31,11 @@ function renderToast(element, message, type = "info") {
 }
 
 function enableTooltips() {
+  document.querySelectorAll(".filter-toggle").forEach((element) => {
+    element.setAttribute("title", "Filtro Personalizado");
+    element.setAttribute("data-bs-title", "Filtro Personalizado");
+    element.setAttribute("data-bs-toggle", "tooltip");
+  });
   if (!window.bootstrap) return;
   document.querySelectorAll("[data-bs-toggle='tooltip']").forEach((element) => {
     bootstrap.Tooltip.getOrCreateInstance(element);
@@ -101,6 +106,7 @@ const MESSAGE_CATALOG = Object.freeze({
   M35: { text: "Si existe una cuenta asociada al correo ingresado, recibirá un enlace para recuperar su contraseña.", type: "Información", scope: "General" },
   M36: { text: "El enlace de recuperación ha expirado. Solicite uno nuevo.", type: "Alerta", scope: "General" },
   M37: { text: "La contraseña se ha restablecido correctamente.", type: "Información", scope: "General" },
+  M38: { text: "No fue posible restablecer la contraseña. Intente nuevamente.", type: "Alerta", scope: "General" },
   M39: { text: "No tiene proyectos asignados para visualizar.", type: "Información", scope: "General" },
   M40: { text: "No tiene instrumentos pendientes de atención.", type: "Información", scope: "General" },
   M41: { text: "Tiene %s instrumentos asignados.", type: "Información", scope: "General" },
@@ -158,6 +164,58 @@ function getPrototypeMessage(key) {
 }
 
 
+/* source: design-system/table-sort.js */
+const collator = new Intl.Collator("es", { numeric: true, sensitivity: "base" });
+
+function normalize(value, type) {
+  const text = String(value || "").trim();
+  if (type === "number") return Number(text.replace(/[^0-9.-]/g, "")) || 0;
+  if (type === "date") {
+    const parts = text.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+    return parts ? new Date(`${parts[3]}-${parts[2]}-${parts[1]}`).getTime() : 0;
+  }
+  return text;
+}
+
+function attachTableSorting(table) {
+  if (!table) return;
+  const buttons = [...table.querySelectorAll("[data-sort-key]")];
+  const state = { key: null, direction: null };
+
+  buttons.forEach((button) => button.addEventListener("click", () => {
+    const key = button.dataset.sortKey;
+    state.direction = state.key === key && state.direction === "ascending" ? "descending" : "ascending";
+    state.key = key;
+    const header = button.closest("th");
+    const columnIndex = [...header.parentElement.children].indexOf(header);
+    const type = button.dataset.sortType || "text";
+    const body = table.tBodies[0];
+    if (!body) return;
+
+    [...body.rows]
+      .sort((left, right) => {
+        const comparison = type === "number" || type === "date"
+          ? normalize(left.cells[columnIndex]?.textContent, type) - normalize(right.cells[columnIndex]?.textContent, type)
+          : collator.compare(normalize(left.cells[columnIndex]?.textContent, type), normalize(right.cells[columnIndex]?.textContent, type));
+        return state.direction === "ascending" ? comparison : -comparison;
+      })
+      .forEach((row) => body.append(row));
+
+    buttons.forEach((item) => {
+      const itemHeader = item.closest("th");
+      const active = item === button;
+      itemHeader?.setAttribute("aria-sort", active ? state.direction : "none");
+      const icon = item.querySelector("i");
+      if (icon) {
+        icon.classList.toggle("fa-arrow-up", active && state.direction === "ascending");
+        icon.classList.toggle("fa-arrow-down", active && state.direction === "descending");
+        icon.classList.toggle("fa-arrow-down-up", !active);
+      }
+    });
+  }));
+}
+
+
 /* source: gio-ref-003-asignaciones/js/data.js */
 const assignments = [
   { id: "ASN-001", instrument: "Ficha de seguimiento", user: "Ana Paredes", sample: "Muestra nacional 2026", start: "18/08/2026", end: "18/09/2026", progress: "0%", progressGroup: "Sin iniciar", period: "2026", status: "Pendiente", updated: "18/08/2026 09:00" },
@@ -194,8 +252,8 @@ function showToast(first, second, third) {
 
 refs.emptyState.textContent = getMessage("M9");
 function statusClass(status) { return status === "Finalizada" ? "active" : status === "Anulada" ? "expired" : status === "En proceso" || status === "Reasignada" ? "warning" : ""; }
-function renderAssignments() { refs.assignmentsBody.innerHTML = state.filteredAssignments.map((assignment) => { const index = assignments.indexOf(assignment); const canReassign = !["Finalizada", "Anulada"].includes(assignment.status); return `<tr><td><strong>${assignment.instrument}</strong></td><td>${assignment.user}</td><td>${assignment.sample}</td><td>${assignment.start}</td><td>${assignment.end}</td><td>${assignment.progress}</td><td><span class="status ${statusClass(assignment.status)}">${assignment.status}</span></td><td><div class="row-actions"><button class="row-action" type="button" data-action="view" data-index="${index}" title="Ver detalle"><i class="fa-regular fa-eye" aria-hidden="true"></i><span>Ver detalle</span></button>${canReassign ? `<button class="row-action" type="button" data-action="reassign" data-index="${index}" title="Reasignar"><i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i><span>Reasignar</span></button><button class="row-action" type="button" data-action="remove" data-index="${index}" title="Anular"><i class="fa-solid fa-ban" aria-hidden="true"></i><span>Anular</span></button>` : ""}</div></td></tr>`; }).join(""); refs.emptyState.hidden = state.filteredAssignments.length > 0; refs.pageSummary.textContent = state.filteredAssignments.length ? `Mostrando 1 a ${state.filteredAssignments.length} de ${state.filteredAssignments.length} registros` : "Mostrando 0 registros"; refs.assignmentCount.textContent = `${assignments.length} asignaciones registradas`; enableTooltips(); }
-function applyFilters() { const query = document.getElementById("filterQuery").value.trim().toLowerCase(); const instrument = document.getElementById("filterInstrument").value.trim().toLowerCase(); const user = document.getElementById("filterUser").value.trim().toLowerCase(); const sample = document.getElementById("filterSample").value.trim().toLowerCase(); const start = document.getElementById("filterStart").value; const end = document.getElementById("filterEnd").value; const status = document.getElementById("filterStatus").value; const period = document.getElementById("filterPeriod").value; const progress = document.getElementById("filterProgress").value; state.filteredAssignments = assignments.filter((assignment) => { const searchable = [assignment.id, assignment.instrument, assignment.user, assignment.sample, assignment.start, assignment.end, assignment.progress, assignment.status].join(" ").toLowerCase(); const startIso = assignment.start.split("/").reverse().join("-"); const endIso = assignment.end.split("/").reverse().join("-"); return searchable.includes(query) && assignment.instrument.toLowerCase().includes(instrument) && assignment.user.toLowerCase().includes(user) && assignment.sample.toLowerCase().includes(sample) && (!start || startIso === start) && (!end || endIso === end) && (status === "Todos" || assignment.status === status) && (period === "Todos" || assignment.period === period) && (progress === "Todos" || assignment.progressGroup === progress); }); renderAssignments(); }
+function renderAssignments() { const header = refs.assignmentsBody.closest("table")?.querySelector("thead tr"); if (header && !header.querySelector("[data-column='row-number']")) header.insertAdjacentHTML("afterbegin", '<th data-column="row-number">N.°</th>'); refs.assignmentsBody.innerHTML = state.filteredAssignments.map((assignment) => { const index = assignments.indexOf(assignment); const canReassign = !["Finalizada", "Anulada"].includes(assignment.status); return `<tr><td>${index + 1}</td><td><strong>${assignment.instrument}</strong></td><td>${assignment.user}</td><td>${assignment.sample}</td><td>${assignment.start}</td><td>${assignment.end}</td><td>${assignment.progress}</td><td><span class="status ${statusClass(assignment.status)}">${assignment.status}</span></td><td><div class="row-actions"><button class="row-action" type="button" data-action="view" data-index="${index}" title="Ver detalle"><i class="fa-regular fa-eye" aria-hidden="true"></i><span>Ver detalle</span></button>${canReassign ? `<button class="row-action" type="button" data-action="reassign" data-index="${index}" title="Reasignar"><i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i><span>Reasignar</span></button><button class="row-action" type="button" data-action="remove" data-index="${index}" title="Anular"><i class="fa-solid fa-ban" aria-hidden="true"></i><span>Anular</span></button>` : ""}</div></td></tr>`; }).join(""); refs.emptyState.hidden = state.filteredAssignments.length > 0; refs.pageSummary.textContent = state.filteredAssignments.length ? `Mostrando 1 a ${state.filteredAssignments.length} de ${state.filteredAssignments.length} registros` : "Mostrando 0 registros"; refs.assignmentCount.textContent = `${assignments.length} asignaciones registradas`; enableTooltips(); }
+function applyFilters() { const query = document.getElementById("filterQuery").value.trim().toLowerCase(); const instrument = document.getElementById("filterInstrument").value.trim().toLowerCase(); const user = document.getElementById("filterUser").value.trim().toLowerCase(); const sample = document.getElementById("filterSample").value.trim().toLowerCase(); const start = document.getElementById("filterStart").value; const end = document.getElementById("filterEnd").value; const status = document.getElementById("filterStatus").value; const period = document.getElementById("filterPeriod").value; const progress = document.getElementById("filterProgress").value; state.filteredAssignments = assignments.filter((assignment) => { const searchable = [assignments.indexOf(assignment) + 1, assignment.id, assignment.instrument, assignment.user, assignment.sample, assignment.start, assignment.end, assignment.progress, assignment.status].join(" ").toLowerCase(); const startIso = assignment.start.split("/").reverse().join("-"); const endIso = assignment.end.split("/").reverse().join("-"); return searchable.includes(query) && assignment.instrument.toLowerCase().includes(instrument) && assignment.user.toLowerCase().includes(user) && assignment.sample.toLowerCase().includes(sample) && (!start || startIso === start) && (!end || endIso === end) && (status === "Todos" || assignment.status === status) && (period === "Todos" || assignment.period === period) && (progress === "Todos" || assignment.progressGroup === progress); }); renderAssignments(); }
  function openAssignment(index = null) { state.editingIndex = index; const assignment = index === null ? null : assignments[index]; refs.assignmentTitle.textContent = assignment ? "Reasignar instrumento" : "Registrar asignación"; refs.assignmentSaveBtn.textContent = "Guardar"; refs.assignmentContext.textContent = assignment ? `Actualiza la asignación de ${assignment.instrument} para ${assignment.user}.` : "Selecciona los elementos que participarán en la asignación."; refs.assignmentInstrument.value = assignment?.instrument || "Ficha de seguimiento"; refs.assignmentUser.value = assignment?.user || "Ana Paredes"; refs.assignmentSample.value = assignment?.sample || "Muestra nacional 2026"; refs.assignmentStart.value = assignment ? assignment.start.split("/").reverse().join("-") : "2026-08-18"; refs.assignmentEnd.value = assignment ? assignment.end.split("/").reverse().join("-") : "2026-09-18"; bootstrap.Modal.getOrCreateInstance(refs.assignmentModal).show(); }
 function handleAction(event) { const action = event.target.closest("[data-action]"); if (!action) return; const index = Number(action.dataset.index); const assignment = assignments[index]; if (action.dataset.action === "view") showToast(refs.toast, `${assignment.instrument} está ${assignment.status} con un progreso de ${assignment.progress}.`, "info"); if (action.dataset.action === "reassign") openAssignment(index); if (action.dataset.action === "remove") { state.pendingAssignment = { index, remove: true }; openConfirmModal("confirmModal", `Vas a anular la asignación de ${assignment.instrument} para ${assignment.user}. ¿Deseas continuar?`); } }
 function openNewAssignment() { openAssignment(); }
@@ -207,6 +265,8 @@ function confirmAction() { if (!state.pendingAssignment) return; const pending =
 
 
 
+
+document.getElementById("confirmModal")?.querySelector(".modal-header")?.insertAdjacentHTML("afterbegin", '<span class="modal-title-icon" aria-hidden="true"><i class="fa-solid fa-circle-question"></i></span>');
 document.getElementById("filterForm").addEventListener("submit", (event) => { event.preventDefault(); applyFilters(); showToast(refs.toast, "Filtros aplicados.", "info"); });
 document.getElementById("filterToggle").addEventListener("click", () => {
   const filterForm = document.getElementById("filterForm");
@@ -216,4 +276,4 @@ document.getElementById("filterToggle").addEventListener("click", () => {
   filterToggle.setAttribute("aria-label", expanded ? "Cerrar filtros" : "Abrir filtros");
 });
 document.getElementById("clearBtn").addEventListener("click", () => { document.getElementById("filterQuery").value = ""; document.getElementById("filterInstrument").value = ""; document.getElementById("filterUser").value = ""; document.getElementById("filterSample").value = ""; document.getElementById("filterStart").value = ""; document.getElementById("filterEnd").value = ""; document.getElementById("filterStatus").value = "Todos"; document.getElementById("filterPeriod").value = "Todos"; document.getElementById("filterProgress").value = "Todos"; applyFilters(); showToast(refs.toast, "Filtros limpiados.", "info"); });
-document.getElementById("newAssignmentBtn").addEventListener("click", openNewAssignment); refs.assignmentsBody.addEventListener("click", handleAction); document.getElementById("assignmentForm").addEventListener("submit", saveAssignment); document.getElementById("confirmBtn").addEventListener("click", confirmAction); document.getElementById("exportBtn").addEventListener("click", () => showToast(refs.toast, getMessage("M67"), "success")); document.addEventListener("click", (event) => { if (!event.target.closest(".action-menu")) document.querySelectorAll("[data-menu-panel]").forEach((panel) => { panel.hidden = true; }); }); renderAssignments();
+document.getElementById("newAssignmentBtn").addEventListener("click", openNewAssignment); refs.assignmentsBody.addEventListener("click", handleAction); document.getElementById("assignmentForm").addEventListener("submit", saveAssignment); document.getElementById("confirmBtn").addEventListener("click", confirmAction); document.getElementById("exportBtn").addEventListener("click", () => showToast(refs.toast, getMessage("M67"), "success")); document.addEventListener("click", (event) => { if (!event.target.closest(".action-menu")) document.querySelectorAll("[data-menu-panel]").forEach((panel) => { panel.hidden = true; }); }); attachTableSorting(document.querySelector(".ssee-table")); renderAssignments();

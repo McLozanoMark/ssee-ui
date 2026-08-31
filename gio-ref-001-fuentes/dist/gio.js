@@ -31,6 +31,11 @@ function renderToast(element, message, type = "info") {
 }
 
 function enableTooltips() {
+  document.querySelectorAll(".filter-toggle").forEach((element) => {
+    element.setAttribute("title", "Filtro Personalizado");
+    element.setAttribute("data-bs-title", "Filtro Personalizado");
+    element.setAttribute("data-bs-toggle", "tooltip");
+  });
   if (!window.bootstrap) return;
   document.querySelectorAll("[data-bs-toggle='tooltip']").forEach((element) => {
     bootstrap.Tooltip.getOrCreateInstance(element);
@@ -101,6 +106,7 @@ const MESSAGE_CATALOG = Object.freeze({
   M35: { text: "Si existe una cuenta asociada al correo ingresado, recibirá un enlace para recuperar su contraseña.", type: "Información", scope: "General" },
   M36: { text: "El enlace de recuperación ha expirado. Solicite uno nuevo.", type: "Alerta", scope: "General" },
   M37: { text: "La contraseña se ha restablecido correctamente.", type: "Información", scope: "General" },
+  M38: { text: "No fue posible restablecer la contraseña. Intente nuevamente.", type: "Alerta", scope: "General" },
   M39: { text: "No tiene proyectos asignados para visualizar.", type: "Información", scope: "General" },
   M40: { text: "No tiene instrumentos pendientes de atención.", type: "Información", scope: "General" },
   M41: { text: "Tiene %s instrumentos asignados.", type: "Información", scope: "General" },
@@ -440,14 +446,16 @@ function sortValue(source, key) {
 }
 
 function renderSources() {
+  const header = refs.sourcesBody.closest("table")?.querySelector("thead tr");
+  if (header && !header.querySelector("[data-column='row-number']")) header.insertAdjacentHTML("afterbegin", '<th data-column="row-number">N.°</th>');
   refs.sourcesBody.innerHTML = state.filteredSources.map((source) => {
     const index = sources.indexOf(source);
     const canToggle = ["Activa", "Inactiva"].includes(source.status);
     const nextAction = source.status === "Activa" ? "Inactivar" : "Activar";
     return `<tr>
-      <td><strong>${escapeHtml(source.id)}</strong></td>
+      <td>${index + 1}</td><td><strong>${escapeHtml(source.id)}</strong></td>
       <td><strong>${escapeHtml(source.name)}</strong><div class="description">${escapeHtml(source.description)}</div></td>
-      <td><span class="origin-tag ${source.origin === "Interna" ? "internal" : "external"}">${escapeHtml(source.origin)}${source.originDetail ? ` · ${escapeHtml(source.originDetail)}` : ""}</span></td>
+      <td><span class="origin-tag ${source.origin === "Interna" ? "internal" : "external"}">${escapeHtml(source.origin)}</span></td>
       <td>${escapeHtml(source.records)}</td>
       <td><span class="status ${statusClass(source.status)}">${escapeHtml(source.status)}</span></td>
       <td><div class="row-actions source-actions">
@@ -472,7 +480,7 @@ function applyFilters() {
   const status = refs.filterStatus.value;
   const records = document.getElementById("filterRecords").value;
   state.filteredSources = sources.filter((source) => {
-    const searchable = [source.id, source.name, source.description, source.origin, source.originDetail, source.status].join(" ").toLowerCase();
+    const searchable = [sources.indexOf(source) + 1, source.id, source.name, source.description, source.origin, source.originDetail, source.status].join(" ").toLowerCase();
     const recordCount = Number(String(source.records).replace(/,/g, ""));
     const recordsMatch = records === "Todos"
       || (records === "0" && recordCount === 0)
@@ -751,26 +759,10 @@ function markFormDirty() {
   state.dirty = true;
 }
 
-function discardSourceChanges() {
-  const source = state.editingIndex === null ? null : sources[state.editingIndex];
-  if (!source) return;
-  createDraft(source);
-  state.loadMode = "manual";
-  syncGeneralFields();
-  renderFields();
-  renderKeyFields();
-  renderManualRecords();
-  updateLoadMode();
-  updateWizardFooter();
-}
-
 function rejectWizardStepChange() {
   if (state.pendingWizardStep === null) return;
-  const targetStep = state.pendingWizardStep;
   state.pendingWizardStep = null;
-  discardSourceChanges();
   closeConfirmModal("confirmModal");
-  showStep(targetStep);
 }
 
 refs.filterForm.addEventListener("submit", (event) => {

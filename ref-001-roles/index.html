@@ -53,7 +53,7 @@
           <div class="account-separator" aria-hidden="true"></div>
           <div class="account-copy">
             <strong>Administrador</strong>
-            <span>Superadmin</span>
+            <span>Superadministrador</span>
           </div>
           <div class="avatar" aria-hidden="true">A</div>
           <i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>
@@ -89,19 +89,38 @@
             <i class="fa-solid fa-magnifying-glass icon"></i>
             <input class="form-control" id="filterName" type="search" placeholder="Buscar por nombre, descripción, permiso o estado">
           </label>
-          <button class="filter-toggle" type="button" id="filterToggle" aria-label="Abrir filtros" aria-expanded="false" title="Filtro personalizado">
+          <button class="filter-toggle" type="button" id="filterToggle" aria-label="Abrir filtros" title="Filtro Personalizado" data-bs-title="Filtro Personalizado" data-bs-toggle="tooltip" aria-expanded="false">
             <span></span><span></span><span></span>
           </button>
           <div class="advanced-filters" id="advancedFilters">
-            <label class="filter-field"><span>Descripción</span><input class="form-control" id="filterDescription" type="search" placeholder="Buscar por descripción"></label>
-            <label class="filter-field"><span>Permisos</span><input class="form-control" id="filterPermission" type="search" placeholder="Buscar por permiso"></label>
-            <label class="filter-field"><span>Usuarios</span><select class="form-select" id="filterUsers" aria-label="Usuarios asociados">
+            <label class="filter-field"><span>Nombre</span><select class="form-select" id="filterNameAdvanced" aria-label="Nombre del rol">
               <option value="Todos">Todos</option>
-              <option value="0">Sin usuarios</option>
-              <option value="1-3">De 1 a 3</option>
-              <option value="4+">4 o más</option>
+              <option value="Administrador USE">Administrador USE</option>
+              <option value="Supervisor de Seguimiento">Supervisor de Seguimiento</option>
+              <option value="Evaluador">Evaluador</option>
+              <option value="Registrador">Registrador</option>
+              <option value="Consulta Estratégica">Consulta Estratégica</option>
             </select></label>
-            <label class="filter-field"><span>Última actualización</span><input class="form-control" id="filterUpdated" type="date" aria-label="Última actualización"></label>
+            <label class="filter-field"><span>Permisos</span><select class="form-select" id="filterPermission" aria-label="Permisos del rol">
+              <option value="Todos">Todos</option>
+              <option value="Usuarios">Usuarios</option>
+              <option value="Configuración">Configuración</option>
+              <option value="Seguimiento">Seguimiento</option>
+              <option value="Reportes">Reportes</option>
+              <option value="Evaluación">Evaluación</option>
+              <option value="Instrumentos">Instrumentos</option>
+              <option value="Registro">Registro</option>
+              <option value="Consulta">Consulta</option>
+              <option value="Visualización">Visualización</option>
+            </select></label>
+            <label class="filter-field"><span>Última actualización</span><select class="form-select" id="filterUpdated" aria-label="Última actualización">
+              <option value="Todos">Todos</option>
+              <option value="15/05/2024 10:30">15/05/2024 10:30</option>
+              <option value="14/05/2024 16:45">14/05/2024 16:45</option>
+              <option value="13/05/2024 09:15">13/05/2024 09:15</option>
+              <option value="10/05/2024 11:20">10/05/2024 11:20</option>
+              <option value="08/05/2024 14:05">08/05/2024 14:05</option>
+            </select></label>
             <label class="filter-field"><span>Estado</span><select class="form-select" id="filterStatus" aria-label="Estado">
               <option value="Todos">Todos</option>
               <option value="Activo">Activo</option>
@@ -122,13 +141,13 @@
             <table class="table align-middle mb-0 ssee-table">
               <thead>
                 <tr>
-                  <th>N.°</th>
-                  <th>Nombre</th>
-                  <th>Descripción</th>
-                  <th>Permisos</th>
-                  <th>Usuarios</th>
-                  <th>Estado</th>
-                  <th>Última actualización</th>
+                  <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="number" data-sort-type="number">N.° <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                  <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="name" data-sort-type="text">Nombre <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                  <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="description" data-sort-type="text">Descripción <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                  <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="permissions" data-sort-type="text">Permisos <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                  <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="users" data-sort-type="number">Usuarios <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                  <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="status" data-sort-type="text">Estado <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                  <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="updated" data-sort-type="date">Última actualización <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
                   <th>Acciones</th>
                 </tr>
               </thead>
@@ -178,7 +197,6 @@
         <form class="wizard-card role-form" id="roleForm" novalidate>
           <div class="form-step is-active" id="infoStep">
             <div class="alert" id="formAlert" hidden>
-              <strong>No se puede continuar con el registro del rol</strong>
               <span>Complete los datos del rol para activar esta sección.</span>
             </div>
             <p class="form-note">* Campos obligatorios</p>
@@ -268,7 +286,7 @@
           <h2 class="modal-title h5">Confirmar acción</h2>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
-        <div class="modal-body"><p data-confirm-message></p></div>
+        <div class="modal-body"><p data-confirm-message></p><div id="inactivationReasonWrap" class="confirm-reason" hidden><label for="inactivationReason">Motivo de inactivación <span aria-hidden="true">*</span></label><textarea class="form-control" id="inactivationReason" rows="3" placeholder="Ingresa el motivo de inactivación"></textarea><small id="inactivationReasonError" class="field-error"></small></div></div>
         <div class="modal-footer">
           <button type="button" class="btn btn-outline-ssee button button-secondary" data-bs-dismiss="modal">No</button>
           <button type="button" class="btn btn-ssee button button-primary" id="confirmBtn">Sí</button>

@@ -1,4 +1,4 @@
-@import url("../design-system/app.css?v=20260825-wizard");
+@import url("../design-system/app.css?v=20260827-form-controls");
 
 .breadcrumb { display: flex; align-items: center; flex-wrap: wrap; gap: 0.45rem; }
 .breadcrumb a { text-decoration: none; }
