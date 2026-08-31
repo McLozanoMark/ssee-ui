@@ -38,6 +38,7 @@ const MESSAGE_CATALOG = Object.freeze({
   M35: { text: "Si existe una cuenta asociada al correo ingresado, recibirá un enlace para recuperar su contraseña.", type: "Información", scope: "General" },
   M36: { text: "El enlace de recuperación ha expirado. Solicite uno nuevo.", type: "Alerta", scope: "General" },
   M37: { text: "La contraseña se ha restablecido correctamente.", type: "Información", scope: "General" },
+  M38: { text: "No fue posible restablecer la contraseña. Intente nuevamente.", type: "Alerta", scope: "General" },
   M39: { text: "No tiene proyectos asignados para visualizar.", type: "Información", scope: "General" },
   M40: { text: "No tiene instrumentos pendientes de atención.", type: "Información", scope: "General" },
   M41: { text: "Tiene %s instrumentos asignados.", type: "Información", scope: "General" },
@@ -127,6 +128,11 @@ function renderToast(element, message, type = "info") {
 }
 
 function enableTooltips() {
+  document.querySelectorAll(".filter-toggle").forEach((element) => {
+    element.setAttribute("title", "Filtro Personalizado");
+    element.setAttribute("data-bs-title", "Filtro Personalizado");
+    element.setAttribute("data-bs-toggle", "tooltip");
+  });
   if (!window.bootstrap) return;
   document.querySelectorAll("[data-bs-toggle='tooltip']").forEach((element) => {
     bootstrap.Tooltip.getOrCreateInstance(element);

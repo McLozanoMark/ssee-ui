@@ -25,6 +25,7 @@ await bundle("ref-001-roles/dist/roles.js", [
   "design-system/permission-catalog.js",
   "design-system/messages.js",
   "design-system/interaction.js",
+  "design-system/table-sort.js",
   "ref-001-roles/js/data.js",
   "ref-001-roles/js/state.js",
   "ref-001-roles/js/ui.js",
@@ -37,6 +38,7 @@ await bundle("ref-002-permisos/dist/permissions.js", [
   "design-system/permission-catalog.js",
   "design-system/messages.js",
   "design-system/interaction.js",
+  "design-system/table-sort.js",
   "ref-002-permisos/js/data.js",
   "ref-002-permisos/js/state.js",
   "ref-002-permisos/js/permissions.js",
@@ -47,6 +49,7 @@ await bundle("ref-002-permisos/dist/permissions.js", [
 await bundle("ref-006-users/dist/users.js", [
   "design-system/messages.js",
   "design-system/interaction.js",
+  "design-system/table-sort.js",
   "ref-006-users/js/data.js",
   "ref-006-users/js/state.js",
   "ref-006-users/js/ui.js",
@@ -146,6 +149,7 @@ await bundle("ref-016-welcome/dist/welcome.js", [
 await bundle("ref-003-passport/dist/passport.js", [
   "design-system/messages.js",
   "design-system/interaction.js",
+  "design-system/table-sort.js",
   "ref-003-passport/js/main.js"
 ]);
 
@@ -162,6 +166,7 @@ await bundle("gio-ref-001-fuentes/dist/gio.js", [
 await bundle("gio-ref-002-muestras/dist/gio.js", [
   "design-system/interaction.js",
   "design-system/messages.js",
+  "design-system/table-sort.js",
   "gio-ref-002-muestras/js/data.js",
   "gio-ref-002-muestras/js/state.js",
   "gio-ref-002-muestras/js/ui.js",
@@ -172,6 +177,7 @@ await bundle("gio-ref-002-muestras/dist/gio.js", [
 await bundle("gio-ref-003-asignaciones/dist/gio.js", [
   "design-system/interaction.js",
   "design-system/messages.js",
+  "design-system/table-sort.js",
   "gio-ref-003-asignaciones/js/data.js",
   "gio-ref-003-asignaciones/js/state.js",
   "gio-ref-003-asignaciones/js/ui.js",

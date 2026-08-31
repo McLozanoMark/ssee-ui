@@ -38,6 +38,7 @@ const MESSAGE_CATALOG = Object.freeze({
   M35: { text: "Si existe una cuenta asociada al correo ingresado, recibirá un enlace para recuperar su contraseña.", type: "Información", scope: "General" },
   M36: { text: "El enlace de recuperación ha expirado. Solicite uno nuevo.", type: "Alerta", scope: "General" },
   M37: { text: "La contraseña se ha restablecido correctamente.", type: "Información", scope: "General" },
+  M38: { text: "No fue posible restablecer la contraseña. Intente nuevamente.", type: "Alerta", scope: "General" },
   M39: { text: "No tiene proyectos asignados para visualizar.", type: "Información", scope: "General" },
   M40: { text: "No tiene instrumentos pendientes de atención.", type: "Información", scope: "General" },
   M41: { text: "Tiene %s instrumentos asignados.", type: "Información", scope: "General" },
@@ -127,6 +128,11 @@ function renderToast(element, message, type = "info") {
 }
 
 function enableTooltips() {
+  document.querySelectorAll(".filter-toggle").forEach((element) => {
+    element.setAttribute("title", "Filtro Personalizado");
+    element.setAttribute("data-bs-title", "Filtro Personalizado");
+    element.setAttribute("data-bs-toggle", "tooltip");
+  });
   if (!window.bootstrap) return;
   document.querySelectorAll("[data-bs-toggle='tooltip']").forEach((element) => {
     bootstrap.Tooltip.getOrCreateInstance(element);
@@ -249,7 +255,7 @@ function updateLastInteraction(refs, date) {
 
 
 const refs = {
-  activeView: document.getElementById("activeView"), authView: document.getElementById("authView"), authMessage: document.getElementById("authMessage"), authLink: document.getElementById("authLink"), logoutButton: document.getElementById("logoutButton"), newSessionButton: document.getElementById("newSessionButton"), interactButton: document.getElementById("interactButton"), expireButton: document.getElementById("expireButton"), confirmDialog: document.getElementById("confirmDialog"), cancelLogout: document.getElementById("cancelLogout"), confirmLogout: document.getElementById("confirmLogout"), lastInteraction: document.getElementById("lastInteraction"), toast: document.getElementById("toast")
+  activeView: document.getElementById("activeView"), authView: document.getElementById("authView"), authMessage: document.getElementById("authMessage"), authLink: document.getElementById("authLink"), logoutButton: document.getElementById("logoutButton"), newSessionButton: document.getElementById("newSessionButton"), interactButton: document.getElementById("interactButton"), expireButton: document.getElementById("expireButton"), confirmDialog: document.getElementById("confirmDialog"), closeConfirm: document.getElementById("closeConfirm"), cancelLogout: document.getElementById("cancelLogout"), confirmLogout: document.getElementById("confirmLogout"), lastInteraction: document.getElementById("lastInteraction"), toast: document.getElementById("toast")
 };
 
 const params = new URLSearchParams(window.location.search);
@@ -294,6 +300,7 @@ if (expired) {
   refs.expireButton.addEventListener("click", () => endSession(getMessage("M28")));
   refs.logoutButton.addEventListener("click", () => { refs.confirmDialog.hidden = false; refs.cancelLogout.focus(); });
   refs.cancelLogout.addEventListener("click", closeDialog);
+  refs.closeConfirm.addEventListener("click", closeDialog);
   refs.confirmLogout.addEventListener("click", () => endSession(getPrototypeMessage("sessionClosed")));
   refs.confirmDialog.addEventListener("click", (event) => { if (event.target === refs.confirmDialog) closeDialog(); });
 }

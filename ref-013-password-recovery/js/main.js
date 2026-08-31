@@ -11,7 +11,7 @@ const refs = {
 
 const params = new URLSearchParams(window.location.search);
 const authType = params.get("auth") === "passport" ? "Passport" : "Autoregistro";
-const tokenState = params.get("token") === "expired" ? "expired" : "available";
+const tokenState = params.get("token") === "expired" ? "expired" : params.get("token") === "error" ? "error" : "available";
 const state = createRecoveryState({ authType, tokenState });
 
 function resetToRequest() {
@@ -30,6 +30,10 @@ if (state.authType === "Passport") {
   refs.requestView.hidden = true;
   refs.expiredView.hidden = false;
 } else {
+  if (state.tokenState === "error") {
+    refs.requestView.hidden = true;
+    refs.resetView.hidden = false;
+  }
   refs.requestForm.addEventListener("submit", (event) => {
     event.preventDefault();
     refs.requestFeedback.hidden = true;
@@ -53,7 +57,9 @@ if (state.authType === "Passport") {
   refs.resetForm.addEventListener("submit", (event) => {
     event.preventDefault();
     refs.resetFeedback.hidden = true;
-    const result = validateResetPassword({ newPassword: refs.newPassword.value, confirmation: refs.confirmPassword.value, policy: recoveryPolicy });
+    const result = state.tokenState === "error"
+      ? { ok: false, messageCode: "M38", reason: "Error técnico simulado" }
+      : validateResetPassword({ newPassword: refs.newPassword.value, confirmation: refs.confirmPassword.value, policy: recoveryPolicy });
     recordAuditEvent({ user: state.email, authType: state.authType, operation: "Restablecimiento de contraseña", result: result.ok ? "Exitosa" : "Fallida", reason: result.reason || "" });
     if (!result.ok) {
       showFeedback(refs, "resetFeedback", result.messageCode);

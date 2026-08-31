@@ -6,7 +6,7 @@ import { createSessionMarker, invalidateSession, replaceActiveSession } from "./
 import { showAuthView, showToast, updateLastInteraction } from "./ui.js";
 
 const refs = {
-  activeView: document.getElementById("activeView"), authView: document.getElementById("authView"), authMessage: document.getElementById("authMessage"), authLink: document.getElementById("authLink"), logoutButton: document.getElementById("logoutButton"), newSessionButton: document.getElementById("newSessionButton"), interactButton: document.getElementById("interactButton"), expireButton: document.getElementById("expireButton"), confirmDialog: document.getElementById("confirmDialog"), cancelLogout: document.getElementById("cancelLogout"), confirmLogout: document.getElementById("confirmLogout"), lastInteraction: document.getElementById("lastInteraction"), toast: document.getElementById("toast")
+  activeView: document.getElementById("activeView"), authView: document.getElementById("authView"), authMessage: document.getElementById("authMessage"), authLink: document.getElementById("authLink"), logoutButton: document.getElementById("logoutButton"), newSessionButton: document.getElementById("newSessionButton"), interactButton: document.getElementById("interactButton"), expireButton: document.getElementById("expireButton"), confirmDialog: document.getElementById("confirmDialog"), closeConfirm: document.getElementById("closeConfirm"), cancelLogout: document.getElementById("cancelLogout"), confirmLogout: document.getElementById("confirmLogout"), lastInteraction: document.getElementById("lastInteraction"), toast: document.getElementById("toast")
 };
 
 const params = new URLSearchParams(window.location.search);
@@ -51,6 +51,7 @@ if (expired) {
   refs.expireButton.addEventListener("click", () => endSession(getMessage("M28")));
   refs.logoutButton.addEventListener("click", () => { refs.confirmDialog.hidden = false; refs.cancelLogout.focus(); });
   refs.cancelLogout.addEventListener("click", closeDialog);
+  refs.closeConfirm.addEventListener("click", closeDialog);
   refs.confirmLogout.addEventListener("click", () => endSession(getPrototypeMessage("sessionClosed")));
   refs.confirmDialog.addEventListener("click", (event) => { if (event.target === refs.confirmDialog) closeDialog(); });
 }
