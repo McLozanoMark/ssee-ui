@@ -12,7 +12,6 @@ const records = [
 const body = document.getElementById("usersBody");
 const toast = document.getElementById("toast");
 const typeFilter = document.createElement("select");
-let automaticSyncTimer;
 let syncRunning = false;
 
 function showToast(message, type = "info") {
@@ -89,15 +88,13 @@ function runSync() {
 }
 
 document.getElementById("syncBtn").addEventListener("click", () => {
-  window.clearTimeout(automaticSyncTimer);
   runSync();
 });
 
 render();
-automaticSyncTimer = window.setTimeout(runSync, 3500);
 body.addEventListener("click", (event) => {
   if (event.target.closest("[data-access-action='open-users']")) {
     const button = event.target.closest("[data-access-action='open-users']");
-    window.location.href = `../ref-006-users/index.html?accessName=${encodeURIComponent(button.dataset.userName)}`;
+    window.location.href = `../ref-007-users/index.html?accessName=${encodeURIComponent(button.dataset.userName)}`;
   }
 });

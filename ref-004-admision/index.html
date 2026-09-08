@@ -1,60 +1,349 @@
 <!doctype html>
 <html lang="es">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SSEE - Admisión de usuarios</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="../design-system/app.css?v=20260827-form-controls">
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <div class="app-shell">
-    <aside class="sidebar" aria-label="Navegación principal">
-      <div class="side-brand"><div class="logo-symbol">S</div><div><strong>S.S.E.E.</strong><span>Seguimiento y Evaluación Estratégica</span></div></div>
-      <nav class="side-nav"><a class="nav-item is-open" href="#">Administración</a><a class="nav-item is-active" href="#">Usuarios</a></nav>
-    </aside>
-    <main class="main">
-      <header class="topbar">
-        <button class="icon-button top-menu" aria-label="Abrir menú"><span></span><span></span><span></span></button>
-        <div class="top-divider"></div>
-        <div class="top-info">
-          <div class="info-card"><span class="info-icon"><i class="fa-regular fa-clock"></i></span><div><strong>Último acceso</strong><span>5:00 PM - 25/12/2024</span></div></div>
-          <div class="info-card location-card"><span class="info-icon"><i class="fa-solid fa-location-dot"></i></span><div><strong>Sede</strong><span>Unidad de Seguimiento y Evaluación</span></div><i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i></div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SSEE - Gestión de usuarios</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../design-system/app.css?v=20260827-form-controls" />
+    <link rel="stylesheet" href="styles.css?v=20260824-inter" />
+    <script src="../design-system/demo-navigation.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Navegación principal">
+        <div class="side-brand">
+          <div class="logo-symbol" aria-hidden="true">S</div>
+          <div>
+            <strong>S.S.E.E.</strong
+            ><span>Seguimiento y Evaluación Estratégica</span>
+          </div>
         </div>
-        <div class="top-divider"></div>
-        <div class="account"><button class="bell" type="button" aria-label="Notificaciones"><i class="fa-regular fa-bell"></i></button><div class="account-separator" aria-hidden="true"></div><div class="account-copy"><strong>Administrador</strong><span>Superadministrador</span></div><div class="avatar" aria-hidden="true">A</div><i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i></div>
-      </header>
-      <section class="view is-active" id="admissionView">
-        <div class="page-head compact"><div><nav class="breadcrumb"><a href="../index.html">Índice de requerimientos</a> / ALI-REF-004 / Admisión de usuarios</nav><h1>Admitir usuario</h1><p class="page-subtitle">Consulta los datos de identidad y configura el acceso a S.S.E.E.</p></div><div class="page-actions"><a class="btn btn-outline-ssee button button-secondary" href="../ref-006-users/index.html"><i class="fa-solid fa-list"></i> Bandeja de usuarios</a><button class="btn btn-outline-ssee button button-secondary" type="button" id="massModeBtn"><i class="fa-solid fa-file-arrow-up"></i> Carga masiva</button></div></div>
-        <div class="admission-mode" role="tablist" aria-label="Tipo de admisión"><button class="mode-tab is-active" type="button" id="individualModeBtn" role="tab" aria-selected="true">Admisión individual</button><button class="mode-tab" type="button" id="massModeTab" role="tab" aria-selected="false">Carga masiva</button></div>
-        <div class="admission-grid" id="individualAdmission">
-          <section class="form-panel">
-            <h2><i class="fa-solid fa-id-card"></i> Datos de identidad</h2>
-            <form id="identityForm"><div class="input-row"><label>Tipo de documento<select class="form-select" id="documentType"><option>DNI</option><option>CE</option></select></label><label>Número de documento<input class="form-control" id="documentNumber" inputmode="numeric" placeholder="Ingresa el número" required></label><button class="btn btn-ssee button button-primary validate-btn" type="submit"><i class="fa-solid fa-magnifying-glass"></i> Consultar</button></div><div class="lookup-actions"><button class="btn btn-outline-ssee button button-secondary" type="button" id="clearBtn"><i class="fa-solid fa-rotate-left"></i> Limpiar</button></div></form>
-            <div class="identity-result" id="identityResult" hidden><div class="result-heading"><i class="fa-solid fa-circle-check"></i><strong>Datos encontrados</strong></div><div class="readonly-grid"><div><span>Nombres y apellidos</span><strong id="identityName"></strong></div><div><span>Documento</span><strong id="identityDocument"></strong></div><div><span>Fecha de nacimiento</span><strong id="identityBirth"></strong></div></div></div>
+        <nav class="side-nav" aria-label="Menú lateral">
+          <a href="#" class="nav-item is-open">Administración</a
+          ><a href="#" class="nav-item is-active">Usuarios</a>
+        </nav>
+      </aside>
+      <main class="main">
+        <header class="topbar">
+          <button
+            class="icon-button top-menu"
+            type="button"
+            aria-label="Abrir menú"
+          >
+            <span></span><span></span><span></span>
+          </button>
+          <div class="top-divider" aria-hidden="true"></div>
+          <div class="top-info">
+            <div class="info-card">
+              <span class="info-icon" aria-hidden="true"
+                ><i class="fa-regular fa-clock"></i
+              ></span>
+              <div>
+                <strong>Último acceso</strong><span>5:00 PM - 25/12/2024</span>
+              </div>
+            </div>
+            <div class="info-card location-card">
+              <span class="info-icon" aria-hidden="true"
+                ><i class="fa-solid fa-location-dot"></i
+              ></span>
+              <div>
+                <strong>Sede</strong
+                ><span>Unidad de Seguimiento y Evaluación</span>
+              </div>
+              <i
+                class="fa-solid fa-chevron-down chevron"
+                aria-hidden="true"
+              ></i>
+            </div>
+          </div>
+          <div class="top-divider" aria-hidden="true"></div>
+          <div class="account">
+            <button class="bell" aria-label="Notificaciones">
+              <i class="fa-regular fa-bell"></i>
+            </button>
+            <div class="account-separator" aria-hidden="true"></div>
+            <div class="account-copy">
+              <strong>Administrador</strong><span>Superadministrador</span>
+            </div>
+            <div class="avatar" aria-hidden="true">A</div>
+            <i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>
+          </div>
+        </header>
+        <section
+          class="view is-active"
+          id="listView"
+          aria-labelledby="listTitle"
+        >
+          <div class="page-head">
+            <div class="title-cluster">
+              <nav class="breadcrumb" aria-label="Ruta">
+                <a href="../index.html">Índice de requerimientos</a> / ALI-REF-004 / Admisión de usuarios
+              </nav>
+              <div class="title-row">
+                <div class="title-icon" aria-hidden="true">
+                  <i class="fa-solid fa-users"></i>
+                </div>
+                <div>
+                  <h1 id="listTitle">Gestión de usuarios</h1>
+                  <p id="userCount">5 usuarios registrados</p>
+                </div>
+              </div>
+            </div>
+            <div class="head-actions">
+              <a class="btn btn-ssee button button-primary" id="newUserBtn" href="admitir.html?return=ref-004-admision"><i class="fa-solid fa-user-plus icon" aria-hidden="true"></i>Nuevo usuario</a>
+              <button
+                class="btn btn-ssee button button-primary"
+                id="syncBtn"
+                type="button"
+              >
+                <i class="fa-solid fa-rotate icon" aria-hidden="true"></i>Sincronizar usuarios
+              </button>
+              <button
+                class="btn btn-outline-ssee button button-secondary"
+                id="exportBtn"
+              >
+                <i class="fa-solid fa-arrow-up-from-bracket icon"></i>Exportar
+              </button>
+            </div>
+          </div>
+          <div class="user-counters" aria-label="Indicadores de atención">
+            <div><span>Accesos próximos a vencer</span><strong id="expiringCount">0</strong></div>
+            <div><span>Sin proyecto</span><strong id="noProjectCount">0</strong></div>
+          </div>
+          <form class="filter-panel" id="filterForm">
+            <label class="global-search"
+              ><i class="fa-solid fa-magnifying-glass icon"></i
+              ><input
+                class="form-control"
+                id="filterName"
+                type="search"
+                placeholder="Buscar por usuario, nombre, correo o rol" /></label
+            ><button
+              class="filter-toggle"
+              type="button"
+              id="filterToggle"
+              aria-label="Abrir filtros"
+              aria-expanded="false"
+            >
+              <span></span><span></span><span></span>
+            </button>
+            <div class="advanced-filters" id="advancedFilters">
+              <label class="filter-field">
+                <span>Usuario</span>
+                <input class="form-control" id="filterUsername" type="search" placeholder="Buscar por usuario" />
+              </label>
+              <label class="filter-field">
+                <span>Bandeja</span>
+                <select class="form-select" id="filterTray" aria-label="Bandeja">
+                  <option>Todos</option>
+                  <option>Pendientes de rol</option>
+                  <option>Sin proyecto</option>
+                  <option>Por vencer</option>
+                </select>
+              </label>
+              <label class="filter-field">
+                <span>Nombres y apellidos</span>
+                <input class="form-control" id="filterDescription" type="search" placeholder="Buscar por nombres y apellidos" />
+              </label>
+              <label class="filter-field">
+                <span>Correo</span>
+                <input class="form-control" id="filterEmail" type="email" placeholder="Buscar por correo" />
+              </label>
+              <label class="filter-field">
+                <span>Rol</span>
+                <select class="form-select" id="filterRole" aria-label="Rol">
+                  <option>Todos</option>
+                  <option>Administrador USE</option>
+                  <option>Supervisor de Seguimiento</option>
+                  <option>Evaluador</option>
+                </select>
+              </label>
+              <label class="filter-field">
+                <span>Estado</span>
+                <select class="form-select" id="filterStatus" aria-label="Estado">
+                  <option>Todos</option>
+                  <option>Activo</option>
+                  <option>Inactivo</option>
+                </select>
+              </label>
+              <label class="filter-field">
+                <span>Tipo de autenticación</span>
+                <select class="form-select" id="filterAuth" aria-label="Autenticación">
+                  <option>Todos</option>
+                  <option>Passport</option>
+                  <option>Documento</option>
+                  <option>Autoregistro</option>
+                </select>
+              </label>
+              <label class="filter-field">
+                <span>Proyectos</span>
+                <input class="form-control" id="filterProject" type="search" placeholder="Buscar por proyecto" />
+              </label>
+              <label class="filter-field">
+                <span>Vigencia</span>
+                <select class="form-select" id="filterValidity" aria-label="Vigencia">
+                  <option>Todos</option>
+                  <option>Sin vencimiento</option>
+                  <option>Por vencer</option>
+                </select>
+              </label>
+              <label class="filter-field">
+                <span>Último acceso</span>
+                <input class="form-control" id="filterLastAccess" type="date" aria-label="Último acceso" />
+              </label>
+              <div class="filter-actions" aria-label="Acciones de filtro">
+                <button class="btn filter-action btn-ssee button button-primary" type="submit">
+                  <i class="fa-solid fa-magnifying-glass icon"></i>Buscar
+                </button>
+                <button class="btn filter-action btn-outline-ssee button button-secondary" type="button" id="clearBtn">
+                  <i class="fa-solid fa-rotate-left icon"></i>Limpiar
+                </button>
+              </div>
+            </div>
+          </form>
+          <section class="table-panel" aria-label="Resultados de usuarios">
+            <div class="table-wrap">
+              <table class="table align-middle mb-0 ssee-table">
+                <thead>
+                  <tr>
+                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="username" data-sort-type="text">Usuario <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="name" data-sort-type="text">Nombres y apellidos <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="email" data-sort-type="text">Correo <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="auth" data-sort-type="text">Tipo de autenticación <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="roles" data-sort-type="text">Roles <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="projects" data-sort-type="text">Proyectos <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="validity" data-sort-type="text">Vigencia <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="status" data-sort-type="text">Estado <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="lastAccess" data-sort-type="date">Último acceso <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="usersBody"></tbody>
+              </table>
+            </div>
+            <div class="empty-state" id="emptyState" hidden>
+              No se encontraron usuarios con los criterios seleccionados.
+            </div>
+            <div class="pagination">
+              <p id="pageSummary"></p>
+              <div class="page-buttons" aria-label="Paginación">
+                <button class="page-btn" type="button" disabled>&laquo;</button
+                ><button class="page-btn" type="button" disabled>
+                  &lsaquo;</button
+                ><button class="page-btn is-current" type="button">1</button
+                ><button class="page-btn" type="button" disabled>
+                  &rsaquo;</button
+                ><button class="page-btn" type="button" disabled>
+                  &raquo;
+                </button>
+              </div>
+              <label class="page-size"
+                ><select class="form-select" id="pageSize">
+                  <option value="5">5 por página</option>
+                  <option value="10" selected>10 por página</option>
+                </select></label
+              >
+            </div>
           </section>
-          <section class="form-panel">
-            <h2><i class="fa-solid fa-user-gear"></i> Configuración de acceso</h2>
-            <div class="local-grid"><label>Correo electrónico<input class="form-control" id="email" type="email" placeholder="usuario@ejemplo.gob.pe"></label><label>Sede<select class="form-select" id="site"><option>Unidad de Seguimiento y Evaluación</option><option>Oficina de Operaciones</option></select></label><label>Vigencia<select class="form-select" id="validity"><option>Sin fecha de vencimiento</option><option>30 días</option><option>90 días</option><option>1 año</option></select><small class="field-help" id="validityHelp">El acceso no tendrá fecha de vencimiento.</small></label></div>
-            <div class="role-field"><label>Proyectos *</label><div class="role-options" id="projectOptions"><label class="role-check"><input class="form-check-input" type="checkbox" value="Operativo 2026"><span>Operativo 2026</span></label><label class="role-check"><input class="form-check-input" type="checkbox" value="Evaluación 2026"><span>Evaluación 2026</span></label></div><label>Roles activos *</label><div class="role-options" id="roleOptions"></div><small>Selecciona al menos un proyecto y un rol para habilitar el acceso.</small></div>
-            <div class="form-actions"><button class="btn btn-outline-ssee button button-secondary" type="button" id="cancelBtn">Cancelar</button><button class="btn btn-ssee button button-primary" type="button" id="admitBtn" disabled><i class="fa-solid fa-user-check"></i> Guardar</button></div>
-          </section>
-        </div>
-        <section class="mass-admission form-panel" id="massAdmission" hidden>
-          <div class="panel-heading"><div><p class="eyebrow">Carga masiva</p><h2>Admitir usuarios mediante archivo</h2><p>Utiliza la plantilla y revisa la validación antes de guardar los registros correctos.</p></div><button class="btn btn-outline-ssee button button-secondary" type="button" id="downloadTemplateBtn"><i class="fa-solid fa-download"></i> Descargar plantilla</button></div>
-          <div class="upload-box"><i class="fa-solid fa-file-excel" aria-hidden="true"></i><div><strong>Selecciona un archivo Excel</strong><span>Formatos permitidos: XLSX, XLS o CSV. Tamaño máximo: 10 MB.</span></div><input type="file" id="massFileInput" accept=".xlsx,.xls,.csv"><label class="btn btn-outline-ssee button button-secondary" for="massFileInput">Seleccionar archivo</label></div>
-          <p class="file-name" id="massFileName">Ningún archivo seleccionado</p>
-          <div class="validation-summary" id="massValidationSummary" hidden><div><strong id="massValidationTitle">Validación del archivo</strong><span id="massValidationText"></span></div><button class="btn btn-link" type="button" id="downloadErrorsBtn" hidden><i class="fa-solid fa-download"></i> Descargar observaciones</button></div>
-          <div class="mass-actions"><button class="btn btn-outline-ssee button button-secondary" type="button" id="cancelMassBtn">Cancelar</button><button class="btn btn-ssee button button-primary" type="button" id="saveMassBtn" disabled><i class="fa-solid fa-floppy-disk"></i> Guardar</button></div>
         </section>
-      </section>
-      <footer class="footer"><div class="minedu-mark"><img class="minedu-logo" src="../assets/minedu.jpg" alt="Ministerio de Educación"></div><div><p>2026. Todos los derechos reservados.</p><p>Ministerio de Educación - S.S.E.E. - Versión 0.1</p></div></footer>
-    </main>
-  </div>
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="dist/admission.js"></script>
-</body>
+        <section class="view" id="detailView" aria-labelledby="detailTitle">
+          <div class="page-head compact">
+            <div>
+              <nav class="breadcrumb" aria-label="Ruta">
+                <a href="../index.html">Índice de requerimientos</a> / ALI-REF-007 / Gestión de usuarios / Detalle
+              </nav>
+              <h1 id="detailTitle">Detalle del usuario</h1>
+            </div>
+            <button
+              class="btn btn-outline-ssee button button-secondary"
+              id="backBtn"
+            >
+              <i class="fa-solid fa-arrow-left icon"></i>Volver
+            </button>
+          </div>
+          <div class="detail-card" id="detailCard"></div>
+        </section>
+        <footer class="footer">
+          <div class="minedu-mark">
+            <img class="minedu-logo" src="../assets/minedu.jpg" alt="Ministerio de Educación">
+          </div>
+          <div>
+            <p>2026. Todos los derechos reservados.</p>
+            <p>Ministerio de Educación - S.S.E.E. - Versión 0.1</p>
+          </div>
+        </footer>
+      </main>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <aside class="demo-guide demo-guide-admission" id="admissionGuide" aria-label="Guía de demo"><span class="demo-guide-label">Guía de demo</span><strong>Inicia la admisión de usuario</strong><p>Haz clic en Nuevo usuario para continuar.</p></aside>
+    <div class="demo-cursor-admission" id="admissionCursor" aria-hidden="true">➤</div>
+    <div class="modal fade" id="rolesModal" tabindex="-1" aria-labelledby="rolesModalTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content role-modal">
+          <div class="modal-header">
+            <span class="modal-title-icon" aria-hidden="true"><i class="fa-solid fa-user-gear"></i></span><h2 class="modal-title" id="rolesModalTitle">Asignar roles</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body"><p class="modal-context" id="rolesModalContext"></p><div class="access-edit-note" id="accessEditNote" hidden></div><div class="site-picker" id="sitePicker"></div><div class="role-picker" id="rolePicker"></div><div class="project-picker" id="projectPicker"></div><label class="modal-label" id="validityField" for="validitySelect">Vigencia<select class="form-select" id="validitySelect"><option>Sin fecha de vencimiento</option><option>30 días</option><option>90 días</option><option>1 año</option></select></label><p class="modal-feedback" id="roleModalFeedback" hidden></p></div>
+          <div class="modal-footer justify-content-between">
+            <div class="edit-status-control" id="editUserStatusControl" hidden>
+              <span>Estado</span>
+              <label class="form-check form-switch switch" data-on-label="Activo" data-off-label="Inactivo">
+                <input class="form-check-input" type="checkbox" id="editUserStatusToggle" aria-label="Activar o inactivar usuario">
+              </label>
+            </div>
+            <div class="form-actions-right">
+              <button type="button" class="btn btn-outline-ssee button button-secondary" id="cancelRolesBtn">Cancelar</button>
+              <button type="button" class="btn btn-ssee button button-primary" id="saveRolesBtn">Guardar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="reniecModal" tabindex="-1" aria-labelledby="reniecModalTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content role-modal reniec-modal">
+          <div class="modal-header">
+            <span class="modal-title-icon" aria-hidden="true"><i class="fa-solid fa-id-card"></i></span><h2 class="modal-title" id="reniecModalTitle">Actualizar datos RENIEC</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <p class="modal-context" id="reniecModalContext"></p>
+            <label class="modal-label" for="reniecDocument">Número de documento<input class="form-control" id="reniecDocument" type="text" readonly></label>
+            <button class="btn btn-outline-ssee button button-secondary reniec-consult" type="button" id="consultReniecBtn"><i class="fa-solid fa-magnifying-glass icon" aria-hidden="true"></i>Consultar</button>
+            <div class="reniec-result" id="reniecResult" hidden>
+              <div><span>Nombres y apellidos</span><strong id="reniecName"></strong></div>
+              <div><span>Fecha de nacimiento</span><strong id="reniecBirth"></strong></div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-ssee button button-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-ssee button button-primary" id="saveReniecBtn" disabled>Guardar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="confirmRolesModal" tabindex="-1" aria-labelledby="confirmRolesTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content role-modal"><div class="modal-header"><span class="modal-title-icon" aria-hidden="true"><i class="fa-solid fa-circle-question"></i></span><h2 class="modal-title" id="confirmRolesTitle">Confirmar acción</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div><div class="modal-body"><p class="modal-context" id="confirmRolesMessage"></p></div><div class="modal-footer"><button type="button" class="btn btn-outline-ssee button button-secondary" data-bs-dismiss="modal">No</button><button type="button" class="btn btn-ssee button button-primary" id="confirmRolesBtn">Sí</button></div></div></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="dist/users.js?v=20260901-copysearch"></script>
+    <script src="../ref-003-passport/js/passport-flow.js?v=20260904-sync-button"></script>
+    <script src="js/admission-guide.js?v=20260904-admission"></script>
+    <script>
+      if (new URLSearchParams(window.location.search).get("admitted") === "1") {
+        const toast = document.getElementById("toast");
+        toast.className = "toast toast-success is-visible";
+        toast.innerHTML = '<i class="fa-solid fa-circle-check" aria-hidden="true"></i><span>La información se ha guardado correctamente.</span>';
+      }
+    </script>
+  </body>
 </html>

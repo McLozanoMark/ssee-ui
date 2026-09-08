@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SSEE - Configuración de autoregistro</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="../design-system/app.css?v=20260907-ref005">
+  <link rel="stylesheet" href="styles.css?v=20260907-ref005-modal">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Navegación principal">
+      <div class="side-brand"><div class="logo-symbol">S</div><div><strong>S.S.E.E.</strong><span>Seguimiento y Evaluación Estratégica</span></div></div>
+      <nav class="side-nav"><a class="nav-item is-open" href="#">Administración</a><a class="nav-item is-active" href="#">Autoregistro</a><a class="nav-item" href="../ref-007-users/index.html">Usuarios</a></nav>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-button top-menu" type="button" aria-label="Abrir menú"><span></span><span></span><span></span></button>
+        <div class="top-divider" aria-hidden="true"></div>
+        <div class="top-info">
+          <div class="info-card"><span class="info-icon" aria-hidden="true"><i class="fa-regular fa-clock"></i></span><div><strong>Último acceso</strong><span>5:00 PM - 25/12/2024</span></div></div>
+          <div class="info-card location-card"><span class="info-icon" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></span><div><strong>Sede</strong><span>Unidad de Seguimiento y Evaluación</span></div><i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i></div>
+        </div>
+        <div class="top-divider" aria-hidden="true"></div>
+        <div class="account"><button class="bell" type="button" aria-label="Notificaciones"><i class="fa-regular fa-bell"></i></button><div class="account-separator" aria-hidden="true"></div><div class="account-copy"><strong>Administrador</strong><span>Superadministrador</span></div><div class="avatar" aria-hidden="true">A</div><i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i></div>
+      </header>
+
+      <section class="view is-active" aria-labelledby="pageTitle">
+        <div class="page-head">
+          <div class="title-cluster">
+            <nav class="breadcrumb" aria-label="Ruta"><a href="../index.html">Índice de requerimientos</a> / ALI-REF-005 / Configuración de autoregistro</nav>
+            <div class="title-row"><div class="title-icon" aria-hidden="true"><i class="fa-solid fa-link"></i></div><div><h1 id="pageTitle">Configuración de autoregistro</h1><p id="configCount">2 configuraciones registradas</p></div></div>
+          </div>
+          <div class="head-actions"><button class="btn btn-ssee button button-primary" type="button" id="newConfigBtn"><i class="fa-solid fa-plus icon" aria-hidden="true"></i>Nuevo</button></div>
+        </div>
+
+        <form class="filter-panel" id="filterForm" novalidate>
+          <label class="global-search"><i class="fa-solid fa-magnifying-glass icon" aria-hidden="true"></i><input class="form-control" id="filterSearch" type="search" placeholder="Buscar por proyecto, rol o código" aria-label="Buscar por proyecto, rol o código"></label>
+          <button class="filter-toggle" type="button" id="filterToggle" aria-label="Abrir filtros" title="Filtro Personalizado" data-bs-title="Filtro Personalizado" data-bs-toggle="tooltip" aria-expanded="false"><span></span><span></span><span></span></button>
+          <div class="advanced-filters" id="advancedFilters">
+            <label class="filter-field"><span>Proyecto</span><select class="form-select" id="filterProject"><option>Todos</option><option>Operativo 2026</option><option>Evaluación 2026</option><option>Monitoreo 2026</option></select></label>
+            <label class="filter-field"><span>Rol predeterminado</span><select class="form-select" id="filterRole"><option>Todos</option><option>Registrador</option><option>Supervisor de Seguimiento</option><option>Evaluador</option></select></label>
+            <label class="filter-field"><span>Estado</span><select class="form-select" id="filterStatus"><option>Todos</option><option>Activa</option><option>Inactiva</option></select></label>
+            <label class="filter-field"><span>Fecha de inicio</span><input class="form-control" id="filterStart" type="date" aria-label="Fecha de inicio"></label>
+            <label class="filter-field"><span>Fecha de fin</span><input class="form-control" id="filterEnd" type="date" aria-label="Fecha de fin"></label>
+            <div class="filter-actions" aria-label="Acciones de filtro"><button class="btn filter-action btn-ssee button button-primary" type="submit"><i class="fa-solid fa-magnifying-glass icon" aria-hidden="true"></i>Buscar</button><button class="btn filter-action btn-outline-ssee button button-secondary" type="button" id="clearFilters"><i class="fa-solid fa-rotate-left icon" aria-hidden="true"></i>Limpiar</button></div>
+          </div>
+        </form>
+
+        <section class="table-panel" aria-label="Configuraciones de autoregistro">
+          <div class="table-wrap"><table class="table align-middle mb-0 ssee-table"><thead><tr>
+            <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="project" data-sort-type="text">Proyecto <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+            <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="role" data-sort-type="text">Rol predeterminado <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+            <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="start" data-sort-type="date">Periodo habilitado <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+            <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="status" data-sort-type="text">Estado <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+            <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="code" data-sort-type="text">Código <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+            <th>Acciones</th>
+          </tr></thead><tbody id="configBody"></tbody></table></div>
+          <div class="empty-state" id="emptyState" hidden>No se encontraron configuraciones con los criterios seleccionados.</div>
+          <div class="pagination"><p id="configSummary">Mostrando 1 a 2 de 2 configuraciones</p><div class="page-buttons" aria-label="Paginación"><button class="page-btn" type="button" disabled>&laquo;</button><button class="page-btn" type="button" disabled>&lsaquo;</button><button class="page-btn is-current" type="button">1</button><button class="page-btn" type="button" disabled>&rsaquo;</button><button class="page-btn" type="button" disabled>&raquo;</button></div><label class="page-size"><select class="form-select" aria-label="Registros por página"><option>10 por página</option></select></label></div>
+        </section>
+      </section>
+      <footer class="footer"><div class="minedu-mark"><img class="minedu-logo" src="../assets/minedu.jpg" alt="Ministerio de Educación"></div><div><p>2026. Todos los derechos reservados.</p><p>Ministerio de Educación - S.S.E.E. - Versión 0.1</p></div></footer>
+    </main>
+  </div>
+
+  <div class="modal fade" id="configModal" tabindex="-1" aria-labelledby="configModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg config-modal"><div class="modal-content">
+      <div class="modal-header"><span class="modal-title-icon" aria-hidden="true"><i class="fa-solid fa-link"></i></span><h2 class="modal-title" id="configModalTitle">Configurar autoregistro</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+      <div class="modal-body">
+        <form id="configForm" novalidate>
+          <div class="form-grid">
+            <label>Proyecto *<select class="form-select" id="project" required><option value="">Seleccionar</option><option>Operativo 2026</option><option>Evaluación 2026</option><option>Monitoreo 2026</option></select></label>
+            <label>Rol predeterminado *<select class="form-select" id="defaultRole" required><option value="">Seleccionar</option><option>Registrador</option><option>Supervisor de Seguimiento</option><option>Evaluador</option></select></label>
+            <label>Fecha de inicio *<input class="form-control" id="startDate" type="date" required></label>
+            <label>Fecha de fin *<input class="form-control" id="endDate" type="date" required></label>
+            <label>Fecha de caducidad de la cuenta (opcional)<input class="form-control" id="accountExpiry" type="date"></label>
+            <label>Estado<select class="form-select" id="configStatus"><option>Activa</option><option>Inactiva</option></select></label>
+          </div>
+          <p class="form-note" id="editNote" hidden>En edición solo se pueden modificar el proyecto, el rol predeterminado y el estado.</p>
+          <div class="generated-result" id="generatedResult" hidden>
+            <div class="result-heading"><i class="fa-solid fa-circle-check" aria-hidden="true"></i><strong>Configuración generada</strong></div>
+            <div class="generated-grid"><div class="generated-field"><span>Código de autoregistro</span><div><strong id="generatedCode"></strong><button class="icon-button copy-button" type="button" data-copy="code" aria-label="Copiar código" title="Copiar código"><i class="fa-regular fa-copy"></i></button></div></div><div class="generated-field"><span>Enlace de autoregistro</span><div><strong id="generatedLink"></strong><button class="icon-button copy-button" type="button" data-copy="link" aria-label="Copiar enlace" title="Copiar enlace"><i class="fa-regular fa-copy"></i></button></div></div></div>
+          </div>
+          <div class="modal-form-actions" id="configFormActions"><button class="btn btn-outline-ssee button button-secondary" type="button" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-ssee button button-primary" type="submit"><i class="fa-solid fa-floppy-disk icon" aria-hidden="true"></i>Guardar</button></div>
+        </form>
+        <div class="result-actions" id="resultActions" hidden><button class="btn btn-ssee button button-primary" type="button" data-bs-dismiss="modal">Cerrar</button></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmTitle" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content"><div class="modal-header"><span class="modal-title-icon" aria-hidden="true"><i class="fa-solid fa-question"></i></span><h2 class="modal-title" id="confirmTitle">Confirmar acción</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div><div class="modal-body"><p data-confirm-message id="confirmMessage"></p></div><div class="modal-footer"><button class="btn btn-outline-ssee button button-secondary" type="button" data-bs-dismiss="modal">No</button><button class="btn btn-ssee button button-primary" type="button" id="confirmAction">Sí</button></div></div></div></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="dist/autoreg-config.js?v=20260907-ref005-modal"></script>
+</body>
+</html>

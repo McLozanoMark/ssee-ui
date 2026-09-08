@@ -1146,63 +1146,39 @@ textarea {
 .modal-header {
   display: flex;
   align-items: center;
-  gap: 0.7rem;
-  min-height: 3.25rem;
+  gap: var(--ssee-modal-header-gap);
+  min-height: var(--ssee-modal-header-height);
   padding: 0.75rem 1rem;
   border-bottom-color: var(--ssee-line);
   background: #fbfcff;
 }
 
-.modal-title-group {
-  display: grid;
-  min-width: 0;
-  gap: 0.08rem;
-}
-
 .modal-title-icon {
-  width: 1.85rem;
-  height: 1.85rem;
+  width: var(--ssee-modal-title-icon-size);
+  height: var(--ssee-modal-title-icon-size);
   flex: 0 0 auto;
   display: grid;
   place-items: center;
-  border: 1px solid #cfd5ff;
+  border: 1px solid var(--ssee-modal-title-icon-border);
   border-radius: 50%;
-  background: var(--ssee-primary-soft);
-  color: var(--ssee-primary);
+  background: var(--ssee-modal-title-icon-bg);
+  color: var(--ssee-modal-title-icon-color);
   font-size: 0.82rem;
 }
 
-.modal-header:not(:has(.modal-title-icon)) .modal-title::before {
-  content: "\f059";
-  width: 1.85rem;
-  height: 1.85rem;
-  display: inline-grid;
-  place-items: center;
-  margin-right: 0.65rem;
-  border: 1px solid #cfd5ff;
-  border-radius: 50%;
-  background: var(--ssee-primary-soft);
-  color: var(--ssee-primary);
-  font-family: "Font Awesome 6 Free";
-  font-size: 0.82rem;
-  font-weight: 900;
-  vertical-align: -0.42rem;
-}
-
-.assignment-modal .modal-header:not(:has(.modal-title-icon)) .modal-title::before {
-  content: "\f0c1";
-}
-
-.role-modal .modal-header:not(:has(.modal-title-icon)) #rolesModalTitle::before {
-  content: "\f4fe";
-}
-
-.modal-header .modal-title {
+.modal-header > .modal-title {
+  flex: 1 1 auto;
+  min-width: 0;
   color: var(--ssee-text);
   font-size: 0.98rem;
   font-weight: 750;
   line-height: 1.2;
   margin: 0;
+}
+
+.modal-header > .btn-close {
+  flex: 0 0 auto;
+  margin-left: auto;
 }
 
 .modal-body {
@@ -1722,8 +1698,19 @@ textarea {
   line-height: 1.35;
 }
 
-.demo-index-link { position: fixed; left: 1rem; bottom: 1rem; z-index: 1040; display: inline-flex; align-items: center; gap: .45rem; padding: .5rem .7rem; border: 1px solid var(--ssee-line); border-radius: .45rem; background: rgba(255,255,255,.96); color: var(--ssee-muted); font-size: .75rem; font-weight: 700; text-decoration: none; box-shadow: 0 .25rem .75rem rgba(15,23,42,.08); }
-.demo-index-link:hover { color: var(--ssee-primary); border-color: var(--ssee-primary); }
+.demo-index-link { position: fixed; left: 1rem; bottom: 1rem; z-index: 1040; display: inline-flex; align-items: center; gap: .45rem; padding: .5rem .7rem; border: 1px solid #374151; border-radius: .5rem; background: #111827; color: #f8fafc; font-size: .75rem; font-weight: 700; text-decoration: none; box-shadow: 0 10px 28px rgba(15,23,42,.18); }
+.demo-index-link:hover, .demo-index-link:focus-visible { color: #fff; background: #1f2937; border-color: #94a3b8; box-shadow: 0 12px 30px rgba(15,23,42,.24); outline: none; }
+.is-syncing .icon { animation: sync-icon-turn .9s linear infinite; }
+@keyframes sync-icon-turn { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.demo-guide-admission { width: min(20rem, calc(100vw - 2.5rem)); }
+.demo-guide-admission { position: fixed; right: 1.25rem; bottom: 1.25rem; z-index: 1045; padding: 1rem 1.1rem; color: #fff; background: #111827; border: 1px solid #374151; border-radius: .5rem; box-shadow: 0 10px 28px rgba(15,23,42,.22); }
+.demo-guide-admission .demo-guide-label { display: block; margin-bottom: .45rem; color: #cbd5e1; font-size: .68rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.demo-guide-admission strong { display: block; font-size: .9rem; }
+.demo-guide-admission p { margin: .35rem 0 0; color: #cbd5e1; font-size: .78rem; }
+.demo-cursor-admission { position: fixed; z-index: 1050; color: #111827; font-size: 2rem; line-height: 1; pointer-events: none; opacity: 0; }
+.demo-cursor-admission.is-visible { opacity: 1; animation: demo-cursor-arrive-admission .8s ease-out forwards, demo-cursor-pulse-admission 1.4s ease-in-out .8s infinite; }
+@keyframes demo-cursor-arrive-admission { from { transform: translate(10rem, 6rem) scale(.82); } to { transform: translate(0) scale(1); } }
+@keyframes demo-cursor-pulse-admission { 50% { transform: scale(1.12); } }
 
 /* Shared wizard stepper used by all creation and edit flows. */
 .wizard-stepper { display: flex; align-items: center; gap: 0.65rem; margin: -0.25rem 0 1.15rem; padding: 0.85rem 1rem; border: 1px solid var(--ssee-line); border-radius: 0.75rem; background: #fff; box-shadow: var(--ssee-shadow); }

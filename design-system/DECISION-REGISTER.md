@@ -30,6 +30,11 @@ and future demo unless an exception is explicitly listed.
 | DS-020 | Label the custom-filter control consistently. | Data trays | Every `.filter-toggle` exposes the exact tooltip `Filtro Personalizado`; its `aria-label` continues to describe the open/close action. |
 | DS-021 | Distinguish inactive and disabled switches. | Activation controls | Enabled unchecked switches use a restrained red danger tint; disabled switches keep a neutral silhouette, have no thumb shadow and show no visible state label. The row status remains in the `Estado` tag. |
 | DS-022 | Use borderless table action buttons. | Data-table actions | Shared row actions use a compact borderless treatment with no resting shadow; hover adds only a subtle surface and shadow, while focus keeps a visible outline. |
+| DS-023 | Use one shared authentication entry shell. | REF-IDE-008/009/010 | Authentication demos use the same desktop two-zone shell: S.S.E.E. brand and method-specific form on the left, the approved visual on the right, no public header or breadcrumb, and only the method-specific fields vary. |
+| DS-024 | Represent Passport synchronization inside the centralized user tray. | REF-IDE-003/007 | REF-003 uses the REF-007 tray as its presentation surface, with initial, in-progress and updated-result states. Automatic synchronization remains internal; the confirmed manual action is an operational override inside the user tray. No separate Passport screen or synchronization module is introduced. |
+| DS-025 | Reuse approved standards before implementing any change. | Entire system | Every implementation starts by reviewing the shared design system and approved reference flows. Legacy implementations, one-off patches and local component variants are prohibited. If an element does not exist, it is defined once in the shared design-system layer before being consumed by demos, then rebuilt and audited across affected screens. |
+| DS-026 | Use one shared demo-index navigation control. | All demos and demo subflows | `demo-navigation.js` mounts the canonical `.demo-index-link` with the shared `app.css` treatment. No demo may replace it with a logo link, inline anchor, injected local markup or another class variant. |
+| DS-027 | Use one immutable modal-header contract. | All modals and future flows | Every modal has one explicit icon, one approved `h2.modal-title` and the close control in one centered row. The shared icon size, treatment, gap, header height, typography and alignment are fixed. Eyebrows, subtitles, duplicate titles, pseudo-element icons and runtime icon injection are prohibited. |
 
 ## Documented Exceptions
 
@@ -44,6 +49,11 @@ and future demo unless an exception is explicitly listed.
 
 1. Record the new observation or decision before editing a demo.
 2. Identify every affected demo in the traceability matrix.
-3. Update the shared component or rule once.
-4. Apply only requirement-specific differences in each affected screen.
-5. Audit all affected demos and record evidence before closing the decision.
+3. Review and reuse the approved shared component and reference flow before
+   writing implementation code.
+4. Update the shared component or rule once; define a new shared component
+   first when the required element does not exist.
+5. Apply only requirement-specific differences in each affected screen.
+6. Do not use legacy sources or isolated patches.
+7. Rebuild, audit all affected demos and record evidence before closing the
+   decision.

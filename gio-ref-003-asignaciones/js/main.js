@@ -2,7 +2,6 @@ import { refs, showToast } from "./ui.js";
 import { applyFilters, renderAssignments, handleAction, openNewAssignment, saveAssignment, confirmAction } from "./assignments.js";
 import { getMessage } from "../../design-system/messages.js";
 import { attachTableSorting } from "../../design-system/table-sort.js";
-document.getElementById("confirmModal")?.querySelector(".modal-header")?.insertAdjacentHTML("afterbegin", '<span class="modal-title-icon" aria-hidden="true"><i class="fa-solid fa-circle-question"></i></span>');
 document.getElementById("filterForm").addEventListener("submit", (event) => { event.preventDefault(); applyFilters(); showToast(refs.toast, "Filtros aplicados.", "info"); });
 document.getElementById("filterToggle").addEventListener("click", () => {
   const filterForm = document.getElementById("filterForm");

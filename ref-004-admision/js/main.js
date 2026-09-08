@@ -55,31 +55,42 @@ function updateAdmit() {
     || !document.querySelector("#projectOptions input:checked");
 }
 
+function resetIdentityLookup() {
+  refs.number.value = "";
+  refs.result.hidden = true;
+  consulted = false;
+  updateAdmit();
+}
+
 function resetForm() {
   refs.form.reset();
   document.querySelectorAll("#projectOptions input, #roleOptions input").forEach((input) => {
     input.checked = false;
   });
   document.getElementById("email").value = "";
-  document.getElementById("site").value = "";
-  document.getElementById("validity").value = "";
-  refs.result.hidden = true;
-  consulted = false;
-  updateAdmit();
+  document.getElementById("site").selectedIndex = 0;
+  document.getElementById("validity").selectedIndex = 0;
+  resetIdentityLookup();
+  updateValidityHelp();
 }
 
 function confirmAdmission(mode = "individual") {
   const isMass = mode === "mass";
   const modal = document.createElement("div");
   modal.className = "modal fade";
-  modal.innerHTML = `<div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content admission-modal"><div class="modal-header"><div><span class="modal-eyebrow">${isMass ? "Confirmar carga masiva" : "Confirmar admisión"}</span><h2 class="modal-title">Confirmar acción</h2></div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div><div class="modal-body"><p>${getMessage("M1")}</p></div><div class="modal-footer"><button type="button" class="btn btn-outline-ssee button button-secondary" data-bs-dismiss="modal">No</button><button type="button" class="btn btn-ssee button button-primary" data-confirm="${isMass ? "mass-admission" : "admission"}">Sí</button></div></div></div>`;
-  modal.querySelector(".modal-header")?.insertAdjacentHTML("afterbegin", '<span class="modal-title-icon" aria-hidden="true"><i class="fa-solid fa-circle-question"></i></span>');
+  modal.innerHTML = `<div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content admission-modal"><div class="modal-header"><span class="modal-title-icon" aria-hidden="true"><i class="fa-solid fa-circle-question"></i></span><h2 class="modal-title">Confirmar acción</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div><div class="modal-body"><p>${getMessage("M1")}</p></div><div class="modal-footer"><button type="button" class="btn btn-outline-ssee button button-secondary" data-bs-dismiss="modal">No</button><button type="button" class="btn btn-ssee button button-primary" data-confirm="${isMass ? "mass-admission" : "admission"}">Sí</button></div></div></div>`;
   document.body.append(modal);
   const instance = new bootstrap.Modal(modal);
   modal.addEventListener("click", (event) => {
     if (event.target.closest(`[data-confirm='${isMass ? "mass-admission" : "admission"}']`)) {
       instance.hide();
       toast(getMessage(isMass ? "M52" : "M2"), "success");
+      const returnTarget = new URLSearchParams(window.location.search).get("return");
+      if (returnTarget === "ref-007-users" || returnTarget === "ref-003-passport") {
+        window.setTimeout(() => { window.location.href = `../${returnTarget}/index.html?admitted=1`; }, 350);
+      } else if (returnTarget === "ref-004-admision") {
+        window.setTimeout(() => { window.location.href = "index.html?admitted=1"; }, 350);
+      }
     }
   });
   modal.addEventListener("hidden.bs.modal", () => modal.remove());
@@ -160,12 +171,12 @@ refs.form.addEventListener("submit", (event) => {
 
 document.addEventListener("input", updateAdmit);
 refs.admit.addEventListener("click", confirmAdmission);
-document.getElementById("clearBtn").addEventListener("click", resetForm);
+document.getElementById("clearBtn").addEventListener("click", resetIdentityLookup);
 document.getElementById("cancelBtn").addEventListener("click", resetForm);
 refs.validity.addEventListener("change", updateValidityHelp);
 refs.individualMode.addEventListener("click", () => setMode("individual"));
 refs.massMode.addEventListener("click", () => setMode("mass"));
-refs.massModeButton.addEventListener("click", () => setMode("mass"));
+refs.massModeButton?.addEventListener("click", () => setMode("mass"));
 document.getElementById("cancelMassBtn").addEventListener("click", () => { refs.massFile.value = ""; refs.massFileName.textContent = "Ningún archivo seleccionado"; refs.massSummary.hidden = true; refs.downloadErrors.hidden = true; refs.saveMass.disabled = true; massReady = false; setMode("individual"); });
 refs.massFile.addEventListener("change", validateMassFile);
 document.getElementById("downloadTemplateBtn").addEventListener("click", downloadTemplate);

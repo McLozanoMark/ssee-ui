@@ -99,7 +99,6 @@ export function handleRoleAction(event, onEdit) {
       return;
     }
     state.pendingStatus = { index: Number(stateControl.dataset.state), next: role.status === "Activo" ? "Inactivo" : "Activo" };
-    prepareInactivationReason(state.pendingStatus.next === "Inactivo");
     openConfirmModal("confirmModal", getMessage(state.pendingStatus.next === "Activo" ? "M5" : "M6"));
   }
 }
@@ -115,27 +114,14 @@ export function handleEditStatusToggle(event) {
   const next = event.target.checked ? "Activo" : "Inactivo";
   refs.editStatusToggles.forEach((toggle) => { toggle.checked = role.status === "Activo"; });
   state.pendingEditStatus = { index: state.editingIndex, next };
-  prepareInactivationReason(next === "Inactivo");
   openConfirmModal("confirmModal", getMessage(next === "Activo" ? "M5" : "M6"));
-}
-
-function prepareInactivationReason(required) {
-  refs.inactivationReasonWrap.hidden = !required;
-  refs.inactivationReason.value = "";
-  refs.inactivationReasonError.textContent = "";
 }
 
 export function confirmStatus() {
   const pending = state.pendingEditStatus || state.pendingStatus;
-  if (pending?.next === "Inactivo" && !refs.inactivationReason.value.trim()) {
-    refs.inactivationReasonError.textContent = "Ingresa el motivo de inactivación.";
-    refs.inactivationReason.focus();
-    return;
-  }
   if (state.pendingEditStatus) {
     const { index, next } = state.pendingEditStatus;
     roles[index].status = next;
-    roles[index].inactivationReason = refs.inactivationReason.value.trim();
     roles[index].updated = "18/08/2026 09:00";
     state.pendingEditStatus = null;
     refs.editStatusToggles.forEach((toggle) => { toggle.checked = next === "Activo"; });
@@ -148,7 +134,6 @@ export function confirmStatus() {
   if (!state.pendingStatus) return;
   const { index, next } = state.pendingStatus;
   roles[index].status = next;
-  roles[index].inactivationReason = refs.inactivationReason.value.trim();
   roles[index].updated = "18/08/2026 09:00";
   state.pendingStatus = null;
   closeConfirmModal("confirmModal");

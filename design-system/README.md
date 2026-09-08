@@ -20,9 +20,31 @@ change and must be checked across every tray before delivery.
 - `tokens.css`: shared color, spacing, radius and shadow tokens.
 - `components.css`: reusable technical navigation, toast and status helpers.
 - `app.css`: canonical S.S.E.E. shell and CRUD layout.
+- `demo-navigation.js`: canonical external `Volver al índice` control for
+  every local demo.
 - `interaction.js`: shared toast, tooltip, menu and confirmation behavior.
 - `table-sort.js`: shared sortable-table behavior and accessibility state.
 - `messages.js`: shared analyst message catalog and parameter substitution.
+
+## Modal Header Contract
+
+Every modal uses one immutable header structure. The header contains exactly
+one explicit icon, one `h2.modal-title`, and the Bootstrap close control in a
+single horizontal row:
+
+```html
+<div class="modal-header">
+  <span class="modal-title-icon" aria-hidden="true"><i class="fa-solid fa-circle-question"></i></span>
+  <h2 class="modal-title" id="modalTitle">Título aprobado</h2>
+  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+</div>
+```
+
+The icon size, icon treatment, gap, header height, typography and vertical
+alignment come from the shared tokens and `app.css`. Modal-specific code may
+change the approved icon and title, but may not add an eyebrow, subtitle,
+second title, local spacing, pseudo-element icon or runtime icon injection.
+Changing the modal width or body layout never changes this header contract.
 
 The supporting decision register and requirement traceability matrix are kept
 with the demos so that an analyst observation becomes one explicit system rule
@@ -32,6 +54,17 @@ and its affected screens are visible before implementation:
   exceptions.
 - `../qa/traceability/TRACEABILITY-MATRIX.md`: requirement, source, affected
   demos, implementation status and verification evidence.
+
+## Mandatory implementation protocol
+
+Before changing any demo, inspect the approved design-system components,
+decisions and established reference flows, then reuse them as the source of
+truth. A new element or component is allowed only when the required element
+does not exist yet; it must first be defined in the shared design-system layer
+and then consumed by the affected demos. Legacy implementations must never be
+used as a source or visual reference. One-off patches, local component
+variants and isolated visual overrides are prohibited; changes must be made at
+the canonical source, rebuilt and audited across every affected demo.
 
 All CRUD list filters use the same contract: one global search field, one
 filter-toggle control, labelled advanced fields, and a shared action group with
@@ -45,7 +78,9 @@ fields and moves to a full-width row on narrow screens.
 
 The baseline uses Bootstrap 5, Font Awesome CDN, compact `rem` sizing, the
 reference-zero header, upper-right toasts, standardized confirmation modals,
-and the technical `Volver al índice` navigation for local demos.
+and one shared technical `Volver al índice` navigation mounted by
+`demo-navigation.js` in every local demo. It must not be replaced by a logo link,
+an inline anchor, or a local class variant.
 
 Inter is the only shared system font. It is loaded through the shared
 stylesheet and applied explicitly to the document, body and form controls;

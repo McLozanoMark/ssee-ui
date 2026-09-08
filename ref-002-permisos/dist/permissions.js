@@ -1,3 +1,20 @@
+/* source: design-system/demo-navigation.js */
+function mountDemoIndexLink() {
+  if (document.querySelector(".demo-index-link")) return;
+  const link = document.createElement("a");
+  link.className = "demo-index-link";
+  link.href = "../index.html";
+  link.setAttribute("aria-label", "Volver al índice");
+  link.innerHTML = '<i class="fa-solid fa-list" aria-hidden="true"></i><span>Volver al índice</span>';
+  document.body.append(link);
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", mountDemoIndexLink, { once: true });
+} else {
+  mountDemoIndexLink();
+}
+
 
 /* source: design-system/permission-catalog.js */
 const sharedPermissionOperations = ["Consultar", "Registrar", "Modificar", "Eliminar", "Exportar", "Validar"];
@@ -100,7 +117,7 @@ const MESSAGE_CATALOG = Object.freeze({
 
 // Confirmed prototype copy pending official codes in the stakeholder workbook.
 const PROTOTYPE_MESSAGES = Object.freeze({
-  identityLookupSuccess: "Información consultada correctamente.",
+  identityLookupSuccess: "La información fue consultada correctamente.",
   authenticationSuccess: "Autenticación validada correctamente.",
   syncStarted: "Sincronización iniciada.",
   filtersApplied: "Filtros aplicados.",

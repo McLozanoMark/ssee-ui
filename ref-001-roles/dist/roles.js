@@ -1,3 +1,20 @@
+/* source: design-system/demo-navigation.js */
+function mountDemoIndexLink() {
+  if (document.querySelector(".demo-index-link")) return;
+  const link = document.createElement("a");
+  link.className = "demo-index-link";
+  link.href = "../index.html";
+  link.setAttribute("aria-label", "Volver al índice");
+  link.innerHTML = '<i class="fa-solid fa-list" aria-hidden="true"></i><span>Volver al índice</span>';
+  document.body.append(link);
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", mountDemoIndexLink, { once: true });
+} else {
+  mountDemoIndexLink();
+}
+
 
 /* source: design-system/permission-catalog.js */
 const sharedPermissionOperations = ["Consultar", "Registrar", "Modificar", "Eliminar", "Exportar", "Validar"];
@@ -100,7 +117,7 @@ const MESSAGE_CATALOG = Object.freeze({
 
 // Confirmed prototype copy pending official codes in the stakeholder workbook.
 const PROTOTYPE_MESSAGES = Object.freeze({
-  identityLookupSuccess: "Información consultada correctamente.",
+  identityLookupSuccess: "La información fue consultada correctamente.",
   authenticationSuccess: "Autenticación validada correctamente.",
   syncStarted: "Sincronización iniciada.",
   filtersApplied: "Filtros aplicados.",
@@ -386,9 +403,6 @@ const refs = {
   formBreadcrumb: document.getElementById("formBreadcrumb"),
   toast: document.getElementById("toast"),
   confirmModal: document.getElementById("confirmModal"),
-  inactivationReasonWrap: document.getElementById("inactivationReasonWrap"),
-  inactivationReason: document.getElementById("inactivationReason"),
-  inactivationReasonError: document.getElementById("inactivationReasonError"),
   editStatusControls: [...document.querySelectorAll("[data-edit-status-control]")],
   editStatusToggles: [...document.querySelectorAll("[data-edit-status-toggle]")],
   editStatusLabels: [...document.querySelectorAll("[data-edit-status-label]")],
@@ -647,7 +661,6 @@ function handleRoleAction(event, onEdit) {
       return;
     }
     state.pendingStatus = { index: Number(stateControl.dataset.state), next: role.status === "Activo" ? "Inactivo" : "Activo" };
-    prepareInactivationReason(state.pendingStatus.next === "Inactivo");
     openConfirmModal("confirmModal", getMessage(state.pendingStatus.next === "Activo" ? "M5" : "M6"));
   }
 }
@@ -663,27 +676,14 @@ function handleEditStatusToggle(event) {
   const next = event.target.checked ? "Activo" : "Inactivo";
   refs.editStatusToggles.forEach((toggle) => { toggle.checked = role.status === "Activo"; });
   state.pendingEditStatus = { index: state.editingIndex, next };
-  prepareInactivationReason(next === "Inactivo");
   openConfirmModal("confirmModal", getMessage(next === "Activo" ? "M5" : "M6"));
-}
-
-function prepareInactivationReason(required) {
-  refs.inactivationReasonWrap.hidden = !required;
-  refs.inactivationReason.value = "";
-  refs.inactivationReasonError.textContent = "";
 }
 
 function confirmStatus() {
   const pending = state.pendingEditStatus || state.pendingStatus;
-  if (pending?.next === "Inactivo" && !refs.inactivationReason.value.trim()) {
-    refs.inactivationReasonError.textContent = "Ingresa el motivo de inactivación.";
-    refs.inactivationReason.focus();
-    return;
-  }
   if (state.pendingEditStatus) {
     const { index, next } = state.pendingEditStatus;
     roles[index].status = next;
-    roles[index].inactivationReason = refs.inactivationReason.value.trim();
     roles[index].updated = "18/08/2026 09:00";
     state.pendingEditStatus = null;
     refs.editStatusToggles.forEach((toggle) => { toggle.checked = next === "Activo"; });
@@ -696,7 +696,6 @@ function confirmStatus() {
   if (!state.pendingStatus) return;
   const { index, next } = state.pendingStatus;
   roles[index].status = next;
-  roles[index].inactivationReason = refs.inactivationReason.value.trim();
   roles[index].updated = "18/08/2026 09:00";
   state.pendingStatus = null;
   closeConfirmModal("confirmModal");
@@ -903,9 +902,6 @@ refs.saveStepButtons.forEach((button) => button.addEventListener("click", () => 
 document.getElementById("confirmBtn").addEventListener("click", confirmPendingAction);
 refs.confirmModal.querySelector(".modal-footer [data-bs-dismiss='modal']").addEventListener("click", rejectWizardStepChange);
 refs.confirmModal.addEventListener("hidden.bs.modal", () => {
-  refs.inactivationReasonWrap.hidden = true;
-  refs.inactivationReason.value = "";
-  refs.inactivationReasonError.textContent = "";
   state.pendingSave = false;
   state.pendingSaveStep = null;
   state.pendingCancel = false;

@@ -181,190 +181,140 @@ function closeConfirmModal(id) {
 }
 
 
-/* source: ref-004-admision/js/main.js */
+/* source: ref-006-autoregistro/js/main.js */
 
 
 
-const roles = ["Administrador USE", "Supervisor de Seguimiento", "Evaluador", "Registrador"];
 const refs = {
-  form: document.getElementById("identityForm"),
-  number: document.getElementById("documentNumber"),
-  result: document.getElementById("identityResult"),
-  admit: document.getElementById("admitBtn"),
-  roles: document.getElementById("roleOptions"),
-  projects: document.getElementById("projectOptions"),
-  toast: document.getElementById("toast"),
-  individualMode: document.getElementById("individualModeBtn"),
-  massMode: document.getElementById("massModeTab"),
-  massModeButton: document.getElementById("massModeBtn"),
-  individualAdmission: document.getElementById("individualAdmission"),
-  massAdmission: document.getElementById("massAdmission"),
-  massFile: document.getElementById("massFileInput"),
-  massFileName: document.getElementById("massFileName"),
-  massSummary: document.getElementById("massValidationSummary"),
-  massTitle: document.getElementById("massValidationTitle"),
-  massText: document.getElementById("massValidationText"),
-  downloadErrors: document.getElementById("downloadErrorsBtn"),
-  saveMass: document.getElementById("saveMassBtn"),
-  validity: document.getElementById("validity"),
-  validityHelp: document.getElementById("validityHelp"),
+  form: document.getElementById("registrationForm"),
+  documentType: document.getElementById("documentType"),
+  documentNumber: document.getElementById("documentNumber"),
+  consult: document.getElementById("consultBtn"),
+  identityFeedback: document.getElementById("identityFeedback"),
+  givenNames: document.getElementById("givenNames"),
+  paternalSurname: document.getElementById("paternalSurname"),
+  maternalSurname: document.getElementById("maternalSurname"),
+  email: document.getElementById("email"),
+  securityCode: document.getElementById("securityCode"),
+  password: document.getElementById("password"),
+  passwordConfirm: document.getElementById("passwordConfirm"),
+  clear: document.getElementById("clearBtn"),
+  registrationLayout: document.querySelector(".registration-layout"),
+  successCard: document.getElementById("successCard"),
+  toast: document.getElementById("toast")
 };
+
+const identities = {
+  DNI: { names: "Ana María", paternal: "Paredes", maternal: "García" },
+  CE: { names: "Jean Pierre", paternal: "Rojas", maternal: "Vargas" }
+};
+
 let consulted = false;
-let massReady = false;
+let periodState = new URLSearchParams(window.location.search).get("period") || "open";
 
-function validitySummary(value) {
-  if (value === "Sin fecha de vencimiento") return "El acceso no tendrá fecha de vencimiento.";
-  const days = value === "30 días" ? 30 : value === "90 días" ? 90 : 365;
-  const expiry = new Date();
-  expiry.setHours(0, 0, 0, 0);
-  expiry.setDate(expiry.getDate() + days);
-  return `El acceso vencerá el ${expiry.toLocaleDateString("es-PE")}. Al vencer, el acceso quedará inactivo.`;
-}
-
-function updateValidityHelp() {
-  refs.validityHelp.textContent = validitySummary(refs.validity.value);
-}
-
-function toast(message, type = "info") {
+function showToast(message, type = "info") {
   renderToast(refs.toast, message, type);
 }
 
-function renderRoles() {
-  refs.roles.innerHTML = roles.map((role) => `<label class="role-check"><input class="form-check-input" type="checkbox" value="${role}"><span>${role}</span></label>`).join("");
+function setPeriodState(state) {
+  periodState = state;
+  const closed = state === "closed";
+  const expired = state === "expired";
+  refs.form.querySelectorAll("input, select, button").forEach((control) => { control.disabled = closed || expired; });
+  if (closed || expired) {
+    showToast(getMessage(closed ? "M23" : "M24"), "warning");
+  }
 }
 
-function updateAdmit() {
-  refs.admit.disabled = !consulted
-    || !document.querySelector("#roleOptions input:checked")
-    || !document.querySelector("#projectOptions input:checked");
+function setFeedback(message, type) {
+  refs.identityFeedback.hidden = false;
+  refs.identityFeedback.className = `auth-feedback identity-feedback is-${type}`;
+  refs.identityFeedback.textContent = message;
 }
 
-function resetIdentityLookup() {
-  refs.number.value = "";
-  refs.result.hidden = true;
-  consulted = false;
-  updateAdmit();
+function consultIdentity() {
+  const number = refs.documentNumber.value.trim();
+  if (!number || number.length < 8) {
+    consulted = false;
+    setFeedback(getMessage("M12"), "error");
+    return;
+  }
+  if (number === "88888888") {
+    consulted = false;
+    setFeedback(getMessage("M19"), "error");
+    return;
+  }
+  const identity = identities[refs.documentType.value];
+  refs.givenNames.value = identity.names;
+  refs.paternalSurname.value = identity.paternal;
+  refs.maternalSurname.value = identity.maternal;
+  consulted = true;
+  setFeedback(getPrototypeMessage("identityLookupSuccess"), "success");
+  showToast(getPrototypeMessage("identityLookupSuccess"), "success");
 }
 
-function resetForm() {
-  refs.form.reset();
-  document.querySelectorAll("#projectOptions input, #roleOptions input").forEach((input) => {
-    input.checked = false;
-  });
-  document.getElementById("email").value = "";
-  document.getElementById("site").selectedIndex = 0;
-  document.getElementById("validity").selectedIndex = 0;
-  resetIdentityLookup();
-  updateValidityHelp();
+function passwordIsValid(value) {
+  return value.length >= 8 && /[A-Z]/.test(value) && /[a-z]/.test(value) && /\d/.test(value);
 }
 
-function confirmAdmission(mode = "individual") {
-  const isMass = mode === "mass";
+function openConfirmation() {
   const modal = document.createElement("div");
   modal.className = "modal fade";
-  modal.innerHTML = `<div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content admission-modal"><div class="modal-header"><span class="modal-title-icon" aria-hidden="true"><i class="fa-solid fa-circle-question"></i></span><h2 class="modal-title">Confirmar acción</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div><div class="modal-body"><p>${getMessage("M1")}</p></div><div class="modal-footer"><button type="button" class="btn btn-outline-ssee button button-secondary" data-bs-dismiss="modal">No</button><button type="button" class="btn btn-ssee button button-primary" data-confirm="${isMass ? "mass-admission" : "admission"}">Sí</button></div></div></div>`;
+  modal.innerHTML = `<div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content admission-modal"><div class="modal-header"><span class="modal-title-icon" aria-hidden="true"><i class="fa-solid fa-circle-question"></i></span><h2 class="modal-title">Confirmar acción</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div><div class="modal-body"><p>${getMessage("M1")}</p></div><div class="modal-footer"><button type="button" class="btn btn-outline-ssee button button-secondary" data-bs-dismiss="modal">No</button><button type="button" class="btn btn-ssee button button-primary" data-confirm="registration">Sí</button></div></div></div>`;
   document.body.append(modal);
   const instance = new bootstrap.Modal(modal);
   modal.addEventListener("click", (event) => {
-    if (event.target.closest(`[data-confirm='${isMass ? "mass-admission" : "admission"}']`)) {
+    if (event.target.closest("[data-confirm='registration']")) {
       instance.hide();
-      toast(getMessage(isMass ? "M52" : "M2"), "success");
-      const returnTarget = new URLSearchParams(window.location.search).get("return");
-      if (returnTarget === "ref-007-users" || returnTarget === "ref-003-passport") {
-        window.setTimeout(() => { window.location.href = `../${returnTarget}/index.html?admitted=1`; }, 350);
-      } else if (returnTarget === "ref-004-admision") {
-        window.setTimeout(() => { window.location.href = "index.html?admitted=1"; }, 350);
-      }
+      refs.registrationLayout.hidden = true;
+      refs.successCard.hidden = false;
+      showToast(getMessage("M2"), "success");
     }
   });
   modal.addEventListener("hidden.bs.modal", () => modal.remove());
   instance.show();
 }
 
-function setMode(mode) {
-  const isMass = mode === "mass";
-  refs.individualAdmission.hidden = isMass;
-  refs.massAdmission.hidden = !isMass;
-  refs.individualMode.classList.toggle("is-active", !isMass);
-  refs.massMode.classList.toggle("is-active", isMass);
-  refs.individualMode.setAttribute("aria-selected", String(!isMass));
-  refs.massMode.setAttribute("aria-selected", String(isMass));
-}
-
-function showMassValidation(title, text, type = "success", allowSave = false) {
-  refs.massSummary.hidden = false;
-  refs.massTitle.textContent = title;
-  refs.massText.textContent = text;
-  refs.massSummary.className = `validation-summary ${type}`;
-  refs.saveMass.disabled = !allowSave;
-  massReady = allowSave;
-}
-
-function downloadTextFile(filename, content) {
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(new Blob([content], { type: "text/csv;charset=utf-8" }));
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(link.href);
-}
-
-function downloadTemplate() {
-  downloadTextFile("plantilla-admision-usuarios.csv", "Tipo de documento,Número de documento,Correo electrónico,Sede,Vigencia,Proyecto,Rol\nDNI,00000000,usuario@ejemplo.gob.pe,Unidad de Seguimiento y Evaluación,Sin fecha de vencimiento,Operativo 2026,Registrador\n");
-  toast(getMessage("M58"), "success");
-}
-
-function downloadErrors() {
-  downloadTextFile("observaciones-admision.csv", "Fila,Campo,Observación\n3,Número de documento,El documento no pudo validarse\n");
-  toast(getMessage("M58"), "success");
-}
-
-function validateMassFile() {
-  const file = refs.massFile.files[0];
-  if (!file) return;
-  refs.massFileName.textContent = file.name;
-  refs.downloadErrors.hidden = true;
-  if (file.size > 10 * 1024 * 1024) {
-    showMassValidation(getMessage("M12"), "El archivo supera el tamaño máximo permitido de 10 MB.", "error");
-    return;
-  }
-  const hasObservations = /error|observad|rechaz/i.test(file.name);
-  if (hasObservations) {
-    refs.downloadErrors.hidden = false;
-    showMassValidation(getMessage("M51"), "Se procesaron 4 registros: 3 aceptados y 1 con observaciones.", "warning", true);
-    toast(getMessage("M56"), "warning");
-    return;
-  }
-  showMassValidation(getMessage("M52"), "Se validaron 4 registros correctamente y están listos para guardar.", "success", true);
-  toast(getMessage("M53", [4, 4, 0, 0, 0]), "success");
-}
-
+refs.consult.addEventListener("click", consultIdentity);
+refs.documentNumber.addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); consultIdentity(); } });
+refs.documentNumber.addEventListener("input", () => {
+  consulted = false;
+  refs.givenNames.value = "";
+  refs.paternalSurname.value = "";
+  refs.maternalSurname.value = "";
+  refs.identityFeedback.hidden = true;
+});
+refs.documentType.addEventListener("change", () => { consulted = false; refs.identityFeedback.hidden = true; });
 refs.form.addEventListener("submit", (event) => {
   event.preventDefault();
-  if (refs.number.value.trim().length < 8) {
-    toast(getMessage("M12"), "warning");
-    return;
-  }
-  consulted = true;
-  document.getElementById("identityName").textContent = "Ana María Paredes García";
-  document.getElementById("identityDocument").textContent = `${document.getElementById("documentType").value} ${refs.number.value.trim()}`;
-  document.getElementById("identityBirth").textContent = "15/04/1988";
-  refs.result.hidden = false;
-  updateAdmit();
-  toast(getPrototypeMessage("identityLookupSuccess"), "success");
+  if (periodState === "closed") return showToast(getMessage("M23"), "warning");
+  if (periodState === "expired") return showToast(getMessage("M24"), "warning");
+  if (!consulted) return showToast(getMessage("M12"), "warning");
+  if (!refs.email.value.trim() || !refs.securityCode.value.trim() || !refs.password.value || !refs.passwordConfirm.value) return showToast(getMessage("M11"), "warning");
+  if (refs.email.value.trim().toLowerCase() === "duplicado@ejemplo.gob.pe") return showToast(getMessage("M20"), "warning");
+  if (!passwordIsValid(refs.password.value)) return showToast(getMessage("M31"), "warning");
+  if (refs.password.value !== refs.passwordConfirm.value) return showToast(getMessage("M32"), "warning");
+  if (refs.securityCode.value.trim().toUpperCase() !== "8K4P2") return showToast(getMessage("M12"), "warning");
+  openConfirmation();
 });
 
-document.addEventListener("input", updateAdmit);
-refs.admit.addEventListener("click", confirmAdmission);
-document.getElementById("clearBtn").addEventListener("click", resetIdentityLookup);
-document.getElementById("cancelBtn").addEventListener("click", resetForm);
-refs.validity.addEventListener("change", updateValidityHelp);
-refs.individualMode.addEventListener("click", () => setMode("individual"));
-refs.massMode.addEventListener("click", () => setMode("mass"));
-refs.massModeButton?.addEventListener("click", () => setMode("mass"));
-document.getElementById("cancelMassBtn").addEventListener("click", () => { refs.massFile.value = ""; refs.massFileName.textContent = "Ningún archivo seleccionado"; refs.massSummary.hidden = true; refs.downloadErrors.hidden = true; refs.saveMass.disabled = true; massReady = false; setMode("individual"); });
-refs.massFile.addEventListener("change", validateMassFile);
-document.getElementById("downloadTemplateBtn").addEventListener("click", downloadTemplate);
-refs.downloadErrors.addEventListener("click", downloadErrors);
-refs.saveMass.addEventListener("click", () => { if (massReady) confirmAdmission("mass"); });
-renderRoles();
-updateValidityHelp();
+refs.clear.addEventListener("click", () => {
+  refs.form.reset();
+  refs.givenNames.value = "";
+  refs.paternalSurname.value = "";
+  refs.maternalSurname.value = "";
+  refs.identityFeedback.hidden = true;
+  consulted = false;
+});
+
+document.querySelectorAll("[data-password-target]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const input = document.getElementById(button.dataset.passwordTarget);
+    const visible = input.type === "text";
+    input.type = visible ? "password" : "text";
+    button.querySelector("i").className = `fa-regular ${visible ? "fa-eye" : "fa-eye-slash"}`;
+    button.setAttribute("aria-label", visible ? "Mostrar contraseña" : "Ocultar contraseña");
+  });
+});
+
+setPeriodState(periodState);

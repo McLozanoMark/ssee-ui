@@ -195,9 +195,6 @@ refs.saveStepButtons.forEach((button) => button.addEventListener("click", () => 
 document.getElementById("confirmBtn").addEventListener("click", confirmPendingAction);
 refs.confirmModal.querySelector(".modal-footer [data-bs-dismiss='modal']").addEventListener("click", rejectWizardStepChange);
 refs.confirmModal.addEventListener("hidden.bs.modal", () => {
-  refs.inactivationReasonWrap.hidden = true;
-  refs.inactivationReason.value = "";
-  refs.inactivationReasonError.textContent = "";
   state.pendingSave = false;
   state.pendingSaveStep = null;
   state.pendingCancel = false;

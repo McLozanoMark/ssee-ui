@@ -1,4 +1,21 @@
-const demoIndexLink=document.createElement("a");demoIndexLink.className="demo-index-link";demoIndexLink.href="../index.html";demoIndexLink.textContent="← Volver al índice";document.body.append(demoIndexLink);
+/* source: design-system/demo-navigation.js */
+function mountDemoIndexLink() {
+  if (document.querySelector(".demo-index-link")) return;
+  const link = document.createElement("a");
+  link.className = "demo-index-link";
+  link.href = "../index.html";
+  link.setAttribute("aria-label", "Volver al índice");
+  link.innerHTML = '<i class="fa-solid fa-list" aria-hidden="true"></i><span>Volver al índice</span>';
+  document.body.append(link);
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", mountDemoIndexLink, { once: true });
+} else {
+  mountDemoIndexLink();
+}
+
+
 /* source: design-system/messages.js */
 const MESSAGE_CATALOG = Object.freeze({
   M1: { text: "¿Está seguro que desea guardar esta información?", type: "Confirmación", scope: "General" },
@@ -73,7 +90,7 @@ const MESSAGE_CATALOG = Object.freeze({
 
 // Confirmed prototype copy pending official codes in the stakeholder workbook.
 const PROTOTYPE_MESSAGES = Object.freeze({
-  identityLookupSuccess: "Información consultada correctamente.",
+  identityLookupSuccess: "La información fue consultada correctamente.",
   authenticationSuccess: "Autenticación validada correctamente.",
   syncStarted: "Sincronización iniciada.",
   filtersApplied: "Filtros aplicados.",
@@ -231,7 +248,6 @@ const records = [
 const body = document.getElementById("usersBody");
 const toast = document.getElementById("toast");
 const typeFilter = document.createElement("select");
-let automaticSyncTimer;
 let syncRunning = false;
 
 function showToast(message, type = "info") {
@@ -308,15 +324,13 @@ function runSync() {
 }
 
 document.getElementById("syncBtn").addEventListener("click", () => {
-  window.clearTimeout(automaticSyncTimer);
   runSync();
 });
 
 render();
-automaticSyncTimer = window.setTimeout(runSync, 3500);
 body.addEventListener("click", (event) => {
   if (event.target.closest("[data-access-action='open-users']")) {
     const button = event.target.closest("[data-access-action='open-users']");
-    window.location.href = `../ref-006-users/index.html?accessName=${encodeURIComponent(button.dataset.userName)}`;
+    window.location.href = `../ref-007-users/index.html?accessName=${encodeURIComponent(button.dataset.userName)}`;
   }
 });
