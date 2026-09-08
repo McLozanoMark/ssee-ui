@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL(".", import.meta.url));
 
 async function bundle(name, files) {
-  const output = files.map(async (file) => {
+  const output = ["design-system/demo-navigation.js", ...files].map(async (file) => {
     const source = await readFile(resolve(root, file), "utf8");
     const withoutImports = source
       .replace(/import[\s\S]*?from\s+["'][^"']+["'];/g, "")
@@ -13,12 +13,9 @@ async function bundle(name, files) {
     return `/* source: ${file} */\n${withoutImports.replace(/^export /gm, "")}`;
   });
   const content = (await Promise.all(output)).join("\n\n");
-  const indexLink = name === "ref-003-passport/dist/passport.js" || name === "ref-004-admision/dist/admission.js"
-    ? 'const demoIndexLink=document.createElement("a");demoIndexLink.className="demo-index-link";demoIndexLink.href="../index.html";demoIndexLink.textContent="← Volver al índice";document.body.append(demoIndexLink);'
-    : "";
   const target = resolve(root, name);
   await mkdir(dirname(target), { recursive: true });
-  await writeFile(target, `${indexLink}\n${content}`, "utf8");
+  await writeFile(target, content, "utf8");
 }
 
 await bundle("ref-001-roles/dist/roles.js", [
@@ -46,16 +43,20 @@ await bundle("ref-002-permisos/dist/permissions.js", [
   "ref-002-permisos/js/main.js"
 ]);
 
-await bundle("ref-006-users/dist/users.js", [
+const usersBundle = [
   "design-system/messages.js",
   "design-system/interaction.js",
   "design-system/table-sort.js",
-  "ref-006-users/js/data.js",
-  "ref-006-users/js/state.js",
-  "ref-006-users/js/ui.js",
-  "ref-006-users/js/users.js",
-  "ref-006-users/js/main.js"
-]);
+  "ref-007-users/js/data.js",
+  "ref-007-users/js/state.js",
+  "ref-007-users/js/ui.js",
+  "ref-007-users/js/users.js",
+  "ref-007-users/js/main.js"
+];
+
+await bundle("ref-003-passport/dist/users.js", usersBundle);
+await bundle("ref-004-admision/dist/users.js", usersBundle);
+await bundle("ref-007-users/dist/users.js", usersBundle);
 
 await bundle("ref-004-admision/dist/admission.js", [
   "design-system/messages.js",
@@ -63,87 +64,93 @@ await bundle("ref-004-admision/dist/admission.js", [
   "ref-004-admision/js/main.js"
 ]);
 
-await bundle("ref-005-autoregistro/dist/autoregistro.js", [
+await bundle("ref-006-autoregistro/dist/autoregistro.js", [
   "design-system/messages.js",
   "design-system/interaction.js",
-  "ref-005-autoregistro/js/main.js"
+  "ref-006-autoregistro/js/main.js"
 ]);
 
-await bundle("ref-007-auth-passport/dist/auth.js", [
+await bundle("ref-005-configuracion-autoregistro/dist/autoreg-config.js", [
+  "design-system/messages.js",
+  "design-system/interaction.js",
+  "ref-005-configuracion-autoregistro/js/main.js"
+]);
+
+await bundle("ref-008-auth-passport/dist/auth.js", [
   "design-system/messages.js",
   "design-system/interaction.js",
   "design-system/auth-validation.js",
   "design-system/auth-audit.js",
-  "ref-007-auth-passport/js/main.js"
+  "ref-008-auth-passport/js/main.js"
 ]);
 
-await bundle("ref-008-auth-document/dist/auth.js", [
+await bundle("ref-009-auth-document/dist/auth.js", [
   "design-system/messages.js",
   "design-system/interaction.js",
   "design-system/auth-validation.js",
   "design-system/auth-audit.js",
-  "ref-008-auth-document/js/main.js"
+  "ref-009-auth-document/js/main.js"
 ]);
 
-await bundle("ref-009-auth-autoregistro/dist/auth.js", [
+await bundle("ref-010-auth-autoregistro/dist/auth.js", [
   "design-system/messages.js",
   "design-system/interaction.js",
   "design-system/auth-validation.js",
   "design-system/auth-audit.js",
-  "ref-009-auth-autoregistro/js/main.js"
+  "ref-010-auth-autoregistro/js/main.js"
 ]);
 
-await bundle("ref-012-password-change/dist/password.js", [
+await bundle("ref-013-password-change/dist/password.js", [
   "design-system/messages.js",
   "design-system/interaction.js",
   "design-system/auth-audit.js",
-  "ref-012-password-change/js/data.js",
-  "ref-012-password-change/js/state.js",
-  "ref-012-password-change/js/ui.js",
-  "ref-012-password-change/js/password.js",
-  "ref-012-password-change/js/main.js"
+  "ref-013-password-change/js/data.js",
+  "ref-013-password-change/js/state.js",
+  "ref-013-password-change/js/ui.js",
+  "ref-013-password-change/js/password.js",
+  "ref-013-password-change/js/main.js"
 ]);
 
-await bundle("ref-013-password-recovery/dist/recovery.js", [
+await bundle("ref-014-password-recovery/dist/recovery.js", [
   "design-system/messages.js",
   "design-system/interaction.js",
   "design-system/auth-audit.js",
-  "ref-013-password-recovery/js/data.js",
-  "ref-013-password-recovery/js/state.js",
-  "ref-013-password-recovery/js/ui.js",
-  "ref-013-password-recovery/js/recovery.js",
-  "ref-013-password-recovery/js/main.js"
+  "ref-014-password-recovery/js/data.js",
+  "ref-014-password-recovery/js/state.js",
+  "ref-014-password-recovery/js/ui.js",
+  "ref-014-password-recovery/js/recovery.js",
+  "ref-014-password-recovery/js/main.js"
 ]);
 
-await bundle("ref-014-logout/dist/logout.js", [
+await bundle("ref-015-logout/dist/logout.js", [
   "design-system/messages.js",
   "design-system/interaction.js",
   "design-system/auth-audit.js",
-  "ref-014-logout/js/data.js",
-  "ref-014-logout/js/state.js",
-  "ref-014-logout/js/session.js",
-  "ref-014-logout/js/ui.js",
-  "ref-014-logout/js/main.js"
+  "ref-015-logout/js/data.js",
+  "ref-015-logout/js/state.js",
+  "ref-015-logout/js/session.js",
+  "ref-015-logout/js/ui.js",
+  "ref-015-logout/js/main.js"
 ]);
 
-await bundle("ref-015-sessions/dist/sessions.js", [
+await bundle("ref-016-sessions/dist/sessions.js", [
   "design-system/messages.js",
   "design-system/interaction.js",
   "design-system/auth-audit.js",
-  "ref-015-sessions/js/data.js",
-  "ref-015-sessions/js/state.js",
-  "ref-015-sessions/js/session.js",
-  "ref-015-sessions/js/ui.js",
-  "ref-015-sessions/js/main.js"
+  "ref-016-sessions/js/data.js",
+  "ref-016-sessions/js/state.js",
+  "ref-016-sessions/js/session.js",
+  "ref-016-sessions/js/ui.js",
+  "ref-016-sessions/js/main.js"
 ]);
 
-await bundle("ref-016-welcome/dist/welcome.js", [
+await bundle("ref-017-welcome/dist/welcome.js", [
   "design-system/messages.js",
   "design-system/interaction.js",
-  "ref-016-welcome/js/data.js",
-  "ref-016-welcome/js/state.js",
-  "ref-016-welcome/js/ui.js",
-  "ref-016-welcome/js/main.js"
+  "ref-017-welcome/js/data.js",
+  "ref-017-welcome/js/state.js",
+  "ref-017-welcome/js/ui.js",
+  "ref-017-welcome/js/main.js"
 ]);
 
 await bundle("ref-003-passport/dist/passport.js", [
