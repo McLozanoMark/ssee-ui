@@ -6,10 +6,11 @@ import { showFeedback, showToast, updateAccount, updatePolicy } from "./ui.js";
 import { validatePasswordChange } from "./password.js";
 
 const refs = {
-  form: document.getElementById("passwordForm"), current: document.getElementById("currentPassword"), next: document.getElementById("newPassword"), confirmation: document.getElementById("confirmPassword"), feedback: document.getElementById("passwordFeedback"), success: document.getElementById("passwordSuccess"), passportNotice: document.getElementById("passportNotice"), passportRedirect: document.getElementById("passportRedirect"), accountName: document.getElementById("accountName"), accountEmail: document.getElementById("accountEmail"), accountType: document.getElementById("accountType"), policyLength: document.getElementById("policyLength"), policyUpper: document.getElementById("policyUpper"), policyLower: document.getElementById("policyLower"), policyNumber: document.getElementById("policyNumber"), toast: document.getElementById("toast")
+  form: document.getElementById("passwordForm"), current: document.getElementById("currentPassword"), next: document.getElementById("newPassword"), confirmation: document.getElementById("confirmPassword"), feedback: document.getElementById("passwordFeedback"), success: document.getElementById("passwordSuccess"), passportNotice: document.getElementById("passportNotice"), passportRedirect: document.getElementById("passportRedirect"), documentPanel: document.getElementById("documentPanel"), documentRedirect: document.getElementById("documentRedirect"), accountSummary: document.querySelector(".account-summary"), accountName: document.getElementById("accountName"), accountEmail: document.getElementById("accountEmail"), accountType: document.getElementById("accountType"), policyLength: document.getElementById("policyLength"), policyUpper: document.getElementById("policyUpper"), policyLower: document.getElementById("policyLower"), policyNumber: document.getElementById("policyNumber"), toast: document.getElementById("toast")
 };
 
-const authType = new URLSearchParams(window.location.search).get("auth") === "passport" ? "Passport" : "Autoregistro";
+const authParam = new URLSearchParams(window.location.search).get("auth");
+const authType = authParam === "passport" ? "Passport" : authParam === "document" ? "Documento" : "Autoregistro";
 const state = createPasswordState(authType);
 
 function setPassportView() {
@@ -17,10 +18,20 @@ function setPassportView() {
   refs.passportNotice.hidden = false;
 }
 
+function setDocumentView() {
+  refs.form.hidden = true;
+  refs.documentPanel.hidden = false;
+  refs.accountSummary.hidden = true;
+}
+
 if (state.authType === "Passport") {
   setPassportView();
   updateAccount(refs, state.user);
   refs.passportRedirect.addEventListener("click", () => { window.location.href = "../ref-008-auth-passport/index.html"; });
+} else if (state.authType === "Documento") {
+  setDocumentView();
+  updateAccount(refs, state.user);
+  refs.documentRedirect.addEventListener("click", () => { window.location.href = "../ref-009-auth-document/index.html"; });
 } else {
   updateAccount(refs, state.user);
   refs.next.addEventListener("input", () => updatePolicy(refs, refs.next.value, passwordPolicy));

@@ -1,47 +1,58 @@
+import { welcomeProfiles } from "../../ref-017-welcome/js/data.js";
+import { getWelcomeState } from "../../ref-017-welcome/js/state.js";
+import { renderNotifications, renderProfile, setNotificationPanel, showToast } from "../../ref-017-welcome/js/ui.js";
 import { recordAuditEvent } from "../../design-system/auth-audit.js";
-import { getMessage, getPrototypeMessage } from "../../design-system/messages.js";
-import { sessionUsers } from "./data.js";
-import { createSessionState } from "./state.js";
-import { invalidateSession } from "./session.js";
-import { showAuthView, showToast } from "./ui.js";
+import { getPrototypeMessage } from "../../design-system/messages.js";
 
 const refs = {
-  activeView: document.getElementById("activeView"), authView: document.getElementById("authView"), authTitle: document.getElementById("authTitle"), authMessage: document.getElementById("authMessage"), authLink: document.getElementById("authLink"), logoutButton: document.getElementById("logoutButton"), confirmDialog: document.getElementById("confirmDialog"), closeConfirm: document.getElementById("closeConfirm"), cancelLogout: document.getElementById("cancelLogout"), confirmLogout: document.getElementById("confirmLogout"), toast: document.getElementById("toast")
+  accountName: document.getElementById("accountName"), accountRole: document.getElementById("accountRole"), accountInitial: document.getElementById("accountInitial"), welcomeTitle: document.getElementById("welcomeTitle"), welcomeSubtitle: document.getElementById("welcomeSubtitle"), processContext: document.getElementById("processContext"), processText: document.getElementById("processText"), moduleCount: document.getElementById("moduleCount"), projectCount: document.getElementById("projectCount"), moduleGrid: document.getElementById("moduleGrid"), projectList: document.getElementById("projectList"), userSummary: document.getElementById("userSummary"), notificationButton: document.getElementById("notificationButton"), notificationCount: document.getElementById("notificationCount"), notificationPanel: document.getElementById("notificationPanel"), notificationList: document.getElementById("notificationList"), closeNotifications: document.getElementById("closeNotifications"), accountMenuTrigger: document.getElementById("accountMenuTrigger"), accountMenu: document.getElementById("accountMenu"), logoutOption: document.getElementById("logoutOption"), welcomeShell: document.querySelector(".app-shell"), loginView: document.getElementById("loginView"), autoregisterLogin: document.getElementById("autoregisterLogin"), passportLogin: document.getElementById("passportLogin"), toast: document.getElementById("toast")
 };
 
 const params = new URLSearchParams(window.location.search);
-const authType = params.get("auth") === "passport" ? "Passport" : "Autoregistro";
-const expired = params.get("mode") === "expired";
-const user = sessionUsers[authType];
-const state = createSessionState({ authType, expired });
+const state = getWelcomeState(params, welcomeProfiles);
+const profile = state.profile;
+renderProfile(refs, profile);
+renderNotifications(refs, profile.notifications);
 
-document.getElementById("accountName").textContent = user.name;
-document.getElementById("authType").textContent = user.authType;
-document.getElementById("activeAuthType").textContent = user.authType;
-
-function closeDialog() {
-  refs.confirmDialog.hidden = true;
+function setAccountMenu(isOpen) {
+  refs.accountMenu.hidden = !isOpen;
+  refs.accountMenuTrigger.setAttribute("aria-expanded", String(isOpen));
 }
 
-function finishLogout(closureType) {
-  invalidateSession();
-  state.active = false;
-  closeDialog();
-  recordAuditEvent({ user: user.name, authType: state.authType, operation: "Cierre de sesión", closureType, result: "Exitosa" });
-  showAuthView(refs, user, false);
+refs.notificationButton.addEventListener("click", () => {
+  state.notificationsOpen = !state.notificationsOpen;
+  setNotificationPanel(refs, state.notificationsOpen);
+});
+refs.closeNotifications.addEventListener("click", () => {
+  state.notificationsOpen = false;
+  setNotificationPanel(refs, false);
+});
+refs.accountMenuTrigger.addEventListener("click", () => {
+  setAccountMenu(refs.accountMenu.hidden);
+});
+document.addEventListener("click", (event) => {
+  if (state.notificationsOpen && !refs.notificationPanel.contains(event.target) && !refs.notificationButton.contains(event.target)) {
+    state.notificationsOpen = false;
+    setNotificationPanel(refs, false);
+  }
+  if (!refs.accountMenu.contains(event.target) && !refs.accountMenuTrigger.contains(event.target)) setAccountMenu(false);
+});
+refs.moduleGrid.addEventListener("click", (event) => {
+  const module = event.target.closest("[data-module]");
+  if (!module) return;
+  event.preventDefault();
+  showToast(refs, `Acceso a ${module.dataset.module} disponible para revisión.`, "info");
+});
+refs.logoutOption.addEventListener("click", () => {
+  recordAuditEvent({ user: profile.name, authType: profile.authType, operation: "Cierre de sesión", closureType: "Voluntario", result: "Exitosa" });
+  try { sessionStorage.removeItem("ssee-demo-session"); } catch { /* demo continues without storage */ }
+  setAccountMenu(false);
   showToast(refs, getPrototypeMessage("sessionClosed"), "success");
-}
+  refs.notificationPanel.hidden = true;
+  refs.welcomeShell.hidden = true;
+  refs.loginView.hidden = false;
+  refs.autoregisterLogin.hidden = state.profileKey === "passport";
+  refs.passportLogin.hidden = state.profileKey !== "passport";
+});
 
-if (expired) {
-  invalidateSession();
-  recordAuditEvent({ user: user.name, authType: state.authType, operation: "Cierre de sesión", closureType: "Por expiración de sesión", result: "Exitosa" });
-  showAuthView(refs, user, true);
-  showToast(refs, getMessage("M28"), "warning");
-} else {
-  try { sessionStorage.setItem("ssee-demo-session", "active"); } catch { /* demo continues without storage */ }
-  refs.logoutButton.addEventListener("click", () => { refs.confirmDialog.hidden = false; refs.cancelLogout.focus(); });
-  refs.cancelLogout.addEventListener("click", closeDialog);
-  refs.closeConfirm.addEventListener("click", closeDialog);
-  refs.confirmLogout.addEventListener("click", () => finishLogout("Voluntario"));
-  refs.confirmDialog.addEventListener("click", (event) => { if (event.target === refs.confirmDialog) closeDialog(); });
-}
+try { sessionStorage.setItem("ssee-demo-session", "active"); } catch { /* demo continues without storage */ }

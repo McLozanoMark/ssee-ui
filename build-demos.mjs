@@ -77,6 +77,7 @@ await bundle("ref-005-configuracion-autoregistro/dist/autoreg-config.js", [
 ]);
 
 await bundle("ref-008-auth-passport/dist/auth.js", [
+  "design-system/auth-guide.js",
   "design-system/messages.js",
   "design-system/interaction.js",
   "design-system/auth-validation.js",
@@ -85,6 +86,7 @@ await bundle("ref-008-auth-passport/dist/auth.js", [
 ]);
 
 await bundle("ref-009-auth-document/dist/auth.js", [
+  "design-system/auth-guide.js",
   "design-system/messages.js",
   "design-system/interaction.js",
   "design-system/auth-validation.js",
@@ -93,6 +95,7 @@ await bundle("ref-009-auth-document/dist/auth.js", [
 ]);
 
 await bundle("ref-010-auth-autoregistro/dist/auth.js", [
+  "design-system/auth-guide.js",
   "design-system/messages.js",
   "design-system/interaction.js",
   "design-system/auth-validation.js",
@@ -100,7 +103,26 @@ await bundle("ref-010-auth-autoregistro/dist/auth.js", [
   "ref-010-auth-autoregistro/js/main.js"
 ]);
 
+await bundle("ref-011-validaciones/dist/auth.js", [
+  "design-system/auth-guide.js",
+  "design-system/messages.js",
+  "design-system/interaction.js",
+  "design-system/auth-validation.js",
+  "design-system/auth-audit.js",
+  "ref-008-auth-passport/js/main.js"
+]);
+
+await bundle("ref-012-auditoria/dist/auth.js", [
+  "design-system/auth-guide.js",
+  "design-system/messages.js",
+  "design-system/interaction.js",
+  "design-system/auth-validation.js",
+  "design-system/auth-audit.js",
+  "ref-008-auth-passport/js/main.js"
+]);
+
 await bundle("ref-013-password-change/dist/password.js", [
+  "design-system/auth-guide.js",
   "design-system/messages.js",
   "design-system/interaction.js",
   "design-system/auth-audit.js",
@@ -112,6 +134,7 @@ await bundle("ref-013-password-change/dist/password.js", [
 ]);
 
 await bundle("ref-014-password-recovery/dist/recovery.js", [
+  "design-system/auth-guide.js",
   "design-system/messages.js",
   "design-system/interaction.js",
   "design-system/auth-audit.js",
@@ -123,13 +146,13 @@ await bundle("ref-014-password-recovery/dist/recovery.js", [
 ]);
 
 await bundle("ref-015-logout/dist/logout.js", [
+  "design-system/auth-guide.js",
   "design-system/messages.js",
   "design-system/interaction.js",
   "design-system/auth-audit.js",
-  "ref-015-logout/js/data.js",
-  "ref-015-logout/js/state.js",
-  "ref-015-logout/js/session.js",
-  "ref-015-logout/js/ui.js",
+  "ref-017-welcome/js/data.js",
+  "ref-017-welcome/js/state.js",
+  "ref-017-welcome/js/ui.js",
   "ref-015-logout/js/main.js"
 ]);
 
@@ -137,11 +160,11 @@ await bundle("ref-016-sessions/dist/sessions.js", [
   "design-system/messages.js",
   "design-system/interaction.js",
   "design-system/auth-audit.js",
-  "ref-016-sessions/js/data.js",
-  "ref-016-sessions/js/state.js",
-  "ref-016-sessions/js/session.js",
-  "ref-016-sessions/js/ui.js",
-  "ref-016-sessions/js/main.js"
+  "ref-017-welcome/js/data.js",
+  "ref-017-welcome/js/state.js",
+  "ref-017-welcome/js/ui.js",
+  "ref-016-sessions/js/main.js",
+  "ref-016-sessions/js/session-guide.js"
 ]);
 
 await bundle("ref-017-welcome/dist/welcome.js", [

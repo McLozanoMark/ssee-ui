@@ -16,6 +16,150 @@ if (document.readyState === "loading") {
 }
 
 
+/* source: design-system/auth-guide.js */
+(function () {
+  const guide = document.getElementById("authGuide");
+  const cursor = document.getElementById("authCursor");
+  const root = document.querySelector("[data-auth-guide]");
+  if (!guide || !cursor || !root) return;
+
+  const title = document.getElementById("authGuideTitle");
+  const copy = document.getElementById("authGuideCopy");
+  const kind = root.dataset.authGuide;
+  const authParam = new URLSearchParams(window.location.search).get("auth");
+  const authType = authParam === "passport" ? "Passport" : authParam === "document" ? "Documento" : "Autoregistro";
+
+  const loginSteps = {
+    passport: [
+      ["#documentNumber", "Ingresa el documento", "Escribe el número de documento del usuario registrado en Passport.", "input"],
+      ["#password", "Ingresa la contraseña", "Escribe la contraseña asociada al usuario.", "input"],
+      ["#loginForm button[type=submit]", "Envía los datos", "Presiona Ingresar para ejecutar la validación del acceso.", "submit"]
+    ],
+    document: [
+      ["#documentNumber", "Ingresa el documento", "Escribe el número de documento para iniciar la validación.", "input"],
+      ["#birthDate", "Ingresa la fecha", "Completa la fecha de nacimiento del documento.", "input"],
+      ["#issueDate", "Ingresa la fecha", "Completa la fecha de emisión del documento.", "input"],
+      ["#loginForm button[type=submit]", "Envía los datos", "Presiona Ingresar para ejecutar la validación del acceso.", "submit"]
+    ],
+    autoregister: [
+      ["#email", "Ingresa el correo", "Escribe el correo de la cuenta creada mediante Autoregistro.", "input"],
+      ["#password", "Ingresa la contraseña", "Escribe la contraseña de la cuenta.", "input"],
+      ["#loginForm button[type=submit]", "Envía los datos", "Presiona Ingresar para validar el acceso.", "submit"]
+    ]
+  };
+
+  function getSteps() {
+    if (kind === "password") {
+      return authType === "Passport"
+        ? [["#passportRedirect", "Continúa en Passport", "El cambio de contraseña se gestiona en el mecanismo oficial de Passport.", "click"]]
+        : authType === "Documento"
+          ? [["#documentPanel", "Revisa el acceso", "Este tipo de acceso no administra una contraseña local.", "click"]]
+        : [
+          ["#currentPassword", "Ingresa la contraseña", "Escribe la contraseña actual de la cuenta.", "input"],
+          ["#newPassword", "Ingresa la contraseña", "Escribe la nueva contraseña.", "input"],
+          ["#confirmPassword", "Confirma la contraseña", "Repite la nueva contraseña.", "input"],
+          ["#passwordForm button[type=submit]", "Guarda el cambio", "Presiona Cambiar contraseña para completar el flujo.", "submit"]
+        ];
+    }
+    if (kind === "recovery") {
+      return authType === "Passport"
+        ? [["#passportRedirect", "Continúa en Passport", "La recuperación se gestiona en el mecanismo oficial de Passport.", "click"]]
+        : authType === "Documento"
+          ? [["#documentPanel", "Revisa el acceso", "Este tipo de acceso no requiere recuperación de contraseña local.", "click"]]
+        : [
+          ["#email", "Ingresa el correo", "Escribe el correo registrado para solicitar el enlace.", "input"],
+          ["#requestForm button[type=submit]", "Solicita el enlace", "Presiona Solicitar enlace para continuar.", "request"],
+          ["#openLink", "Abre el enlace", "En la demo, este botón representa el enlace recibido por correo.", "click"],
+          ["#newPassword", "Ingresa la contraseña", "Escribe la nueva contraseña.", "input"],
+          ["#confirmPassword", "Confirma la contraseña", "Repite la nueva contraseña.", "input"],
+          ["#resetForm button[type=submit]", "Restablece la contraseña", "Presiona Restablecer contraseña para finalizar.", "submit"]
+        ];
+    }
+    if (kind === "logout") {
+      return [
+        ["#accountMenuTrigger", "Abre tu cuenta", "Selecciona tu nombre para ver las opciones de sesión.", "click"],
+        ["#logoutOption", "Cierra sesión", "Selecciona esta opción para finalizar la sesión actual.", "click"]
+      ];
+    }
+    if (kind === "validation") return loginSteps.passport.map((step) => [step[0], step[1], "Este paso evidencia la validación general de autenticación.", step[3]]);
+    if (kind === "audit") return loginSteps.passport.map((step) => [step[0], step[1], "Este paso genera la trazabilidad del intento de autenticación.", step[3]]);
+    return loginSteps[kind] || [];
+  }
+
+  const steps = getSteps();
+  let current = 0;
+
+  function isVisible(element) {
+    return element && !element.hidden && getComputedStyle(element).display !== "none";
+  }
+
+  function finish(message) {
+    title.textContent = "Recorrido completo";
+    copy.textContent = message;
+    cursor.classList.remove("is-visible");
+  }
+
+  function bindStep(step) {
+    const element = document.querySelector(step[0]);
+    if (!element) return;
+    const eventName = step[3] === "input" ? "blur" : "click";
+    element.addEventListener(eventName, () => {
+      if (step[3] === "submit" || step[3] === "request") return;
+      window.setTimeout(nextStep, 0);
+    }, { once: true });
+    if (step[3] === "submit" || step[3] === "request") {
+      const form = element.form;
+      form?.addEventListener("submit", () => {
+        window.setTimeout(() => {
+          const success = document.querySelector(".auth-success, #successView");
+          const response = step[3] === "request" && isVisible(document.getElementById("sentView"))
+            ? "El enlace de recuperación está disponible para continuar."
+            : isVisible(success)
+              ? "El sistema muestra la confirmación del flujo."
+              : "El sistema muestra el resultado de la validación.";
+          if (step[3] === "request" && isVisible(document.getElementById("sentView"))) nextStep();
+          else finish(response);
+        }, 80);
+      }, { once: true });
+    }
+  }
+
+  function position(step, bind = true) {
+    const element = document.querySelector(step[0]);
+    if (!isVisible(element)) {
+      current += 1;
+      return showStep();
+    }
+    const box = element.getBoundingClientRect();
+    cursor.style.left = `${box.left + box.width / 2 - 8}px`;
+    cursor.style.top = `${box.top + box.height / 2 - 8}px`;
+    title.textContent = step[1];
+    copy.textContent = step[2];
+    cursor.classList.remove("is-visible");
+    requestAnimationFrame(() => cursor.classList.add("is-visible"));
+    if (bind) bindStep(step);
+  }
+
+  function showStep() {
+    if (current >= steps.length) return finish("El flujo terminó correctamente.");
+    position(steps[current]);
+  }
+
+  function nextStep() {
+    current += 1;
+    showStep();
+  }
+
+  window.setTimeout(() => {
+    guide.hidden = false;
+    showStep();
+  }, 0);
+  window.addEventListener("resize", () => {
+    if (steps[current]) position(steps[current], false);
+  });
+})();
+
+
 /* source: design-system/messages.js */
 const MESSAGE_CATALOG = Object.freeze({
   M1: { text: "¿Está seguro que desea guardar esta información?", type: "Confirmación", scope: "General" },
@@ -165,14 +309,54 @@ function closeMenus(root = document) {
   });
 }
 
-function openConfirmModal(id, message) {
+const INACTIVATION_REASON_MAX_LENGTH = 240;
+
+function resetConfirmReason(modal, required) {
+  const wrapper = modal.querySelector("[data-confirm-reason-wrap]");
+  const field = modal.querySelector("[data-confirm-reason]");
+  const error = modal.querySelector("[data-confirm-reason-error]");
+  if (!wrapper || !field) return;
+  wrapper.hidden = !required;
+  field.required = required;
+  field.maxLength = INACTIVATION_REASON_MAX_LENGTH;
+  field.setAttribute("aria-required", String(required));
+  field.setAttribute("aria-invalid", "false");
+  field.value = "";
+  if (error) {
+    error.hidden = true;
+    error.textContent = "";
+  }
+  modal.dataset.requireReason = String(required);
+}
+
+function openConfirmModal(id, message, { requireReason = false } = {}) {
   const modal = document.getElementById(id);
   if (!modal || !window.bootstrap) return null;
   const messageNode = modal.querySelector("[data-confirm-message]");
   if (messageNode) messageNode.textContent = message;
+  resetConfirmReason(modal, requireReason);
   const instance = bootstrap.Modal.getOrCreateInstance(modal);
   instance.show();
   return instance;
+}
+
+function getConfirmReason(id) {
+  return document.getElementById(id)?.querySelector("[data-confirm-reason]")?.value.trim() || "";
+}
+
+function validateConfirmReason(id, message = "Debe completar los campos obligatorios.") {
+  const modal = document.getElementById(id);
+  const field = modal?.querySelector("[data-confirm-reason]");
+  if (!modal || !field || modal.dataset.requireReason !== "true") return true;
+  const error = modal.querySelector("[data-confirm-reason-error]");
+  const valid = Boolean(field.value.trim());
+  field.setAttribute("aria-invalid", String(!valid));
+  if (error) {
+    error.textContent = valid ? "" : message;
+    error.hidden = valid;
+  }
+  if (!valid) field.focus();
+  return valid;
 }
 
 function closeConfirmModal(id) {
@@ -208,43 +392,86 @@ function recordAuthAttempt(args) {
 }
 
 
-/* source: ref-015-logout/js/data.js */
-const sessionUsers = {
-  Autoregistro: { name: "Ana Paredes", authType: "Autoregistro", authenticationUrl: "../ref-010-auth-autoregistro/index.html" },
-  Passport: { name: "Luis Ramos", authType: "Passport", authenticationUrl: "../ref-008-auth-passport/index.html" }
+/* source: ref-017-welcome/js/data.js */
+const welcomeProfiles = {
+  passport: {
+    name: "Luis Ramos",
+    role: "Supervisor de Seguimiento",
+    authType: "Passport",
+    site: "Unidad de Seguimiento y Evaluación",
+    institution: "Ministerio de Educación",
+    process: "",
+    modules: [
+      { name: "Seguimiento", description: "Consulta y supervisa avances.", icon: "fa-chart-line" },
+      { name: "Evaluación", description: "Revisa resultados e indicadores.", icon: "fa-clipboard-check" },
+      { name: "Instrumentos", description: "Atiende instrumentos asignados.", icon: "fa-file-lines" },
+      { name: "Reportes", description: "Consulta reportes disponibles.", icon: "fa-chart-column" }
+    ],
+    projects: [{ name: "Seguimiento 2026", period: "2026", assigned: 12, pending: 4, sent: 8, contact: "Equipo de Seguimiento" }],
+    notifications: [
+      { title: "Instrumentos pendientes", text: "Tienes 4 instrumentos pendientes de atención.", icon: "fa-clipboard-list" },
+      { title: "Nuevo reporte disponible", text: "El reporte de avance del periodo 2026 está disponible.", icon: "fa-file-lines" },
+      { title: "Actualización de proyecto", text: "Se actualizó la información de Seguimiento 2026.", icon: "fa-circle-info" }
+    ]
+  },
+  autoregistro: {
+    name: "Ana Paredes",
+    role: "Administrador USE",
+    authType: "Autoregistro",
+    site: "Unidad de Seguimiento y Evaluación",
+    institution: "Ministerio de Educación",
+    process: "Autoregistro 2026",
+    modules: [
+      { name: "Seguimiento", description: "Consulta el avance de tu proceso.", icon: "fa-chart-line" },
+      { name: "Instrumentos", description: "Revisa los instrumentos asignados.", icon: "fa-file-lines" },
+      { name: "Reportes", description: "Consulta reportes disponibles.", icon: "fa-chart-column" }
+    ],
+    projects: [{ name: "Seguimiento 2026", period: "2026", assigned: 8, pending: 2, sent: 6, contact: "Mesa de ayuda USE" }],
+    notifications: [
+      { title: "Instrumentos pendientes", text: "Tienes 2 instrumentos pendientes de atención.", icon: "fa-clipboard-list" },
+      { title: "Registro habilitado", text: "Tu acceso al proceso Autoregistro 2026 está habilitado.", icon: "fa-circle-check" }
+    ]
+  }
 };
 
 
-/* source: ref-015-logout/js/state.js */
-function createSessionState({ authType, expired }) {
-  return { authType, expired, active: !expired };
+/* source: ref-017-welcome/js/state.js */
+function getWelcomeState(params, profiles) {
+  const requested = params.get("auth") === "passport" ? "passport" : "autoregistro";
+  return { profileKey: requested, profile: profiles[requested], notificationsOpen: false };
 }
 
 
-/* source: ref-015-logout/js/session.js */
-function invalidateSession() {
-  try {
-    sessionStorage.removeItem("ssee-demo-session");
-  } catch {
-    // The demo remains usable when browser storage is unavailable.
-  }
-}
-
-
-/* source: ref-015-logout/js/ui.js */
-
+/* source: ref-017-welcome/js/ui.js */
 
 
 function showToast(refs, message, type = "info") {
   renderToast(refs.toast, message, type);
 }
 
-function showAuthView(refs, user, expired) {
-  refs.activeView.hidden = true;
-  refs.authView.hidden = false;
-  refs.authTitle.textContent = expired ? "Sesión expirada" : "Sesión cerrada";
-  refs.authMessage.textContent = expired ? getMessage("M28") : `${getPrototypeMessage("sessionClosed")} Inicia sesión nuevamente para continuar.`;
-  refs.authLink.href = user.authenticationUrl;
+function renderProfile(refs, profile) {
+  refs.accountName.textContent = profile.name;
+  refs.accountRole.textContent = profile.role;
+  refs.accountInitial.textContent = profile.name.charAt(0);
+  refs.welcomeTitle.textContent = `Bienvenido, ${profile.name}`;
+  refs.welcomeSubtitle.textContent = profile.authType === "Autoregistro" ? "Consulta las opciones disponibles para tu proceso de registro." : "Consulta los módulos y proyectos disponibles para tu acceso.";
+  refs.processContext.hidden = !profile.process;
+  refs.processText.textContent = profile.process;
+  refs.moduleCount.textContent = `${profile.modules.length} módulos`;
+  refs.projectCount.textContent = `${profile.projects.length} ${profile.projects.length === 1 ? "proyecto" : "proyectos"}`;
+  refs.moduleGrid.innerHTML = profile.modules.map((module) => `<a href="#" class="module-item" data-module="${module.name}"><span class="module-icon"><i class="fa-solid ${module.icon}" aria-hidden="true"></i></span><span><strong>${module.name}</strong><span>${module.description}</span></span><i class="fa-solid fa-chevron-right module-arrow" aria-hidden="true"></i></a>`).join("");
+  refs.projectList.innerHTML = profile.projects.map((project) => `<article class="project-item"><div class="project-item-head"><strong>${project.name}</strong><span class="count-label">Periodo ${project.period}</span></div><div class="project-meta"><span class="metric"><i class="fa-solid fa-layer-group" aria-hidden="true"></i>${project.assigned} asignados</span><span class="metric pending"><i class="fa-solid fa-clock" aria-hidden="true"></i>${project.pending} pendientes</span><span class="metric sent"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i>${project.sent} enviados</span></div><div class="project-contact"><i class="fa-regular fa-address-book" aria-hidden="true"></i><span>Contacto: ${project.contact}</span></div></article>`).join("");
+  refs.userSummary.innerHTML = `<div><span>Nombre completo</span><strong>${profile.name}</strong></div><div><span>Tipo de autenticación</span><strong>${profile.authType}</strong></div><div><span>Rol referencial</span><strong>${profile.role}</strong></div><div><span>Sede</span><strong>${profile.site}</strong></div>`;
+}
+
+function renderNotifications(refs, notifications) {
+  refs.notificationCount.textContent = notifications.length;
+  refs.notificationList.innerHTML = notifications.map((notification) => `<article class="notification-item"><span class="notification-icon"><i class="fa-solid ${notification.icon}" aria-hidden="true"></i></span><div><strong>${notification.title}</strong><span>${notification.text}</span></div></article>`).join("");
+}
+
+function setNotificationPanel(refs, isOpen) {
+  refs.notificationPanel.hidden = !isOpen;
+  refs.notificationButton.setAttribute("aria-expanded", String(isOpen));
 }
 
 
@@ -255,44 +482,55 @@ function showAuthView(refs, user, expired) {
 
 
 
-
 const refs = {
-  activeView: document.getElementById("activeView"), authView: document.getElementById("authView"), authTitle: document.getElementById("authTitle"), authMessage: document.getElementById("authMessage"), authLink: document.getElementById("authLink"), logoutButton: document.getElementById("logoutButton"), confirmDialog: document.getElementById("confirmDialog"), closeConfirm: document.getElementById("closeConfirm"), cancelLogout: document.getElementById("cancelLogout"), confirmLogout: document.getElementById("confirmLogout"), toast: document.getElementById("toast")
+  accountName: document.getElementById("accountName"), accountRole: document.getElementById("accountRole"), accountInitial: document.getElementById("accountInitial"), welcomeTitle: document.getElementById("welcomeTitle"), welcomeSubtitle: document.getElementById("welcomeSubtitle"), processContext: document.getElementById("processContext"), processText: document.getElementById("processText"), moduleCount: document.getElementById("moduleCount"), projectCount: document.getElementById("projectCount"), moduleGrid: document.getElementById("moduleGrid"), projectList: document.getElementById("projectList"), userSummary: document.getElementById("userSummary"), notificationButton: document.getElementById("notificationButton"), notificationCount: document.getElementById("notificationCount"), notificationPanel: document.getElementById("notificationPanel"), notificationList: document.getElementById("notificationList"), closeNotifications: document.getElementById("closeNotifications"), accountMenuTrigger: document.getElementById("accountMenuTrigger"), accountMenu: document.getElementById("accountMenu"), logoutOption: document.getElementById("logoutOption"), welcomeShell: document.querySelector(".app-shell"), loginView: document.getElementById("loginView"), autoregisterLogin: document.getElementById("autoregisterLogin"), passportLogin: document.getElementById("passportLogin"), toast: document.getElementById("toast")
 };
 
 const params = new URLSearchParams(window.location.search);
-const authType = params.get("auth") === "passport" ? "Passport" : "Autoregistro";
-const expired = params.get("mode") === "expired";
-const user = sessionUsers[authType];
-const state = createSessionState({ authType, expired });
+const state = getWelcomeState(params, welcomeProfiles);
+const profile = state.profile;
+renderProfile(refs, profile);
+renderNotifications(refs, profile.notifications);
 
-document.getElementById("accountName").textContent = user.name;
-document.getElementById("authType").textContent = user.authType;
-document.getElementById("activeAuthType").textContent = user.authType;
-
-function closeDialog() {
-  refs.confirmDialog.hidden = true;
+function setAccountMenu(isOpen) {
+  refs.accountMenu.hidden = !isOpen;
+  refs.accountMenuTrigger.setAttribute("aria-expanded", String(isOpen));
 }
 
-function finishLogout(closureType) {
-  invalidateSession();
-  state.active = false;
-  closeDialog();
-  recordAuditEvent({ user: user.name, authType: state.authType, operation: "Cierre de sesión", closureType, result: "Exitosa" });
-  showAuthView(refs, user, false);
+refs.notificationButton.addEventListener("click", () => {
+  state.notificationsOpen = !state.notificationsOpen;
+  setNotificationPanel(refs, state.notificationsOpen);
+});
+refs.closeNotifications.addEventListener("click", () => {
+  state.notificationsOpen = false;
+  setNotificationPanel(refs, false);
+});
+refs.accountMenuTrigger.addEventListener("click", () => {
+  setAccountMenu(refs.accountMenu.hidden);
+});
+document.addEventListener("click", (event) => {
+  if (state.notificationsOpen && !refs.notificationPanel.contains(event.target) && !refs.notificationButton.contains(event.target)) {
+    state.notificationsOpen = false;
+    setNotificationPanel(refs, false);
+  }
+  if (!refs.accountMenu.contains(event.target) && !refs.accountMenuTrigger.contains(event.target)) setAccountMenu(false);
+});
+refs.moduleGrid.addEventListener("click", (event) => {
+  const module = event.target.closest("[data-module]");
+  if (!module) return;
+  event.preventDefault();
+  showToast(refs, `Acceso a ${module.dataset.module} disponible para revisión.`, "info");
+});
+refs.logoutOption.addEventListener("click", () => {
+  recordAuditEvent({ user: profile.name, authType: profile.authType, operation: "Cierre de sesión", closureType: "Voluntario", result: "Exitosa" });
+  try { sessionStorage.removeItem("ssee-demo-session"); } catch { /* demo continues without storage */ }
+  setAccountMenu(false);
   showToast(refs, getPrototypeMessage("sessionClosed"), "success");
-}
+  refs.notificationPanel.hidden = true;
+  refs.welcomeShell.hidden = true;
+  refs.loginView.hidden = false;
+  refs.autoregisterLogin.hidden = state.profileKey === "passport";
+  refs.passportLogin.hidden = state.profileKey !== "passport";
+});
 
-if (expired) {
-  invalidateSession();
-  recordAuditEvent({ user: user.name, authType: state.authType, operation: "Cierre de sesión", closureType: "Por expiración de sesión", result: "Exitosa" });
-  showAuthView(refs, user, true);
-  showToast(refs, getMessage("M28"), "warning");
-} else {
-  try { sessionStorage.setItem("ssee-demo-session", "active"); } catch { /* demo continues without storage */ }
-  refs.logoutButton.addEventListener("click", () => { refs.confirmDialog.hidden = false; refs.cancelLogout.focus(); });
-  refs.cancelLogout.addEventListener("click", closeDialog);
-  refs.closeConfirm.addEventListener("click", closeDialog);
-  refs.confirmLogout.addEventListener("click", () => finishLogout("Voluntario"));
-  refs.confirmDialog.addEventListener("click", (event) => { if (event.target === refs.confirmDialog) closeDialog(); });
-}
+try { sessionStorage.setItem("ssee-demo-session", "active"); } catch { /* demo continues without storage */ }

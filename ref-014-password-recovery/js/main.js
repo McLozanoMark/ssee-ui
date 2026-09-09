@@ -6,11 +6,12 @@ import { showFeedback, showOnly, showToast, updatePolicy } from "./ui.js";
 import { validateResetPassword } from "./recovery.js";
 
 const refs = {
-  passportPanel: document.getElementById("passportPanel"), passportRedirect: document.getElementById("passportRedirect"), requestForm: document.getElementById("requestForm"), email: document.getElementById("email"), requestFeedback: document.getElementById("requestFeedback"), backToLogin: document.getElementById("backToLogin"), requestView: document.getElementById("requestView"), sentView: document.getElementById("sentView"), resetView: document.getElementById("resetView"), expiredView: document.getElementById("expiredView"), successView: document.getElementById("successView"), openLink: document.getElementById("openLink"), requestNew: document.getElementById("requestNew"), resetForm: document.getElementById("resetForm"), newPassword: document.getElementById("newPassword"), confirmPassword: document.getElementById("confirmPassword"), resetFeedback: document.getElementById("resetFeedback"), cancelReset: document.getElementById("cancelReset"), policyLength: document.getElementById("policyLength"), policyUpper: document.getElementById("policyUpper"), policyLower: document.getElementById("policyLower"), policyNumber: document.getElementById("policyNumber"), toast: document.getElementById("toast")
+  passportPanel: document.getElementById("passportPanel"), passportRedirect: document.getElementById("passportRedirect"), documentPanel: document.getElementById("documentPanel"), documentRedirect: document.getElementById("documentRedirect"), requestForm: document.getElementById("requestForm"), email: document.getElementById("email"), requestFeedback: document.getElementById("requestFeedback"), backToLogin: document.getElementById("backToLogin"), requestView: document.getElementById("requestView"), sentView: document.getElementById("sentView"), resetView: document.getElementById("resetView"), expiredView: document.getElementById("expiredView"), successView: document.getElementById("successView"), openLink: document.getElementById("openLink"), requestNew: document.getElementById("requestNew"), resetForm: document.getElementById("resetForm"), newPassword: document.getElementById("newPassword"), confirmPassword: document.getElementById("confirmPassword"), resetFeedback: document.getElementById("resetFeedback"), cancelReset: document.getElementById("cancelReset"), policyLength: document.getElementById("policyLength"), policyUpper: document.getElementById("policyUpper"), policyLower: document.getElementById("policyLower"), policyNumber: document.getElementById("policyNumber"), toast: document.getElementById("toast")
 };
 
 const params = new URLSearchParams(window.location.search);
-const authType = params.get("auth") === "passport" ? "Passport" : "Autoregistro";
+const authParam = params.get("auth");
+const authType = authParam === "passport" ? "Passport" : authParam === "document" ? "Documento" : "Autoregistro";
 const tokenState = params.get("token") === "expired" ? "expired" : params.get("token") === "error" ? "error" : "available";
 const state = createRecoveryState({ authType, tokenState });
 
@@ -26,6 +27,10 @@ if (state.authType === "Passport") {
   refs.requestView.hidden = true;
   refs.passportPanel.hidden = false;
   refs.passportRedirect.addEventListener("click", () => { window.location.href = "../ref-008-auth-passport/index.html"; });
+} else if (state.authType === "Documento") {
+  refs.requestView.hidden = true;
+  refs.documentPanel.hidden = false;
+  refs.documentRedirect.addEventListener("click", () => { window.location.href = "../ref-009-auth-document/index.html"; });
 } else if (state.tokenState === "expired") {
   refs.requestView.hidden = true;
   refs.expiredView.hidden = false;

@@ -165,14 +165,54 @@ function closeMenus(root = document) {
   });
 }
 
-function openConfirmModal(id, message) {
+const INACTIVATION_REASON_MAX_LENGTH = 240;
+
+function resetConfirmReason(modal, required) {
+  const wrapper = modal.querySelector("[data-confirm-reason-wrap]");
+  const field = modal.querySelector("[data-confirm-reason]");
+  const error = modal.querySelector("[data-confirm-reason-error]");
+  if (!wrapper || !field) return;
+  wrapper.hidden = !required;
+  field.required = required;
+  field.maxLength = INACTIVATION_REASON_MAX_LENGTH;
+  field.setAttribute("aria-required", String(required));
+  field.setAttribute("aria-invalid", "false");
+  field.value = "";
+  if (error) {
+    error.hidden = true;
+    error.textContent = "";
+  }
+  modal.dataset.requireReason = String(required);
+}
+
+function openConfirmModal(id, message, { requireReason = false } = {}) {
   const modal = document.getElementById(id);
   if (!modal || !window.bootstrap) return null;
   const messageNode = modal.querySelector("[data-confirm-message]");
   if (messageNode) messageNode.textContent = message;
+  resetConfirmReason(modal, requireReason);
   const instance = bootstrap.Modal.getOrCreateInstance(modal);
   instance.show();
   return instance;
+}
+
+function getConfirmReason(id) {
+  return document.getElementById(id)?.querySelector("[data-confirm-reason]")?.value.trim() || "";
+}
+
+function validateConfirmReason(id, message = "Debe completar los campos obligatorios.") {
+  const modal = document.getElementById(id);
+  const field = modal?.querySelector("[data-confirm-reason]");
+  if (!modal || !field || modal.dataset.requireReason !== "true") return true;
+  const error = modal.querySelector("[data-confirm-reason-error]");
+  const valid = Boolean(field.value.trim());
+  field.setAttribute("aria-invalid", String(!valid));
+  if (error) {
+    error.textContent = valid ? "" : message;
+    error.hidden = valid;
+  }
+  if (!valid) field.focus();
+  return valid;
 }
 
 function closeConfirmModal(id) {
@@ -208,58 +248,86 @@ function recordAuthAttempt(args) {
 }
 
 
-/* source: ref-016-sessions/js/data.js */
-const sessionUsers = {
-  Autoregistro: { name: "Ana Paredes", authType: "Autoregistro", role: "Administrador USE", authenticationUrl: "../ref-010-auth-autoregistro/index.html" },
-  Passport: { name: "Luis Ramos", authType: "Passport", role: "Supervisor de Seguimiento", authenticationUrl: "../ref-008-auth-passport/index.html" }
+/* source: ref-017-welcome/js/data.js */
+const welcomeProfiles = {
+  passport: {
+    name: "Luis Ramos",
+    role: "Supervisor de Seguimiento",
+    authType: "Passport",
+    site: "Unidad de Seguimiento y Evaluación",
+    institution: "Ministerio de Educación",
+    process: "",
+    modules: [
+      { name: "Seguimiento", description: "Consulta y supervisa avances.", icon: "fa-chart-line" },
+      { name: "Evaluación", description: "Revisa resultados e indicadores.", icon: "fa-clipboard-check" },
+      { name: "Instrumentos", description: "Atiende instrumentos asignados.", icon: "fa-file-lines" },
+      { name: "Reportes", description: "Consulta reportes disponibles.", icon: "fa-chart-column" }
+    ],
+    projects: [{ name: "Seguimiento 2026", period: "2026", assigned: 12, pending: 4, sent: 8, contact: "Equipo de Seguimiento" }],
+    notifications: [
+      { title: "Instrumentos pendientes", text: "Tienes 4 instrumentos pendientes de atención.", icon: "fa-clipboard-list" },
+      { title: "Nuevo reporte disponible", text: "El reporte de avance del periodo 2026 está disponible.", icon: "fa-file-lines" },
+      { title: "Actualización de proyecto", text: "Se actualizó la información de Seguimiento 2026.", icon: "fa-circle-info" }
+    ]
+  },
+  autoregistro: {
+    name: "Ana Paredes",
+    role: "Administrador USE",
+    authType: "Autoregistro",
+    site: "Unidad de Seguimiento y Evaluación",
+    institution: "Ministerio de Educación",
+    process: "Autoregistro 2026",
+    modules: [
+      { name: "Seguimiento", description: "Consulta el avance de tu proceso.", icon: "fa-chart-line" },
+      { name: "Instrumentos", description: "Revisa los instrumentos asignados.", icon: "fa-file-lines" },
+      { name: "Reportes", description: "Consulta reportes disponibles.", icon: "fa-chart-column" }
+    ],
+    projects: [{ name: "Seguimiento 2026", period: "2026", assigned: 8, pending: 2, sent: 6, contact: "Mesa de ayuda USE" }],
+    notifications: [
+      { title: "Instrumentos pendientes", text: "Tienes 2 instrumentos pendientes de atención.", icon: "fa-clipboard-list" },
+      { title: "Registro habilitado", text: "Tu acceso al proceso Autoregistro 2026 está habilitado.", icon: "fa-circle-check" }
+    ]
+  }
 };
 
 
-/* source: ref-016-sessions/js/state.js */
-function createSessionState({ authType, expired }) {
-  return { authType, expired, active: !expired, lastInteraction: new Date() };
+/* source: ref-017-welcome/js/state.js */
+function getWelcomeState(params, profiles) {
+  const requested = params.get("auth") === "passport" ? "passport" : "autoregistro";
+  return { profileKey: requested, profile: profiles[requested], notificationsOpen: false };
 }
 
 
-/* source: ref-016-sessions/js/session.js */
-function createSessionMarker(user, role) {
-  return { id: `demo-${Date.now()}`, user, role, createdAt: new Date().toISOString() };
-}
-
-function invalidateSession() {
-  try {
-    sessionStorage.removeItem("ssee-single-session");
-  } catch {
-    // The demo remains usable when browser storage is unavailable.
-  }
-}
-
-function replaceActiveSession(marker) {
-  try {
-    sessionStorage.setItem("ssee-single-session", JSON.stringify(marker));
-  } catch {
-    // The demo remains usable when browser storage is unavailable.
-  }
-}
-
-
-/* source: ref-016-sessions/js/ui.js */
+/* source: ref-017-welcome/js/ui.js */
 
 
 function showToast(refs, message, type = "info") {
   renderToast(refs.toast, message, type);
 }
 
-function showAuthView(refs, user, message) {
-  refs.activeView.hidden = true;
-  refs.authView.hidden = false;
-  refs.logoutButton.hidden = true;
-  refs.authMessage.textContent = message;
-  refs.authLink.href = user.authenticationUrl;
+function renderProfile(refs, profile) {
+  refs.accountName.textContent = profile.name;
+  refs.accountRole.textContent = profile.role;
+  refs.accountInitial.textContent = profile.name.charAt(0);
+  refs.welcomeTitle.textContent = `Bienvenido, ${profile.name}`;
+  refs.welcomeSubtitle.textContent = profile.authType === "Autoregistro" ? "Consulta las opciones disponibles para tu proceso de registro." : "Consulta los módulos y proyectos disponibles para tu acceso.";
+  refs.processContext.hidden = !profile.process;
+  refs.processText.textContent = profile.process;
+  refs.moduleCount.textContent = `${profile.modules.length} módulos`;
+  refs.projectCount.textContent = `${profile.projects.length} ${profile.projects.length === 1 ? "proyecto" : "proyectos"}`;
+  refs.moduleGrid.innerHTML = profile.modules.map((module) => `<a href="#" class="module-item" data-module="${module.name}"><span class="module-icon"><i class="fa-solid ${module.icon}" aria-hidden="true"></i></span><span><strong>${module.name}</strong><span>${module.description}</span></span><i class="fa-solid fa-chevron-right module-arrow" aria-hidden="true"></i></a>`).join("");
+  refs.projectList.innerHTML = profile.projects.map((project) => `<article class="project-item"><div class="project-item-head"><strong>${project.name}</strong><span class="count-label">Periodo ${project.period}</span></div><div class="project-meta"><span class="metric"><i class="fa-solid fa-layer-group" aria-hidden="true"></i>${project.assigned} asignados</span><span class="metric pending"><i class="fa-solid fa-clock" aria-hidden="true"></i>${project.pending} pendientes</span><span class="metric sent"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i>${project.sent} enviados</span></div><div class="project-contact"><i class="fa-regular fa-address-book" aria-hidden="true"></i><span>Contacto: ${project.contact}</span></div></article>`).join("");
+  refs.userSummary.innerHTML = `<div><span>Nombre completo</span><strong>${profile.name}</strong></div><div><span>Tipo de autenticación</span><strong>${profile.authType}</strong></div><div><span>Rol referencial</span><strong>${profile.role}</strong></div><div><span>Sede</span><strong>${profile.site}</strong></div>`;
 }
 
-function updateLastInteraction(refs, date) {
-  refs.lastInteraction.textContent = date.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" });
+function renderNotifications(refs, notifications) {
+  refs.notificationCount.textContent = notifications.length;
+  refs.notificationList.innerHTML = notifications.map((notification) => `<article class="notification-item"><span class="notification-icon"><i class="fa-solid ${notification.icon}" aria-hidden="true"></i></span><div><strong>${notification.title}</strong><span>${notification.text}</span></div></article>`).join("");
+}
+
+function setNotificationPanel(refs, isOpen) {
+  refs.notificationPanel.hidden = !isOpen;
+  refs.notificationButton.setAttribute("aria-expanded", String(isOpen));
 }
 
 
@@ -270,54 +338,226 @@ function updateLastInteraction(refs, date) {
 
 
 
-
 const refs = {
-  activeView: document.getElementById("activeView"), authView: document.getElementById("authView"), authMessage: document.getElementById("authMessage"), authLink: document.getElementById("authLink"), logoutButton: document.getElementById("logoutButton"), newSessionButton: document.getElementById("newSessionButton"), interactButton: document.getElementById("interactButton"), expireButton: document.getElementById("expireButton"), confirmDialog: document.getElementById("confirmDialog"), closeConfirm: document.getElementById("closeConfirm"), cancelLogout: document.getElementById("cancelLogout"), confirmLogout: document.getElementById("confirmLogout"), lastInteraction: document.getElementById("lastInteraction"), toast: document.getElementById("toast")
+  welcomeShell: document.getElementById("welcomeShell"), accountName: document.getElementById("accountName"), accountRole: document.getElementById("accountRole"), accountInitial: document.getElementById("accountInitial"), welcomeTitle: document.getElementById("welcomeTitle"), welcomeSubtitle: document.getElementById("welcomeSubtitle"), processContext: document.getElementById("processContext"), processText: document.getElementById("processText"), moduleCount: document.getElementById("moduleCount"), projectCount: document.getElementById("projectCount"), moduleGrid: document.getElementById("moduleGrid"), projectList: document.getElementById("projectList"), userSummary: document.getElementById("userSummary"), notificationButton: document.getElementById("notificationButton"), notificationCount: document.getElementById("notificationCount"), notificationPanel: document.getElementById("notificationPanel"), notificationList: document.getElementById("notificationList"), closeNotifications: document.getElementById("closeNotifications"), accountMenuTrigger: document.getElementById("accountMenuTrigger"), accountMenu: document.getElementById("accountMenu"), logoutOption: document.getElementById("logoutOption"), authView: document.getElementById("authView"), authMessage: document.getElementById("authMessage"), sessionLoginForm: document.getElementById("sessionLoginForm"), autoregisterFields: document.getElementById("sessionAutoregisterFields"), passportFields: document.getElementById("sessionPassportFields"), sessionEmail: document.getElementById("sessionEmail"), sessionDocumentNumber: document.getElementById("sessionDocumentNumber"), sessionPassword: document.getElementById("sessionPassword"), confirmDialog: document.getElementById("confirmDialog"), closeConfirm: document.getElementById("closeConfirm"), cancelLogout: document.getElementById("cancelLogout"), confirmLogout: document.getElementById("confirmLogout"), inactivityAlert: document.getElementById("inactivityAlert"), toast: document.getElementById("toast")
 };
 
-const params = new URLSearchParams(window.location.search);
-const authType = params.get("auth") === "passport" ? "Passport" : "Autoregistro";
-const expired = params.get("mode") === "expired";
-const user = sessionUsers[authType];
-const state = createSessionState({ authType, expired });
+const state = getWelcomeState(new URLSearchParams(window.location.search), welcomeProfiles);
+let pendingAuthentication = null;
+let inactivityTimer = null;
 
-document.getElementById("accountName").textContent = user.name;
-document.getElementById("authType").textContent = user.authType;
-document.getElementById("detailUser").textContent = user.name;
-document.getElementById("detailRole").textContent = user.role;
+renderProfile(refs, state.profile);
+renderNotifications(refs, state.profile.notifications);
 
+function setAccountMenu(isOpen) {
+  refs.accountMenu.hidden = !isOpen;
+  refs.accountMenuTrigger.setAttribute("aria-expanded", String(isOpen));
+}
+
+function showAuthentication(message, reason) {
+  pendingAuthentication = reason;
+  refs.welcomeShell.hidden = true;
+  refs.notificationPanel.hidden = true;
+  refs.authView.hidden = false;
+  refs.authMessage.textContent = message;
+  refs.autoregisterFields.hidden = state.profile.authType === "Passport";
+  refs.passportFields.hidden = state.profile.authType !== "Passport";
+  refs.sessionEmail.required = state.profile.authType !== "Passport";
+  refs.sessionDocumentNumber.required = state.profile.authType === "Passport";
+  if (state.profile.authType === "Passport") refs.sessionDocumentNumber.value = "72184563";
+}
+
+function showWelcome() {
+  refs.welcomeShell.hidden = false;
+  refs.authView.hidden = true;
+  refs.inactivityAlert.hidden = true;
+  refs.sessionPassword.value = "demo";
+  setAccountMenu(false);
+}
+
+function startNewSession() {
+  showAuthentication("Autentícate nuevamente para iniciar una nueva sesión.", "new");
+  window.dispatchEvent(new CustomEvent("ref016-auth-ready"));
+}
+
+function startInactivity() {
+  window.clearTimeout(inactivityTimer);
+  refs.inactivityAlert.hidden = false;
+  window.dispatchEvent(new CustomEvent("ref016-session-warning"));
+  inactivityTimer = window.setTimeout(() => {
+    refs.inactivityAlert.hidden = true;
+    showAuthentication(getMessage("M28"), "inactivity");
+    showToast(refs, getMessage("M28"), "warning");
+    window.dispatchEvent(new CustomEvent("ref016-session-ended", { detail: { reason: "inactivity" } }));
+  }, 1200);
+}
+
+refs.notificationButton.addEventListener("click", () => {
+  state.notificationsOpen = !state.notificationsOpen;
+  setNotificationPanel(refs, state.notificationsOpen);
+});
+refs.closeNotifications.addEventListener("click", () => {
+  state.notificationsOpen = false;
+  setNotificationPanel(refs, false);
+});
+refs.accountMenuTrigger.addEventListener("click", () => setAccountMenu(refs.accountMenu.hidden));
+document.addEventListener("click", (event) => {
+  if (state.notificationsOpen && !refs.notificationPanel.contains(event.target) && !refs.notificationButton.contains(event.target)) {
+    state.notificationsOpen = false;
+    setNotificationPanel(refs, false);
+  }
+  if (!refs.accountMenu.contains(event.target) && !refs.accountMenuTrigger.contains(event.target)) setAccountMenu(false);
+});
+refs.moduleGrid.addEventListener("click", (event) => {
+  const module = event.target.closest("[data-module]");
+  if (!module) return;
+  event.preventDefault();
+  showToast(refs, `Acceso a ${module.dataset.module} disponible para revisión.`, "info");
+});
+refs.logoutOption.addEventListener("click", () => {
+  setAccountMenu(false);
+  refs.confirmDialog.hidden = false;
+  refs.cancelLogout.focus();
+});
 function closeDialog() { refs.confirmDialog.hidden = true; }
-
-function endSession(message) {
-  invalidateSession();
-  state.active = false;
+refs.cancelLogout.addEventListener("click", closeDialog);
+refs.closeConfirm.addEventListener("click", closeDialog);
+refs.confirmDialog.addEventListener("click", (event) => { if (event.target === refs.confirmDialog) closeDialog(); });
+refs.confirmLogout.addEventListener("click", () => {
+  recordAuditEvent({ user: state.profile.name, authType: state.profile.authType, operation: "Cierre de sesión", closureType: "Voluntario", result: "Exitosa" });
   closeDialog();
-  showAuthView(refs, user, message);
+  showAuthentication(getPrototypeMessage("sessionClosed"), "logout");
   showToast(refs, getPrototypeMessage("sessionInactive"), "success");
-}
+  window.dispatchEvent(new CustomEvent("ref016-session-ended", { detail: { reason: "logout" } }));
+});
+refs.sessionLoginForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const reason = pendingAuthentication;
+  pendingAuthentication = null;
+  showWelcome();
+  showToast(refs, reason === "new" ? getPrototypeMessage("previousSessionClosed") : getPrototypeMessage("sessionActive"), reason === "new" ? "info" : "success");
+  window.dispatchEvent(new CustomEvent("ref016-authenticated", { detail: { reason } }));
+});
+refs.sessionLoginForm.querySelector(".password-toggle").addEventListener("click", () => {
+  const showing = refs.sessionPassword.type === "text";
+  refs.sessionPassword.type = showing ? "password" : "text";
+  refs.sessionLoginForm.querySelector(".password-toggle").setAttribute("aria-label", showing ? "Mostrar contraseña" : "Ocultar contraseña");
+});
+window.addEventListener("ref016-guide-reset", showWelcome);
+window.addEventListener("ref016-start-new-session", startNewSession);
+window.addEventListener("ref016-start-inactivity", startInactivity);
 
-if (expired) {
-  invalidateSession();
-  showAuthView(refs, user, getMessage("M28"));
-  showToast(refs, getMessage("M28"), "warning");
-} else {
-  replaceActiveSession(createSessionMarker(user.name, user.role));
-  updateLastInteraction(refs, state.lastInteraction);
-  refs.interactButton.addEventListener("click", () => {
-    state.lastInteraction = new Date();
-    updateLastInteraction(refs, state.lastInteraction);
-    showToast(refs, getPrototypeMessage("sessionActive"), "success");
+
+/* source: ref-016-sessions/js/session-guide.js */
+(function () {
+  const guide = document.getElementById("sessionGuide");
+  const title = document.getElementById("sessionGuideTitle");
+  const copy = document.getElementById("sessionGuideCopy");
+  const options = document.getElementById("sessionGuideOptions");
+  const cursor = document.getElementById("sessionCursor");
+  if (!guide || !title || !copy || !options || !cursor) return;
+
+  const scenarios = {
+    main: {
+      label: "flujo principal",
+      startEvents: [],
+      steps: [
+        { target: "#accountName", title: "Sesión autenticada", copy: "Ahora iniciaremos el flujo principal. Esta bienvenida se muestra después de una autenticación exitosa y refleja el usuario, su rol y sus módulos habilitados.", auto: 1800 }
+      ]
+    },
+    new: {
+      label: "flujo de nueva sesión",
+      startEvents: ["ref016-start-new-session"],
+      steps: [
+        { target: "#sessionLoginSubmit", title: "Inicia sesión nuevamente", copy: "Ahora iniciaremos el flujo de nueva sesión. La pantalla de autenticación pertenece a este REF-016 y representa el nuevo acceso del mismo usuario.", event: "ref016-authenticated" },
+        { target: "#welcome", title: "Sesión reemplazada", copy: "La sesión anterior finalizó automáticamente y la nueva sesión queda activa en la bienvenida.", auto: 1100 }
+      ]
+    },
+    inactive: {
+      label: "flujo de inactividad",
+      startEvents: ["ref016-start-inactivity"],
+      steps: [
+        { target: "#inactivityAlert .confirm-modal", title: "Alerta de inactividad", copy: "Ahora iniciaremos el flujo de inactividad. A los 28 minutos el sistema avisa que la sesión se cerrará automáticamente en 2 minutos.", auto: 900 },
+        { target: "#authView", title: "Vuelve al login", copy: "Al cumplirse los 30 minutos, la sesión se invalida y el usuario vuelve a la pantalla de autenticación.", auto: 900 }
+      ]
+    },
+    logout: {
+      label: "flujo de cierre voluntario",
+      startEvents: [],
+      steps: [
+        { target: "#accountMenuTrigger", title: "Abre tu cuenta", copy: "Ahora iniciaremos el flujo de cierre voluntario. Selecciona el nombre del usuario para abrir sus opciones.", click: true },
+        { target: "#logoutOption", title: "Cierra sesión", copy: "Selecciona Cerrar sesión para finalizar voluntariamente la sesión activa.", click: true },
+        { target: "#confirmLogout", title: "Confirma el cierre", copy: "Confirma la acción para finalizar inmediatamente la sesión.", event: "ref016-session-ended" },
+        { target: "#authView", title: "Vuelve al login", copy: "La sesión queda invalidada y el usuario permanece dentro de este REF-016 en la pantalla de autenticación.", auto: 900 }
+      ]
+    }
+  };
+
+  let scenarioKey = null;
+  let stepIndex = 0;
+  let runId = 0;
+
+  function isVisible(element) {
+    return element && !element.hidden && getComputedStyle(element).display !== "none";
+  }
+
+  function hideCursor() { cursor.classList.remove("is-visible"); }
+
+  function positionCursor(element) {
+    const box = element.getBoundingClientRect();
+    cursor.style.left = `${box.left + box.width / 2 - 10}px`;
+    cursor.style.top = `${box.top + box.height / 2 - 10}px`;
+    hideCursor();
+    requestAnimationFrame(() => cursor.classList.add("is-visible"));
+  }
+
+  function finish() {
+    title.textContent = "Recorrido completo";
+    copy.textContent = `El ${scenarios[scenarioKey].label} terminó dentro del REF-016. Puedes seleccionar otro flujo.`;
+    options.hidden = false;
+    hideCursor();
+  }
+
+  function showStep() {
+    const steps = scenarios[scenarioKey].steps;
+    if (stepIndex >= steps.length) return finish();
+    const step = steps[stepIndex];
+    const element = document.querySelector(step.target);
+    if (!isVisible(element)) return window.setTimeout(showStep, 80);
+
+    title.textContent = step.title;
+    copy.textContent = step.copy;
+    positionCursor(element);
+    const currentRun = runId;
+    const advance = () => window.setTimeout(() => {
+      if (currentRun !== runId) return;
+      stepIndex += 1;
+      showStep();
+    }, 80);
+    if (step.event) window.addEventListener(step.event, advance, { once: true });
+    else if (step.auto) window.setTimeout(advance, step.auto);
+    else if (step.click) element.addEventListener("click", advance, { once: true });
+  }
+
+  function startScenario(nextScenario) {
+    if (!scenarios[nextScenario]) return;
+    scenarioKey = nextScenario;
+    stepIndex = 0;
+    runId += 1;
+    guide.hidden = false;
+    options.hidden = true;
+    title.textContent = `Ahora iniciaremos el ${scenarios[nextScenario].label}`;
+    copy.textContent = "La guía externa te indicará cada paso y permanecerá dentro de este requerimiento.";
+    hideCursor();
+    window.dispatchEvent(new CustomEvent("ref016-guide-reset"));
+    scenarios[nextScenario].startEvents.forEach((eventName) => window.dispatchEvent(new CustomEvent(eventName)));
+    window.setTimeout(showStep, 140);
+  }
+
+  document.querySelectorAll("[data-session-scenario]").forEach((option) => option.addEventListener("click", () => startScenario(option.dataset.sessionScenario)));
+  window.addEventListener("resize", () => {
+    if (!scenarioKey || !scenarios[scenarioKey].steps[stepIndex]) return;
+    const element = document.querySelector(scenarios[scenarioKey].steps[stepIndex].target);
+    if (isVisible(element)) positionCursor(element);
   });
-  refs.newSessionButton.addEventListener("click", () => {
-    replaceActiveSession(createSessionMarker(user.name, user.role));
-    state.lastInteraction = new Date();
-    updateLastInteraction(refs, state.lastInteraction);
-    showToast(refs, getPrototypeMessage("previousSessionClosed"), "info");
-  });
-  refs.expireButton.addEventListener("click", () => endSession(getMessage("M28")));
-  refs.logoutButton.addEventListener("click", () => { refs.confirmDialog.hidden = false; refs.cancelLogout.focus(); });
-  refs.cancelLogout.addEventListener("click", closeDialog);
-  refs.closeConfirm.addEventListener("click", closeDialog);
-  refs.confirmLogout.addEventListener("click", () => endSession(getPrototypeMessage("sessionClosed")));
-  refs.confirmDialog.addEventListener("click", (event) => { if (event.target === refs.confirmDialog) closeDialog(); });
-}
+})();

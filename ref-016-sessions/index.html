@@ -7,29 +7,105 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="../design-system/app.css?v=20260827-form-controls">
-  <link rel="stylesheet" href="../ref-008-auth-passport/styles.css">
+  <link rel="stylesheet" href="../design-system/auth.css?v=20260908-auth-family">
+  <link rel="stylesheet" href="../ref-017-welcome/styles.css">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-  <div class="session-page">
-    <header class="session-header">
-      <div class="public-brand"><span class="logo-symbol">S</span><span><strong>S.S.E.E.</strong><small>Seguimiento y Evaluación Estratégica</small></span></div>
-      <div class="session-account"><span class="avatar">A</span><div><strong id="accountName">Ana Paredes</strong><span id="authType">Autoregistro</span></div><button class="btn btn-outline-ssee" id="logoutButton" type="button"><i class="fa-solid fa-arrow-right-from-bracket"></i> Cerrar sesión</button></div>
-    </header>
-    <main class="session-main">
-      <section class="session-card" id="activeView">
-        <div class="title-row"><span class="title-icon"><i class="fa-solid fa-lock"></i></span><div><nav class="breadcrumb"><a href="../index.html">Índice de requerimientos</a> / ALI-REF-016 / Gestión de sesiones</nav><h1>Sesión activa</h1><p>La sesión está asociada al usuario y al rol con el que ingresó.</p></div></div>
-        <div class="session-status"><i class="fa-solid fa-circle-check"></i><div><strong>Sesión vigente</strong><span>La sesión se mantiene activa mientras exista interacción.</span></div></div>
-        <div class="session-details"><div><span>Usuario</span><strong id="detailUser">Ana Paredes</strong></div><div><span>Rol de acceso</span><strong id="detailRole">Administrador USE</strong></div><div><span>Última interacción</span><strong id="lastInteraction">Ahora</strong></div><div><span>Inactividad máxima</span><strong>15 minutos</strong></div></div>
-        <div class="module-list"><strong>Módulos habilitados</strong><div class="tags"><span class="tag"><i class="fa-solid fa-chart-line"></i> Seguimiento</span><span class="tag"><i class="fa-solid fa-clipboard-check"></i> Evaluación</span><span class="tag"><i class="fa-solid fa-file-lines"></i> Reportes</span></div></div>
-        <div class="session-actions"><button class="btn btn-outline-ssee" id="interactButton" type="button"><i class="fa-solid fa-hand-pointer"></i> Registrar interacción</button><button class="btn btn-outline-ssee" id="newSessionButton" type="button"><i class="fa-solid fa-right-to-bracket"></i> Simular nueva sesión</button><button class="btn btn-outline-ssee btn-danger-outline" id="expireButton" type="button"><i class="fa-solid fa-clock"></i> Simular inactividad</button></div>
+<body data-session-guide="true">
+  <div class="app-shell" id="welcomeShell">
+    <aside class="sidebar" aria-label="Navegación principal">
+      <div class="side-brand">
+        <div class="logo-symbol" aria-hidden="true">S</div>
+        <div><strong>S.S.E.E.</strong><span>Seguimiento y Evaluación Estratégica</span></div>
+      </div>
+      <nav class="side-nav" aria-label="Menú lateral">
+        <a href="#welcome" class="nav-item is-active"><i class="fa-solid fa-house me-2" aria-hidden="true"></i>Inicio</a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-button top-menu" type="button" aria-label="Abrir menú"><span></span><span></span><span></span></button>
+        <div class="top-divider" aria-hidden="true"></div>
+        <div class="top-info">
+          <div class="info-card">
+            <span class="info-icon" aria-hidden="true"><i class="fa-regular fa-clock"></i></span>
+            <div><strong>Último acceso</strong><span>5:00 PM - 25/12/2024</span></div>
+          </div>
+          <div class="info-card location-card">
+            <span class="info-icon" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></span>
+            <div><strong>Sede</strong><span>Unidad de Seguimiento y Evaluación</span></div>
+            <i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="top-divider" aria-hidden="true"></div>
+        <div class="account">
+          <button class="bell notification-trigger" id="notificationButton" type="button" aria-label="Ver notificaciones" aria-expanded="false">
+            <i class="fa-regular fa-bell" aria-hidden="true"></i><span class="notification-badge" id="notificationCount">0</span>
+          </button>
+          <div class="account-separator" aria-hidden="true"></div>
+          <div class="account-menu-wrap">
+            <button class="account-menu-trigger" id="accountMenuTrigger" type="button" aria-expanded="false" aria-controls="accountMenu">
+              <span class="account-copy"><strong id="accountName">Ana Paredes</strong><span id="accountRole">Administrador USE</span></span>
+              <span class="avatar" id="accountInitial" aria-hidden="true">A</span>
+              <i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>
+            </button>
+            <div class="account-dropdown" id="accountMenu" hidden><button class="dropdown-item" id="logoutOption" type="button"><i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>Cerrar sesión</button></div>
+          </div>
+        </div>
+      </header>
+
+      <section class="view is-active" id="welcome" aria-labelledby="welcomeTitle">
+        <div class="page-head welcome-head">
+          <div>
+            <nav class="breadcrumb" aria-label="Ruta"><a href="../index.html">Índice de requerimientos</a> / ALI-REF-016 / Gestión de sesiones</nav>
+            <div class="title-row">
+              <div class="title-icon" aria-hidden="true"><i class="fa-solid fa-house"></i></div>
+              <div><h1 id="welcomeTitle">Bienvenido, Ana Paredes</h1><p id="welcomeSubtitle">Consulta los módulos y proyectos disponibles para tu acceso.</p></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="context-strip" id="processContext" hidden>
+          <span class="context-icon" aria-hidden="true"><i class="fa-solid fa-user-plus"></i></span>
+          <div><strong>Proceso asociado</strong><span id="processText">Autoregistro 2026</span></div>
+        </div>
+
+        <div class="welcome-grid">
+          <section class="surface-card modules-card" aria-labelledby="modulesTitle">
+            <div class="section-heading"><div><p class="eyebrow">Acceso según rol y permisos</p><h2 id="modulesTitle">Módulos disponibles</h2></div><span class="count-label" id="moduleCount">0 módulos</span></div>
+            <div class="module-grid" id="moduleGrid"></div>
+          </section>
+
+          <section class="surface-card project-card" aria-labelledby="projectsTitle">
+            <div class="section-heading"><div><p class="eyebrow">Asignaciones vigentes</p><h2 id="projectsTitle">Mis proyectos</h2></div><span class="count-label" id="projectCount">0 proyectos</span></div>
+            <div id="projectList" class="project-list"></div>
+          </section>
+        </div>
+
+        <section class="surface-card summary-card" aria-labelledby="summaryTitle">
+          <div class="section-heading"><div><p class="eyebrow">Información del acceso</p><h2 id="summaryTitle">Resumen de usuario</h2></div><span class="status-chip"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Acceso habilitado</span></div>
+          <div class="user-summary" id="userSummary"></div>
+        </section>
       </section>
-      <section class="session-card auth-redirect" id="authView" hidden><span class="auth-icon"><i class="fa-solid fa-right-to-bracket"></i></span><div><h1 id="authTitle">Sesión finalizada</h1><p id="authMessage">La sesión terminó. Inicia sesión nuevamente para continuar.</p><a class="btn btn-ssee mt-3" id="authLink" href="../ref-010-auth-autoregistro/index.html"><i class="fa-solid fa-arrow-right"></i> Ir a autenticación</a></div></section>
+
+      <footer class="footer"><div class="minedu-mark"><img class="minedu-logo" src="../assets/minedu.jpg" alt="Ministerio de Educación"></div><div><p>2026. Todos los derechos reservados.</p><p>Ministerio de Educación - S.S.E.E. - Versión 0.1</p></div></footer>
     </main>
-    <footer class="footer"><div class="minedu-mark"><img class="minedu-logo" src="../assets/minedu.jpg" alt="Ministerio de Educación"></div><div><p>2026. Todos los derechos reservados.</p><p>Ministerio de Educación - S.S.E.E. - Versión 0.1</p></div></footer>
   </div>
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <section class="auth-page session-auth-view" id="authView" hidden>
+    <main class="auth-main"><section class="auth-shell"><div class="auth-form-panel"><div class="auth-brand" aria-label="S.S.E.E."><span class="logo-symbol">S</span><span><strong>S.S.E.E.</strong><small>Seguimiento y Evaluación Estratégica</small></span></div><div class="auth-heading"><h1>Ingresar a S.S.E.E.</h1><p id="authMessage">La sesión terminó. Inicia sesión nuevamente para continuar.</p></div><form id="sessionLoginForm" novalidate><div id="sessionAutoregisterFields"><label class="field-label" for="sessionEmail">Correo electrónico <span>*</span><input class="form-control" id="sessionEmail" type="email" autocomplete="username" value="ana.paredes@ejemplo.gob.pe" required></label></div><div class="field-grid" id="sessionPassportFields" hidden><label class="field-label" for="sessionDocumentType">Tipo de documento <span>*</span><select class="form-select" id="sessionDocumentType"><option>DNI</option><option>CE</option></select></label><label class="field-label" for="sessionDocumentNumber">Número de documento <span>*</span><input class="form-control" id="sessionDocumentNumber" inputmode="numeric" autocomplete="username" placeholder="Ingresa tu número"></label></div><label class="field-label password-field" for="sessionPassword">Contraseña <span>*</span><span class="password-input"><input class="form-control" id="sessionPassword" type="password" autocomplete="current-password" value="demo" required><button class="password-toggle" type="button" aria-label="Mostrar contraseña"><i class="fa-regular fa-eye"></i></button></span></label><div class="form-actions"><button class="btn btn-ssee button button-primary" id="sessionLoginSubmit" type="submit"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>Ingresar</button></div></form></div><aside class="auth-visual-panel" aria-hidden="true"></aside></section></main><footer class="footer"><div class="minedu-mark"><img class="minedu-logo" src="../assets/minedu.jpg" alt="Ministerio de Educación"></div><div><p>2026. Todos los derechos reservados.</p><p>Ministerio de Educación - S.S.E.E. - Versión 0.1</p></div></footer>
+  </section>
+  <div class="confirm-backdrop" id="inactivityAlert" role="alertdialog" aria-modal="true" aria-labelledby="inactivityAlertTitle" hidden><div class="confirm-modal"><div class="confirm-header"><span class="confirm-icon"><i class="fa-solid fa-clock" aria-hidden="true"></i></span><h2 id="inactivityAlertTitle">Sesión próxima a finalizar</h2></div><div class="confirm-body"><p>La sesión se cerrará automáticamente en 2 minutos por inactividad.</p></div></div></div>
   <div class="confirm-backdrop" id="confirmDialog" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden><div class="confirm-modal"><div class="confirm-header"><span class="confirm-icon"><i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i></span><h2 id="confirmTitle">¿Deseas cerrar sesión?</h2><button class="confirm-close" id="closeConfirm" type="button" aria-label="Cerrar"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button></div><div class="confirm-body"><p>Se finalizará la sesión activa y tendrás que volver a autenticarte para ingresar.</p></div><div class="confirm-actions"><button class="btn btn-outline-ssee" id="cancelLogout" type="button">No</button><button class="btn btn-ssee" id="confirmLogout" type="button">Sí</button></div></div></div>
+
+  <aside class="notification-panel" id="notificationPanel" aria-labelledby="notificationTitle" hidden>
+    <div class="notification-panel-head"><div><p class="eyebrow">Centro de avisos</p><h2 id="notificationTitle">Notificaciones</h2></div><button class="panel-close" id="closeNotifications" type="button" aria-label="Cerrar notificaciones"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button></div>
+    <div id="notificationList"></div>
+  </aside>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <aside class="demo-guide session-guide" id="sessionGuide" aria-label="Guía de demo"><span class="demo-guide-label">Guía de demo</span><strong id="sessionGuideTitle">¿Qué flujo deseas probar?</strong><p id="sessionGuideCopy">Selecciona un flujo para iniciar el recorrido.</p><div class="demo-guide-actions" id="sessionGuideOptions"><button type="button" class="demo-guide-option" data-session-scenario="main">Flujo principal</button><button type="button" class="demo-guide-option" data-session-scenario="new">Nueva sesión</button><button type="button" class="demo-guide-option" data-session-scenario="inactive">Inactividad</button><button type="button" class="demo-guide-option" data-session-scenario="logout">Cierre voluntario</button></div></aside>
+  <div class="demo-cursor" id="sessionCursor" aria-hidden="true"><span>➤</span></div>
   <script src="dist/sessions.js"></script>
 </body>
 </html>

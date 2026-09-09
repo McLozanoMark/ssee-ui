@@ -16,6 +16,150 @@ if (document.readyState === "loading") {
 }
 
 
+/* source: design-system/auth-guide.js */
+(function () {
+  const guide = document.getElementById("authGuide");
+  const cursor = document.getElementById("authCursor");
+  const root = document.querySelector("[data-auth-guide]");
+  if (!guide || !cursor || !root) return;
+
+  const title = document.getElementById("authGuideTitle");
+  const copy = document.getElementById("authGuideCopy");
+  const kind = root.dataset.authGuide;
+  const authParam = new URLSearchParams(window.location.search).get("auth");
+  const authType = authParam === "passport" ? "Passport" : authParam === "document" ? "Documento" : "Autoregistro";
+
+  const loginSteps = {
+    passport: [
+      ["#documentNumber", "Ingresa el documento", "Escribe el número de documento del usuario registrado en Passport.", "input"],
+      ["#password", "Ingresa la contraseña", "Escribe la contraseña asociada al usuario.", "input"],
+      ["#loginForm button[type=submit]", "Envía los datos", "Presiona Ingresar para ejecutar la validación del acceso.", "submit"]
+    ],
+    document: [
+      ["#documentNumber", "Ingresa el documento", "Escribe el número de documento para iniciar la validación.", "input"],
+      ["#birthDate", "Ingresa la fecha", "Completa la fecha de nacimiento del documento.", "input"],
+      ["#issueDate", "Ingresa la fecha", "Completa la fecha de emisión del documento.", "input"],
+      ["#loginForm button[type=submit]", "Envía los datos", "Presiona Ingresar para ejecutar la validación del acceso.", "submit"]
+    ],
+    autoregister: [
+      ["#email", "Ingresa el correo", "Escribe el correo de la cuenta creada mediante Autoregistro.", "input"],
+      ["#password", "Ingresa la contraseña", "Escribe la contraseña de la cuenta.", "input"],
+      ["#loginForm button[type=submit]", "Envía los datos", "Presiona Ingresar para validar el acceso.", "submit"]
+    ]
+  };
+
+  function getSteps() {
+    if (kind === "password") {
+      return authType === "Passport"
+        ? [["#passportRedirect", "Continúa en Passport", "El cambio de contraseña se gestiona en el mecanismo oficial de Passport.", "click"]]
+        : authType === "Documento"
+          ? [["#documentPanel", "Revisa el acceso", "Este tipo de acceso no administra una contraseña local.", "click"]]
+        : [
+          ["#currentPassword", "Ingresa la contraseña", "Escribe la contraseña actual de la cuenta.", "input"],
+          ["#newPassword", "Ingresa la contraseña", "Escribe la nueva contraseña.", "input"],
+          ["#confirmPassword", "Confirma la contraseña", "Repite la nueva contraseña.", "input"],
+          ["#passwordForm button[type=submit]", "Guarda el cambio", "Presiona Cambiar contraseña para completar el flujo.", "submit"]
+        ];
+    }
+    if (kind === "recovery") {
+      return authType === "Passport"
+        ? [["#passportRedirect", "Continúa en Passport", "La recuperación se gestiona en el mecanismo oficial de Passport.", "click"]]
+        : authType === "Documento"
+          ? [["#documentPanel", "Revisa el acceso", "Este tipo de acceso no requiere recuperación de contraseña local.", "click"]]
+        : [
+          ["#email", "Ingresa el correo", "Escribe el correo registrado para solicitar el enlace.", "input"],
+          ["#requestForm button[type=submit]", "Solicita el enlace", "Presiona Solicitar enlace para continuar.", "request"],
+          ["#openLink", "Abre el enlace", "En la demo, este botón representa el enlace recibido por correo.", "click"],
+          ["#newPassword", "Ingresa la contraseña", "Escribe la nueva contraseña.", "input"],
+          ["#confirmPassword", "Confirma la contraseña", "Repite la nueva contraseña.", "input"],
+          ["#resetForm button[type=submit]", "Restablece la contraseña", "Presiona Restablecer contraseña para finalizar.", "submit"]
+        ];
+    }
+    if (kind === "logout") {
+      return [
+        ["#accountMenuTrigger", "Abre tu cuenta", "Selecciona tu nombre para ver las opciones de sesión.", "click"],
+        ["#logoutOption", "Cierra sesión", "Selecciona esta opción para finalizar la sesión actual.", "click"]
+      ];
+    }
+    if (kind === "validation") return loginSteps.passport.map((step) => [step[0], step[1], "Este paso evidencia la validación general de autenticación.", step[3]]);
+    if (kind === "audit") return loginSteps.passport.map((step) => [step[0], step[1], "Este paso genera la trazabilidad del intento de autenticación.", step[3]]);
+    return loginSteps[kind] || [];
+  }
+
+  const steps = getSteps();
+  let current = 0;
+
+  function isVisible(element) {
+    return element && !element.hidden && getComputedStyle(element).display !== "none";
+  }
+
+  function finish(message) {
+    title.textContent = "Recorrido completo";
+    copy.textContent = message;
+    cursor.classList.remove("is-visible");
+  }
+
+  function bindStep(step) {
+    const element = document.querySelector(step[0]);
+    if (!element) return;
+    const eventName = step[3] === "input" ? "blur" : "click";
+    element.addEventListener(eventName, () => {
+      if (step[3] === "submit" || step[3] === "request") return;
+      window.setTimeout(nextStep, 0);
+    }, { once: true });
+    if (step[3] === "submit" || step[3] === "request") {
+      const form = element.form;
+      form?.addEventListener("submit", () => {
+        window.setTimeout(() => {
+          const success = document.querySelector(".auth-success, #successView");
+          const response = step[3] === "request" && isVisible(document.getElementById("sentView"))
+            ? "El enlace de recuperación está disponible para continuar."
+            : isVisible(success)
+              ? "El sistema muestra la confirmación del flujo."
+              : "El sistema muestra el resultado de la validación.";
+          if (step[3] === "request" && isVisible(document.getElementById("sentView"))) nextStep();
+          else finish(response);
+        }, 80);
+      }, { once: true });
+    }
+  }
+
+  function position(step, bind = true) {
+    const element = document.querySelector(step[0]);
+    if (!isVisible(element)) {
+      current += 1;
+      return showStep();
+    }
+    const box = element.getBoundingClientRect();
+    cursor.style.left = `${box.left + box.width / 2 - 8}px`;
+    cursor.style.top = `${box.top + box.height / 2 - 8}px`;
+    title.textContent = step[1];
+    copy.textContent = step[2];
+    cursor.classList.remove("is-visible");
+    requestAnimationFrame(() => cursor.classList.add("is-visible"));
+    if (bind) bindStep(step);
+  }
+
+  function showStep() {
+    if (current >= steps.length) return finish("El flujo terminó correctamente.");
+    position(steps[current]);
+  }
+
+  function nextStep() {
+    current += 1;
+    showStep();
+  }
+
+  window.setTimeout(() => {
+    guide.hidden = false;
+    showStep();
+  }, 0);
+  window.addEventListener("resize", () => {
+    if (steps[current]) position(steps[current], false);
+  });
+})();
+
+
 /* source: design-system/messages.js */
 const MESSAGE_CATALOG = Object.freeze({
   M1: { text: "¿Está seguro que desea guardar esta información?", type: "Confirmación", scope: "General" },
@@ -165,14 +309,54 @@ function closeMenus(root = document) {
   });
 }
 
-function openConfirmModal(id, message) {
+const INACTIVATION_REASON_MAX_LENGTH = 240;
+
+function resetConfirmReason(modal, required) {
+  const wrapper = modal.querySelector("[data-confirm-reason-wrap]");
+  const field = modal.querySelector("[data-confirm-reason]");
+  const error = modal.querySelector("[data-confirm-reason-error]");
+  if (!wrapper || !field) return;
+  wrapper.hidden = !required;
+  field.required = required;
+  field.maxLength = INACTIVATION_REASON_MAX_LENGTH;
+  field.setAttribute("aria-required", String(required));
+  field.setAttribute("aria-invalid", "false");
+  field.value = "";
+  if (error) {
+    error.hidden = true;
+    error.textContent = "";
+  }
+  modal.dataset.requireReason = String(required);
+}
+
+function openConfirmModal(id, message, { requireReason = false } = {}) {
   const modal = document.getElementById(id);
   if (!modal || !window.bootstrap) return null;
   const messageNode = modal.querySelector("[data-confirm-message]");
   if (messageNode) messageNode.textContent = message;
+  resetConfirmReason(modal, requireReason);
   const instance = bootstrap.Modal.getOrCreateInstance(modal);
   instance.show();
   return instance;
+}
+
+function getConfirmReason(id) {
+  return document.getElementById(id)?.querySelector("[data-confirm-reason]")?.value.trim() || "";
+}
+
+function validateConfirmReason(id, message = "Debe completar los campos obligatorios.") {
+  const modal = document.getElementById(id);
+  const field = modal?.querySelector("[data-confirm-reason]");
+  if (!modal || !field || modal.dataset.requireReason !== "true") return true;
+  const error = modal.querySelector("[data-confirm-reason-error]");
+  const valid = Boolean(field.value.trim());
+  field.setAttribute("aria-invalid", String(!valid));
+  if (error) {
+    error.textContent = valid ? "" : message;
+    error.hidden = valid;
+  }
+  if (!valid) field.focus();
+  return valid;
 }
 
 function closeConfirmModal(id) {
@@ -270,11 +454,12 @@ function validateResetPassword({ newPassword, confirmation, policy }) {
 
 
 const refs = {
-  passportPanel: document.getElementById("passportPanel"), passportRedirect: document.getElementById("passportRedirect"), requestForm: document.getElementById("requestForm"), email: document.getElementById("email"), requestFeedback: document.getElementById("requestFeedback"), backToLogin: document.getElementById("backToLogin"), requestView: document.getElementById("requestView"), sentView: document.getElementById("sentView"), resetView: document.getElementById("resetView"), expiredView: document.getElementById("expiredView"), successView: document.getElementById("successView"), openLink: document.getElementById("openLink"), requestNew: document.getElementById("requestNew"), resetForm: document.getElementById("resetForm"), newPassword: document.getElementById("newPassword"), confirmPassword: document.getElementById("confirmPassword"), resetFeedback: document.getElementById("resetFeedback"), cancelReset: document.getElementById("cancelReset"), policyLength: document.getElementById("policyLength"), policyUpper: document.getElementById("policyUpper"), policyLower: document.getElementById("policyLower"), policyNumber: document.getElementById("policyNumber"), toast: document.getElementById("toast")
+  passportPanel: document.getElementById("passportPanel"), passportRedirect: document.getElementById("passportRedirect"), documentPanel: document.getElementById("documentPanel"), documentRedirect: document.getElementById("documentRedirect"), requestForm: document.getElementById("requestForm"), email: document.getElementById("email"), requestFeedback: document.getElementById("requestFeedback"), backToLogin: document.getElementById("backToLogin"), requestView: document.getElementById("requestView"), sentView: document.getElementById("sentView"), resetView: document.getElementById("resetView"), expiredView: document.getElementById("expiredView"), successView: document.getElementById("successView"), openLink: document.getElementById("openLink"), requestNew: document.getElementById("requestNew"), resetForm: document.getElementById("resetForm"), newPassword: document.getElementById("newPassword"), confirmPassword: document.getElementById("confirmPassword"), resetFeedback: document.getElementById("resetFeedback"), cancelReset: document.getElementById("cancelReset"), policyLength: document.getElementById("policyLength"), policyUpper: document.getElementById("policyUpper"), policyLower: document.getElementById("policyLower"), policyNumber: document.getElementById("policyNumber"), toast: document.getElementById("toast")
 };
 
 const params = new URLSearchParams(window.location.search);
-const authType = params.get("auth") === "passport" ? "Passport" : "Autoregistro";
+const authParam = params.get("auth");
+const authType = authParam === "passport" ? "Passport" : authParam === "document" ? "Documento" : "Autoregistro";
 const tokenState = params.get("token") === "expired" ? "expired" : params.get("token") === "error" ? "error" : "available";
 const state = createRecoveryState({ authType, tokenState });
 
@@ -290,6 +475,10 @@ if (state.authType === "Passport") {
   refs.requestView.hidden = true;
   refs.passportPanel.hidden = false;
   refs.passportRedirect.addEventListener("click", () => { window.location.href = "../ref-008-auth-passport/index.html"; });
+} else if (state.authType === "Documento") {
+  refs.requestView.hidden = true;
+  refs.documentPanel.hidden = false;
+  refs.documentRedirect.addEventListener("click", () => { window.location.href = "../ref-009-auth-document/index.html"; });
 } else if (state.tokenState === "expired") {
   refs.requestView.hidden = true;
   refs.expiredView.hidden = false;
