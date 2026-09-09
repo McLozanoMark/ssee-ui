@@ -59,10 +59,12 @@ function randomCode() {
 }
 
 function renderConfigs() {
+  const header = refs.body.closest("table")?.querySelector("thead tr");
+  if (header && !header.querySelector("[data-column='row-number']")) header.insertAdjacentHTML("afterbegin", '<th data-column="row-number">N.°</th>');
   refs.body.innerHTML = filteredConfigs.length ? filteredConfigs.map((config) => {
     const index = configs.indexOf(config);
     const inactive = config.status === "Inactiva";
-    return `<tr><td><strong>${config.project}</strong></td><td>${config.role}</td><td><div class="period"><strong>${config.start}</strong><span>hasta ${config.end}</span></div></td><td><span class="status ${inactive ? "inactive" : "active"}">${config.status}</span></td><td class="code-cell">${config.code}</td><td><div class="row-actions"><button class="row-action" type="button" data-action="edit" data-edit="${index}" data-config-action="edit" data-config-index="${index}" aria-label="Editar ${config.project}" title="Editar"><i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span></button><label class="form-check form-switch switch row-state-toggle" data-state="${index}" data-on-label="Activa" data-off-label="Inactiva" title="${inactive ? "Activar configuración" : "Inactivar configuración"}"><input class="form-check-input" type="checkbox" data-config-action="toggle" data-config-index="${index}" ${inactive ? "" : "checked"} aria-label="${inactive ? "Activar" : "Inactivar"} configuración de ${config.project}"></label></div></td></tr>`;
+    return `<tr><td>${index + 1}</td><td><strong>${config.project}</strong></td><td>${config.role}</td><td><div class="period"><strong>${config.start}</strong><span>hasta ${config.end}</span></div></td><td><span class="status ${inactive ? "inactive" : "active"}">${config.status}</span></td><td class="code-cell">${config.code}</td><td><div class="row-actions"><button class="row-action" type="button" data-action="edit" data-edit="${index}" data-config-action="edit" data-config-index="${index}" aria-label="Editar ${config.project}" title="Editar"><i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span></button></div></td></tr>`;
   }).join("") : "";
   refs.emptyState.hidden = filteredConfigs.length > 0;
   const total = filteredConfigs.length;
@@ -130,10 +132,10 @@ function showGeneratedResult(config) {
   refs.resultActions.hidden = false;
 }
 
-function showConfirm(message, action) {
+function showConfirm(message, action, requireReason = false) {
   pendingAction = action;
   refs.confirmMessage.textContent = message;
-  bootstrap.Modal.getOrCreateInstance(refs.confirmModal).show();
+  openConfirmModal("confirmModal", message, { requireReason });
 }
 
 function sortConfigs(key, type) {
@@ -162,20 +164,6 @@ document.getElementById("newConfigBtn").addEventListener("click", () => openConf
 refs.body.addEventListener("click", (event) => {
   const editButton = event.target.closest('[data-config-action="edit"]');
   if (editButton) openConfigModal(Number(editButton.dataset.configIndex));
-});
-
-refs.body.addEventListener("change", (event) => {
-  const toggle = event.target.closest('[data-config-action="toggle"]');
-  if (!toggle) return;
-  const index = Number(toggle.dataset.configIndex);
-  const config = configs[index];
-  toggle.checked = config.status === "Activa";
-  const nextStatus = config.status === "Activa" ? "Inactiva" : "Activa";
-  showConfirm(getMessage(nextStatus === "Activa" ? "M5" : "M6"), () => {
-    config.status = nextStatus;
-    applyFilters(false);
-    showToast(getMessage(nextStatus === "Activa" ? "M7" : "M8"));
-  });
 });
 
 document.querySelectorAll(".sort-button").forEach((button) => button.addEventListener("click", () => sortConfigs(button.dataset.sortKey, button.dataset.sortType)));
@@ -211,6 +199,7 @@ refs.form.addEventListener("submit", (event) => {
 });
 
 refs.confirmAction.addEventListener("click", () => {
+  if (refs.confirmModal.dataset.requireReason === "true" && !validateConfirmReason("confirmModal", getMessage("M11"))) return;
   const action = pendingAction;
   pendingAction = null;
   bootstrap.Modal.getOrCreateInstance(refs.confirmModal).hide();

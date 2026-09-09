@@ -200,7 +200,6 @@ refs.confirmModal.addEventListener("hidden.bs.modal", () => {
   state.pendingCancel = false;
   state.pendingWizardStep = null;
   state.pendingEditStatus = null;
-  state.pendingStatus = null;
 });
 
 renderPermissions();

@@ -192,14 +192,54 @@ function closeMenus(root = document) {
   });
 }
 
-function openConfirmModal(id, message) {
+const INACTIVATION_REASON_MAX_LENGTH = 240;
+
+function resetConfirmReason(modal, required) {
+  const wrapper = modal.querySelector("[data-confirm-reason-wrap]");
+  const field = modal.querySelector("[data-confirm-reason]");
+  const error = modal.querySelector("[data-confirm-reason-error]");
+  if (!wrapper || !field) return;
+  wrapper.hidden = !required;
+  field.required = required;
+  field.maxLength = INACTIVATION_REASON_MAX_LENGTH;
+  field.setAttribute("aria-required", String(required));
+  field.setAttribute("aria-invalid", "false");
+  field.value = "";
+  if (error) {
+    error.hidden = true;
+    error.textContent = "";
+  }
+  modal.dataset.requireReason = String(required);
+}
+
+function openConfirmModal(id, message, { requireReason = false } = {}) {
   const modal = document.getElementById(id);
   if (!modal || !window.bootstrap) return null;
   const messageNode = modal.querySelector("[data-confirm-message]");
   if (messageNode) messageNode.textContent = message;
+  resetConfirmReason(modal, requireReason);
   const instance = bootstrap.Modal.getOrCreateInstance(modal);
   instance.show();
   return instance;
+}
+
+function getConfirmReason(id) {
+  return document.getElementById(id)?.querySelector("[data-confirm-reason]")?.value.trim() || "";
+}
+
+function validateConfirmReason(id, message = "Debe completar los campos obligatorios.") {
+  const modal = document.getElementById(id);
+  const field = modal?.querySelector("[data-confirm-reason]");
+  if (!modal || !field || modal.dataset.requireReason !== "true") return true;
+  const error = modal.querySelector("[data-confirm-reason-error]");
+  const valid = Boolean(field.value.trim());
+  field.setAttribute("aria-invalid", String(!valid));
+  if (error) {
+    error.textContent = valid ? "" : message;
+    error.hidden = valid;
+  }
+  if (!valid) field.focus();
+  return valid;
 }
 
 function closeConfirmModal(id) {
@@ -335,7 +375,6 @@ const state = {
   permissionDirty: false,
   editingIndex: null,
   openActionMenu: null,
-  pendingStatus: null,
   pendingEditStatus: null,
   pendingSave: false,
   pendingSaveStep: null,
@@ -347,7 +386,6 @@ const state = {
 function resetEditingState() {
   state.editingIndex = null;
   state.openActionMenu = null;
-  state.pendingStatus = null;
   state.pendingEditStatus = null;
   state.pendingSave = false;
   state.pendingSaveStep = null;
@@ -569,7 +607,6 @@ function selectedPermissionLabels() {
 function renderRoles() {
   refs.rolesBody.innerHTML = state.filteredRoles.map((role) => {
     const originalIndex = roles.findIndex((item) => item.name === role.name);
-    const hasUsers = role.status === "Activo" && role.users > 0;
     const tooltip = role.permissionDetails.length
       ? ` data-bs-toggle="tooltip" data-bs-title="${role.permissionDetails.join(", ")}"`
       : "";
@@ -592,9 +629,6 @@ function renderRoles() {
             <button type="button" class="row-action" data-action="edit" data-edit="${originalIndex}" aria-label="Editar ${role.name}" title="Editar">
               <i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span>
             </button>
-            <label class="form-check form-switch switch row-state-toggle ${hasUsers ? "is-disabled" : ""}" data-state="${originalIndex}" data-on-label="Activo" data-off-label="Inactivo" title="${hasUsers ? "No disponible: el rol tiene usuarios asociados." : ""}">
-              <input class="form-check-input" type="checkbox" ${role.status === "Activo" ? "checked" : ""} ${hasUsers ? "disabled" : ""} aria-label="${role.status === "Activo" ? "Inactivar" : "Activar"} ${role.name}">
-            </label>
           </div>
         </td>
       </tr>
@@ -631,7 +665,6 @@ function applyFilters() {
 function handleRoleAction(event, onEdit) {
   const editButton = event.target.closest("[data-edit]");
   const menuButton = event.target.closest("[data-menu]");
-  const stateControl = event.target.closest(".switch[data-state]");
 
   if (menuButton) {
     const index = menuButton.dataset.menu;
@@ -653,16 +686,6 @@ function handleRoleAction(event, onEdit) {
     return;
   }
 
-  if (stateControl) {
-    const input = stateControl.querySelector("input");
-    const role = roles[Number(stateControl.dataset.state)];
-    if (input.disabled || (role.status === "Activo" && role.users > 0)) {
-      showToast(getMessage("M15"), "warning");
-      return;
-    }
-    state.pendingStatus = { index: Number(stateControl.dataset.state), next: role.status === "Activo" ? "Inactivo" : "Activo" };
-    openConfirmModal("confirmModal", getMessage(state.pendingStatus.next === "Activo" ? "M5" : "M6"));
-  }
 }
 
 function handleEditStatusToggle(event) {
@@ -676,15 +699,19 @@ function handleEditStatusToggle(event) {
   const next = event.target.checked ? "Activo" : "Inactivo";
   refs.editStatusToggles.forEach((toggle) => { toggle.checked = role.status === "Activo"; });
   state.pendingEditStatus = { index: state.editingIndex, next };
-  openConfirmModal("confirmModal", getMessage(next === "Activo" ? "M5" : "M6"));
+  openConfirmModal("confirmModal", getMessage(next === "Activo" ? "M5" : "M6"), { requireReason: next === "Inactivo" });
 }
 
 function confirmStatus() {
-  const pending = state.pendingEditStatus || state.pendingStatus;
+  const pending = state.pendingEditStatus;
+  if (!pending) return;
+  if (pending.next === "Inactivo" && !validateConfirmReason("confirmModal", getMessage("M11"))) return;
+  const reason = pending.next === "Inactivo" ? getConfirmReason("confirmModal") : "";
   if (state.pendingEditStatus) {
     const { index, next } = state.pendingEditStatus;
     roles[index].status = next;
     roles[index].updated = "18/08/2026 09:00";
+    if (reason) roles[index].inactivationReason = reason;
     state.pendingEditStatus = null;
     refs.editStatusToggles.forEach((toggle) => { toggle.checked = next === "Activo"; });
     refs.editStatusLabels.forEach((label) => { label.textContent = next; });
@@ -693,14 +720,6 @@ function confirmStatus() {
     showToast(getMessage(next === "Activo" ? "M7" : "M8"), "success");
     return;
   }
-  if (!state.pendingStatus) return;
-  const { index, next } = state.pendingStatus;
-  roles[index].status = next;
-  roles[index].updated = "18/08/2026 09:00";
-  state.pendingStatus = null;
-  closeConfirmModal("confirmModal");
-  applyFilters();
-  showToast(getMessage(next === "Activo" ? "M7" : "M8"), "success");
 }
 
 
@@ -907,7 +926,6 @@ refs.confirmModal.addEventListener("hidden.bs.modal", () => {
   state.pendingCancel = false;
   state.pendingWizardStep = null;
   state.pendingEditStatus = null;
-  state.pendingStatus = null;
 });
 
 renderPermissions();

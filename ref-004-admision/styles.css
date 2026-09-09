@@ -124,16 +124,11 @@
 .role-option input { accent-color: var(--ssee-primary); }
 .modal-feedback { margin: 0.75rem 0 0; color: #b42318; font-size: 0.78rem; font-weight: 600; }
 .tag-add { border: 1px dashed var(--ssee-primary); background: #fff; color: var(--ssee-primary); cursor: pointer; }
-.dropdown-switch { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.35rem 1rem; color: var(--ssee-ink); font-size: 0.82rem; }
-.dropdown-switch span { display: inline-flex; align-items: center; gap: 0.5rem; }
 .action-menu.dropdown { position: relative; }
 .action-menu.dropdown .menu-btn { position: relative; z-index: 1; }
 .action-menu .dropdown-menu { min-width: 12rem; padding: 0.4rem; }
 .action-menu .dropdown-item { display: flex; align-items: center; gap: 0.65rem; min-height: 2.2rem; padding: 0.45rem 0.65rem; }
 .action-menu .dropdown-item i { width: 1rem; text-align: center; }
-.dropdown-switch .switch { min-height: 1.8rem; }
-.status-action-danger i { color: #dc3545; }
-.status-action-success i { color: #198754; }
 .reniec-consult { margin-top: 1rem; }
 .reniec-result { display: grid; gap: 0.7rem; margin-top: 1rem; padding: 0.8rem; border: 1px solid #b8e2d1; border-radius: 0.5rem; background: #f1fbf6; }
 .reniec-result div { display: grid; gap: 0.15rem; }

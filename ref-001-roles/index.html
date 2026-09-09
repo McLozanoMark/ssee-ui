@@ -79,7 +79,7 @@
             </button>
             <button class="btn btn-ssee button button-primary" id="newRoleBtn">
               <i class="fa-solid fa-plus icon"></i>
-              Nuevo rol
+              Nuevo
             </button>
           </div>
         </div>
@@ -286,7 +286,14 @@
           <h2 class="modal-title h5">Confirmar acción</h2>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
-        <div class="modal-body"><p data-confirm-message></p></div>
+        <div class="modal-body">
+          <p data-confirm-message></p>
+          <label class="confirm-reason-field" data-confirm-reason-wrap hidden>
+            <span>Motivo de inactivación *</span>
+            <textarea class="form-control" data-confirm-reason rows="3" maxlength="240" aria-describedby="confirmReasonError"></textarea>
+            <small class="field-error" data-confirm-reason-error id="confirmReasonError" hidden></small>
+          </label>
+        </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-outline-ssee button button-secondary" data-bs-dismiss="modal">No</button>
           <button type="button" class="btn btn-ssee button button-primary" id="confirmBtn">Sí</button>

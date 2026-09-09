@@ -213,8 +213,9 @@
             <div class="table-wrap">
               <table class="table align-middle mb-0 ssee-table">
                 <thead>
-                  <tr>
-                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="username" data-sort-type="text">Usuario <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+<tr>
+<th data-column="row-number">N.°</th>
+<th aria-sort="none"><button class="sort-button" type="button" data-sort-key="username" data-sort-type="text">Usuario <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
                     <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="name" data-sort-type="text">Nombres y apellidos <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
                     <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="email" data-sort-type="text">Correo <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
                     <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="auth" data-sort-type="text">Tipo de autenticación <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
@@ -332,7 +333,7 @@
       </div>
     </div>
     <div class="modal fade" id="confirmRolesModal" tabindex="-1" aria-labelledby="confirmRolesTitle" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content role-modal"><div class="modal-header"><span class="modal-title-icon" aria-hidden="true"><i class="fa-solid fa-circle-question"></i></span><h2 class="modal-title" id="confirmRolesTitle">Confirmar acción</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div><div class="modal-body"><p class="modal-context" id="confirmRolesMessage"></p></div><div class="modal-footer"><button type="button" class="btn btn-outline-ssee button button-secondary" data-bs-dismiss="modal">No</button><button type="button" class="btn btn-ssee button button-primary" id="confirmRolesBtn">Sí</button></div></div></div>
+      <div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content role-modal"><div class="modal-header"><span class="modal-title-icon" aria-hidden="true"><i class="fa-solid fa-circle-question"></i></span><h2 class="modal-title" id="confirmRolesTitle">Confirmar acción</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div><div class="modal-body"><p class="modal-context" id="confirmRolesMessage" data-confirm-message></p><label class="confirm-reason-field" data-confirm-reason-wrap hidden><span>Motivo de inactivación *</span><textarea class="form-control" data-confirm-reason rows="3" maxlength="240" aria-describedby="confirmRolesReasonError"></textarea><small class="field-error" data-confirm-reason-error id="confirmRolesReasonError" hidden></small></label></div><div class="modal-footer"><button type="button" class="btn btn-outline-ssee button button-secondary" data-bs-dismiss="modal">No</button><button type="button" class="btn btn-ssee button button-primary" id="confirmRolesBtn">Sí</button></div></div></div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="dist/users.js?v=20260901-copysearch"></script>

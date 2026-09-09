@@ -696,6 +696,17 @@ textarea {
   font-weight: 500;
 }
 
+.confirm-reason-field {
+  margin-top: 0.9rem;
+  color: var(--ssee-text);
+  font-size: var(--ssee-label-font-size) !important;
+  line-height: 1.25;
+}
+
+.confirm-reason-field textarea {
+  width: 100%;
+}
+
 .field-help,
 .form-note {
   font-size: var(--ssee-support-font-size) !important;
@@ -898,18 +909,12 @@ textarea {
   color: var(--ssee-action-danger);
 }
 
+.row-action[data-action="replace"] i {
+  color: var(--ssee-action-success);
+}
+
 .dropdown-item[data-user-action="renew"] i {
   color: var(--ssee-action-renew);
-}
-
-.row-action[data-action="toggle"] i,
-.dropdown-switch.will-deactivate i {
-  color: var(--ssee-action-danger);
-}
-
-.row-action[data-action="toggle"][data-next-state="Activar"] i,
-.dropdown-switch.will-activate i {
-  color: var(--ssee-action-success);
 }
 
 .row-action.is-disabled,
@@ -948,6 +953,38 @@ textarea {
 .row-action:disabled {
   cursor: not-allowed;
   opacity: 1;
+}
+
+.table-icon-button {
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--ssee-line-strong);
+  border-radius: 0.35rem;
+  background: #fff;
+  color: var(--ssee-text);
+}
+
+.table-icon-button i {
+  color: var(--ssee-action-edit);
+}
+
+.table-icon-button.danger i {
+  color: var(--ssee-action-danger);
+}
+
+.table-icon-button:hover {
+  color: var(--ssee-primary);
+  border-color: var(--ssee-primary);
+}
+
+.table-icon-button.danger:hover {
+  color: var(--ssee-danger);
+  border-color: #fca5a5;
+}
+
+.table-icon-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 .status-cell {
@@ -1098,15 +1135,6 @@ textarea {
 .switch .form-check-input:focus-visible {
   outline: 0.15rem solid rgba(45, 43, 232, 0.28);
   outline-offset: 0.12rem;
-}
-
-.row-state-toggle {
-  flex: 0 0 auto;
-  width: 6rem;
-}
-
-.row-state-toggle .form-check-input {
-  flex: 0 0 auto;
 }
 
 .switch.is-disabled {

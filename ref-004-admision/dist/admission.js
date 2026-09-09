@@ -165,14 +165,54 @@ function closeMenus(root = document) {
   });
 }
 
-function openConfirmModal(id, message) {
+const INACTIVATION_REASON_MAX_LENGTH = 240;
+
+function resetConfirmReason(modal, required) {
+  const wrapper = modal.querySelector("[data-confirm-reason-wrap]");
+  const field = modal.querySelector("[data-confirm-reason]");
+  const error = modal.querySelector("[data-confirm-reason-error]");
+  if (!wrapper || !field) return;
+  wrapper.hidden = !required;
+  field.required = required;
+  field.maxLength = INACTIVATION_REASON_MAX_LENGTH;
+  field.setAttribute("aria-required", String(required));
+  field.setAttribute("aria-invalid", "false");
+  field.value = "";
+  if (error) {
+    error.hidden = true;
+    error.textContent = "";
+  }
+  modal.dataset.requireReason = String(required);
+}
+
+function openConfirmModal(id, message, { requireReason = false } = {}) {
   const modal = document.getElementById(id);
   if (!modal || !window.bootstrap) return null;
   const messageNode = modal.querySelector("[data-confirm-message]");
   if (messageNode) messageNode.textContent = message;
+  resetConfirmReason(modal, requireReason);
   const instance = bootstrap.Modal.getOrCreateInstance(modal);
   instance.show();
   return instance;
+}
+
+function getConfirmReason(id) {
+  return document.getElementById(id)?.querySelector("[data-confirm-reason]")?.value.trim() || "";
+}
+
+function validateConfirmReason(id, message = "Debe completar los campos obligatorios.") {
+  const modal = document.getElementById(id);
+  const field = modal?.querySelector("[data-confirm-reason]");
+  if (!modal || !field || modal.dataset.requireReason !== "true") return true;
+  const error = modal.querySelector("[data-confirm-reason-error]");
+  const valid = Boolean(field.value.trim());
+  field.setAttribute("aria-invalid", String(!valid));
+  if (error) {
+    error.textContent = valid ? "" : message;
+    error.hidden = valid;
+  }
+  if (!valid) field.focus();
+  return valid;
 }
 
 function closeConfirmModal(id) {
@@ -194,11 +234,6 @@ const refs = {
   roles: document.getElementById("roleOptions"),
   projects: document.getElementById("projectOptions"),
   toast: document.getElementById("toast"),
-  individualMode: document.getElementById("individualModeBtn"),
-  massMode: document.getElementById("massModeTab"),
-  massModeButton: document.getElementById("massModeBtn"),
-  individualAdmission: document.getElementById("individualAdmission"),
-  massAdmission: document.getElementById("massAdmission"),
   massFile: document.getElementById("massFileInput"),
   massFileName: document.getElementById("massFileName"),
   massSummary: document.getElementById("massValidationSummary"),
@@ -281,16 +316,6 @@ function confirmAdmission(mode = "individual") {
   instance.show();
 }
 
-function setMode(mode) {
-  const isMass = mode === "mass";
-  refs.individualAdmission.hidden = isMass;
-  refs.massAdmission.hidden = !isMass;
-  refs.individualMode.classList.toggle("is-active", !isMass);
-  refs.massMode.classList.toggle("is-active", isMass);
-  refs.individualMode.setAttribute("aria-selected", String(!isMass));
-  refs.massMode.setAttribute("aria-selected", String(isMass));
-}
-
 function showMassValidation(title, text, type = "success", allowSave = false) {
   refs.massSummary.hidden = false;
   refs.massTitle.textContent = title;
@@ -358,10 +383,7 @@ refs.admit.addEventListener("click", confirmAdmission);
 document.getElementById("clearBtn").addEventListener("click", resetIdentityLookup);
 document.getElementById("cancelBtn").addEventListener("click", resetForm);
 refs.validity.addEventListener("change", updateValidityHelp);
-refs.individualMode.addEventListener("click", () => setMode("individual"));
-refs.massMode.addEventListener("click", () => setMode("mass"));
-refs.massModeButton?.addEventListener("click", () => setMode("mass"));
-document.getElementById("cancelMassBtn").addEventListener("click", () => { refs.massFile.value = ""; refs.massFileName.textContent = "Ningún archivo seleccionado"; refs.massSummary.hidden = true; refs.downloadErrors.hidden = true; refs.saveMass.disabled = true; massReady = false; setMode("individual"); });
+document.getElementById("cancelMassBtn").addEventListener("click", () => { refs.massFile.value = ""; refs.massFileName.textContent = "Ningún archivo seleccionado"; refs.massSummary.hidden = true; refs.downloadErrors.hidden = true; refs.saveMass.disabled = true; massReady = false; });
 refs.massFile.addEventListener("change", validateMassFile);
 document.getElementById("downloadTemplateBtn").addEventListener("click", downloadTemplate);
 refs.downloadErrors.addEventListener("click", downloadErrors);

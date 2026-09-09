@@ -10,11 +10,6 @@ const refs = {
   roles: document.getElementById("roleOptions"),
   projects: document.getElementById("projectOptions"),
   toast: document.getElementById("toast"),
-  individualMode: document.getElementById("individualModeBtn"),
-  massMode: document.getElementById("massModeTab"),
-  massModeButton: document.getElementById("massModeBtn"),
-  individualAdmission: document.getElementById("individualAdmission"),
-  massAdmission: document.getElementById("massAdmission"),
   massFile: document.getElementById("massFileInput"),
   massFileName: document.getElementById("massFileName"),
   massSummary: document.getElementById("massValidationSummary"),
@@ -97,16 +92,6 @@ function confirmAdmission(mode = "individual") {
   instance.show();
 }
 
-function setMode(mode) {
-  const isMass = mode === "mass";
-  refs.individualAdmission.hidden = isMass;
-  refs.massAdmission.hidden = !isMass;
-  refs.individualMode.classList.toggle("is-active", !isMass);
-  refs.massMode.classList.toggle("is-active", isMass);
-  refs.individualMode.setAttribute("aria-selected", String(!isMass));
-  refs.massMode.setAttribute("aria-selected", String(isMass));
-}
-
 function showMassValidation(title, text, type = "success", allowSave = false) {
   refs.massSummary.hidden = false;
   refs.massTitle.textContent = title;
@@ -174,10 +159,7 @@ refs.admit.addEventListener("click", confirmAdmission);
 document.getElementById("clearBtn").addEventListener("click", resetIdentityLookup);
 document.getElementById("cancelBtn").addEventListener("click", resetForm);
 refs.validity.addEventListener("change", updateValidityHelp);
-refs.individualMode.addEventListener("click", () => setMode("individual"));
-refs.massMode.addEventListener("click", () => setMode("mass"));
-refs.massModeButton?.addEventListener("click", () => setMode("mass"));
-document.getElementById("cancelMassBtn").addEventListener("click", () => { refs.massFile.value = ""; refs.massFileName.textContent = "Ningún archivo seleccionado"; refs.massSummary.hidden = true; refs.downloadErrors.hidden = true; refs.saveMass.disabled = true; massReady = false; setMode("individual"); });
+document.getElementById("cancelMassBtn").addEventListener("click", () => { refs.massFile.value = ""; refs.massFileName.textContent = "Ningún archivo seleccionado"; refs.massSummary.hidden = true; refs.downloadErrors.hidden = true; refs.saveMass.disabled = true; massReady = false; });
 refs.massFile.addEventListener("change", validateMassFile);
 document.getElementById("downloadTemplateBtn").addEventListener("click", downloadTemplate);
 refs.downloadErrors.addEventListener("click", downloadErrors);

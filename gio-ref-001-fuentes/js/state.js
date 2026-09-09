@@ -15,6 +15,9 @@ export const state = {
   draft: null,
   dirty: false,
   loadMode: "manual",
+  massValidation: { status: "idle", processed: 0, accepted: 0, observed: 0, issues: [] },
+  editingRecordIndex: null,
+  manualValidation: { status: "idle", issues: [] },
   manualRecords: [
     { code: "000123", dni: "71234567", name: "Juan Pérez López", date: "15/03/2012", sex: "Masculino", grade: "3° A", enrollment: "Matriculado" },
     { code: "000124", dni: "71234568", name: "María Fernández García", date: "22/07/2012", sex: "Femenino", grade: "3° A", enrollment: "Matriculado" }
@@ -29,7 +32,7 @@ export function createDraft(source = null) {
     origin: source?.origin || "",
     originDetail: source?.originDetail || "",
     usage: source?.usage || [],
-    status: source?.status || "Borrador",
+    status: source?.status || "Activa",
     fields: source?.fields?.length ? source.fields.map((field) => ({ ...field })) : [
       { name: "Código modular", type: "Texto", required: true, description: "Código oficial de la unidad." },
       { name: "DNI del estudiante", type: "Texto", required: true, description: "Documento de identidad." },
@@ -39,7 +42,10 @@ export function createDraft(source = null) {
     keyFields: source?.keyFields?.length ? [...source.keyFields] : [],
     loadMode: "manual",
     fileName: "",
-    records: source?.records || "0"
+    fileValid: false,
+    records: source?.records || "0",
+    structureLocked: Boolean(source?.inUse),
+    massValidation: { status: "idle", processed: 0, accepted: 0, observed: 0, issues: [] }
   };
   state.dirty = false;
 }
@@ -53,5 +59,19 @@ export function resetWizard() {
   state.pendingWizardStep = null;
   state.step = 1;
   state.draft = null;
+  state.editingRecordIndex = null;
+  state.manualValidation = { status: "idle", issues: [] };
   state.dirty = false;
+}
+
+export function getManualRecordValue(field, record) {
+  const normalized = field.name.toLowerCase();
+  if (/c[oó]digo|identific/.test(normalized)) return record.code || "";
+  if (/dni|document/.test(normalized)) return record.dni || "";
+  if (/nombre/.test(normalized)) return record.name || "";
+  if (/fecha/.test(normalized)) return record.date || "";
+  if (/sexo|g[eé]nero/.test(normalized)) return record.sex || "";
+  if (/grado|nivel/.test(normalized)) return record.grade || "";
+  if (/matr[ií]cula|estado/.test(normalized)) return record.enrollment || "";
+  return record.values?.[field.name] || "";
 }

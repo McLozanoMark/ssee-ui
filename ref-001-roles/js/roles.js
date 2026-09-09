@@ -2,12 +2,11 @@ import { roles } from "./data.js";
 import { state } from "./state.js";
 import { refs, closeActionMenus, enableTooltips, showToast } from "./ui.js";
 import { getMessage } from "../../design-system/messages.js";
-import { openConfirmModal, closeConfirmModal } from "../../design-system/interaction.js";
+import { openConfirmModal, closeConfirmModal, getConfirmReason, validateConfirmReason } from "../../design-system/interaction.js";
 
 export function renderRoles() {
   refs.rolesBody.innerHTML = state.filteredRoles.map((role) => {
     const originalIndex = roles.findIndex((item) => item.name === role.name);
-    const hasUsers = role.status === "Activo" && role.users > 0;
     const tooltip = role.permissionDetails.length
       ? ` data-bs-toggle="tooltip" data-bs-title="${role.permissionDetails.join(", ")}"`
       : "";
@@ -30,9 +29,6 @@ export function renderRoles() {
             <button type="button" class="row-action" data-action="edit" data-edit="${originalIndex}" aria-label="Editar ${role.name}" title="Editar">
               <i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span>
             </button>
-            <label class="form-check form-switch switch row-state-toggle ${hasUsers ? "is-disabled" : ""}" data-state="${originalIndex}" data-on-label="Activo" data-off-label="Inactivo" title="${hasUsers ? "No disponible: el rol tiene usuarios asociados." : ""}">
-              <input class="form-check-input" type="checkbox" ${role.status === "Activo" ? "checked" : ""} ${hasUsers ? "disabled" : ""} aria-label="${role.status === "Activo" ? "Inactivar" : "Activar"} ${role.name}">
-            </label>
           </div>
         </td>
       </tr>
@@ -69,7 +65,6 @@ export function applyFilters() {
 export function handleRoleAction(event, onEdit) {
   const editButton = event.target.closest("[data-edit]");
   const menuButton = event.target.closest("[data-menu]");
-  const stateControl = event.target.closest(".switch[data-state]");
 
   if (menuButton) {
     const index = menuButton.dataset.menu;
@@ -91,16 +86,6 @@ export function handleRoleAction(event, onEdit) {
     return;
   }
 
-  if (stateControl) {
-    const input = stateControl.querySelector("input");
-    const role = roles[Number(stateControl.dataset.state)];
-    if (input.disabled || (role.status === "Activo" && role.users > 0)) {
-      showToast(getMessage("M15"), "warning");
-      return;
-    }
-    state.pendingStatus = { index: Number(stateControl.dataset.state), next: role.status === "Activo" ? "Inactivo" : "Activo" };
-    openConfirmModal("confirmModal", getMessage(state.pendingStatus.next === "Activo" ? "M5" : "M6"));
-  }
 }
 
 export function handleEditStatusToggle(event) {
@@ -114,15 +99,19 @@ export function handleEditStatusToggle(event) {
   const next = event.target.checked ? "Activo" : "Inactivo";
   refs.editStatusToggles.forEach((toggle) => { toggle.checked = role.status === "Activo"; });
   state.pendingEditStatus = { index: state.editingIndex, next };
-  openConfirmModal("confirmModal", getMessage(next === "Activo" ? "M5" : "M6"));
+  openConfirmModal("confirmModal", getMessage(next === "Activo" ? "M5" : "M6"), { requireReason: next === "Inactivo" });
 }
 
 export function confirmStatus() {
-  const pending = state.pendingEditStatus || state.pendingStatus;
+  const pending = state.pendingEditStatus;
+  if (!pending) return;
+  if (pending.next === "Inactivo" && !validateConfirmReason("confirmModal", getMessage("M11"))) return;
+  const reason = pending.next === "Inactivo" ? getConfirmReason("confirmModal") : "";
   if (state.pendingEditStatus) {
     const { index, next } = state.pendingEditStatus;
     roles[index].status = next;
     roles[index].updated = "18/08/2026 09:00";
+    if (reason) roles[index].inactivationReason = reason;
     state.pendingEditStatus = null;
     refs.editStatusToggles.forEach((toggle) => { toggle.checked = next === "Activo"; });
     refs.editStatusLabels.forEach((label) => { label.textContent = next; });
@@ -131,12 +120,4 @@ export function confirmStatus() {
     showToast(getMessage(next === "Activo" ? "M7" : "M8"), "success");
     return;
   }
-  if (!state.pendingStatus) return;
-  const { index, next } = state.pendingStatus;
-  roles[index].status = next;
-  roles[index].updated = "18/08/2026 09:00";
-  state.pendingStatus = null;
-  closeConfirmModal("confirmModal");
-  applyFilters();
-  showToast(getMessage(next === "Activo" ? "M7" : "M8"), "success");
 }

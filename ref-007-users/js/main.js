@@ -11,7 +11,6 @@ import {
   openRoles,
   saveRoles,
   confirmRoles,
-  toggleStatus,
   toggleEditedUserStatus,
   filterAssignmentOptions,
   updateAssignmentTags,
@@ -67,7 +66,6 @@ refs.usersBody.addEventListener("click", (event) => {
   if (action) {
     if (action.dataset.userAction === "detail") openSelected(Number(action.dataset.user));
     if (action.dataset.userAction === "edit") openRoles(Number(action.dataset.user), "edit");
-    if (action.dataset.userAction === "toggle-status") toggleStatus(Number(action.dataset.user));
     if (action.dataset.userAction === "reniec") openReniecUpdate(Number(action.dataset.user));
     return;
   }

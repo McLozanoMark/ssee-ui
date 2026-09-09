@@ -1,15 +1,16 @@
-import { samples } from "./data.js";
-export const state = {
-  filteredSamples: [...samples],
-  editingIndex: null,
-  openMenu: null,
-  step: 1,
-  dirty: false,
-  pendingAction: null,
-  pendingCancel: false,
-  pendingWizardStep: null,
-  draft: null
-};
+import { samples, sourceCatalog } from "./data.js";
+
+const defaultFields = [
+  { name: "Código modular", unique: true, preload: true, informant: false, user: true },
+  { name: "Nombre de la institución", unique: false, preload: true, informant: true, user: false },
+  { name: "DRE", unique: false, preload: false, informant: false, user: false }
+];
+
+export const state = { filteredSamples: [...samples], editingIndex: null, openMenu: null, step: 1, dirty: false, pendingAction: null, pendingStatus: null, pendingCancel: false, pendingWizardStep: null, pendingUnitAction: null, replacementSelection: null, replacementCandidate: null, draft: null };
+
+export function getSourceConfig(name) {
+  return sourceCatalog.find((source) => source.name === name) || null;
+}
 
 export function createDraft(sample = null) {
   state.draft = {
@@ -17,23 +18,17 @@ export function createDraft(sample = null) {
     name: sample?.name || "",
     description: sample?.description || "",
     source: sample?.source || "",
-    instrument: sample?.instrument || "Instrumento de seguimiento",
-    intervention: sample?.intervention || "",
-    period: sample?.period || "",
-    units: sample?.units || "0",
-    status: sample?.status || "Borrador"
+    sampleSize: sample?.sampleSize || "",
+    population: sample?.population || "0",
+    unitTotal: sample?.unitTotal || sample?.sampleSize || "0",
+    selectionMethod: sample?.selectionMethod || "Aleatoria",
+    fields: sample?.fields?.length ? sample.fields.map((field, index) => ({ informant: false, user: index === 0, ...field })) : defaultFields.map((field) => ({ ...field })),
+    units: sample?.unitList?.length ? sample.unitList.map((unit) => ({ ...unit })) : [],
+    instruments: sample?.instruments?.length ? [...sample.instruments] : [],
+    status: sample?.status || "Activa"
   };
   state.step = 1;
   state.dirty = false;
 }
 
-export function resetWizard() {
-  state.editingIndex = null;
-  state.openMenu = null;
-  state.step = 1;
-  state.dirty = false;
-  state.pendingAction = null;
-  state.pendingCancel = false;
-  state.pendingWizardStep = null;
-  state.draft = null;
-}
+export function resetWizard() { state.editingIndex = null; state.openMenu = null; state.step = 1; state.dirty = false; state.pendingAction = null; state.pendingStatus = null; state.pendingCancel = false; state.pendingWizardStep = null; state.pendingUnitAction = null; state.replacementSelection = null; state.replacementCandidate = null; state.draft = null; }

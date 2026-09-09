@@ -46,6 +46,20 @@ change the approved icon and title, but may not add an eyebrow, subtitle,
 second title, local spacing, pseudo-element icon or runtime icon injection.
 Changing the modal width or body layout never changes this header contract.
 
+## Inactivation Reason Contract
+
+Every explicit user action that changes a record from active to inactive uses
+the shared confirmation modal and requires a free-text reason. The reason is
+entered in the standard shared textarea, is limited to 240 characters and is
+not required when activating a record. The field is shown only for the
+inactivation branch and uses the existing textarea size and validation scale
+from `app.css`.
+
+This rule applies to roles, users, autoregistration configurations and data
+sources, including their duplicated requirement flows. It does not apply to
+automatic expiry, external Passport state changes, cancellations or other
+non-inactivation lifecycle events.
+
 The supporting decision register and requirement traceability matrix are kept
 with the demos so that an analyst observation becomes one explicit system rule
 and its affected screens are visible before implementation:
@@ -65,6 +79,11 @@ and then consumed by the affected demos. Legacy implementations must never be
 used as a source or visual reference. One-off patches, local component
 variants and isolated visual overrides are prohibited; changes must be made at
 the canonical source, rebuilt and audited across every affected demo.
+
+Authentication demos follow the same rule: `auth.css` is the canonical shell
+for the two-zone login and password surfaces, and `auth-guide.js` is the
+canonical external presentation guide. A requirement-specific flow may change
+its fields, state or branch, but it may not fork the shell or guide styling.
 
 All CRUD list filters use the same contract: one global search field, one
 filter-toggle control, labelled advanced fields, and a shared action group with
@@ -99,13 +118,19 @@ mark, the same rem rhythm as the shell and the responsive size contract from
   short visible label. No module may create a smaller local action-button
   variant. Table action buttons have no permanent border or shadow; their
   compact hover state uses a subtle surface lift and shadow. The `Estado` column is informational and uses a status tag. A binary
-  toggle belongs only in `Acciones` when the activation action is available;
-  never place a switch in the `Estado` column.
-- Any activation or inactivation action uses the shared toggle switch. The
-  checked state represents `Activo`/`Activa` and the unchecked state represents
-  `Inactivo`/`Inactiva`; never render `ON` or `OFF` as visible text. States that
+  never place a switch in a data-table column, including `Estado` or
+  `Acciones`. A row communicates state with a status tag and exposes `Editar`;
+  activation or inactivation is available only in the record edit surface.
+- Any activation or inactivation control uses the shared toggle switch only in
+  the edit surface. The checked state represents `Activo`/`Activa` and the
+  unchecked state represents `Inactivo`/`Inactiva`; never render `ON` or `OFF`
+  as visible text. States that
   are not binary, such as `Borrador`, `Por vencer`, `Vencido` or `Anulada`,
   remain status tags.
+- Every record data grid begins with `N.°` as its first column, before the
+  identifier or other record fields. Internal configuration matrices and
+  selector tables keep their own semantic first column only when they are not
+  record grids.
 - An enabled unchecked switch uses the semantic danger tint to represent an
   available inactivation state. A disabled switch uses a neutral outlined
   silhouette with no thumb shadow and no visible `Activo`/`Inactivo` label, so

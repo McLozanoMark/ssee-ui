@@ -1,49 +1,43 @@
-import { samples } from "./data.js";
 import { state, createDraft } from "./state.js";
-import { refs, showForm, showToast, setFormStep, updateDraft } from "./ui.js";
-import { applyFilters, renderSamples, handleAction, validateStep, requestSaveStep, requestComplete, requestCancel, confirmPendingAction } from "./samples.js";
+import { refs, showForm, showToast, setFormStep, updateDraft, renderAvailableFields, renderFields, renderUnits, renderSourceOptions, updateSelectionSummary } from "./ui.js";
+import { applyFilters, renderSamples, handleAction, validateStep, requestSaveStep, requestComplete, requestCancel, confirmPendingAction, updateField, prepareUnits, exportRows, renderReplacementCandidates, confirmReplacement } from "./samples.js";
 import { getMessage, getPrototypeMessage } from "../../design-system/messages.js";
-import { openConfirmModal, closeConfirmModal } from "../../design-system/interaction.js";
+import { openConfirmModal } from "../../design-system/interaction.js";
 import { attachTableSorting } from "../../design-system/table-sort.js";
-
 const $ = (id) => document.getElementById(id);
-function moveStep(step) { setFormStep(step); }
 
-function rejectWizardStepChange() {
-  if (state.pendingWizardStep === null) return;
-  state.pendingWizardStep = null;
-  closeConfirmModal("confirmModal");
-}
-
-function requestWizardStep(step) {
-  if (step === state.step) return;
-  if (state.editingIndex !== null && state.dirty) {
-    updateDraft();
-    if (!validateStep(state.step)) { showToast(getMessage("M12"), "warning"); return; }
-    state.pendingWizardStep = step;
-    openConfirmModal("confirmModal", getMessage("M70"));
-    return;
-  }
-  if (state.editingIndex === null && step > state.step && !validateStep(state.step)) { showToast(getMessage("M12"), "warning"); return; }
-  moveStep(step);
-}
+function requestWizardStep(step) { if (step === state.step) return; if (state.editingIndex !== null && state.dirty) { updateDraft(); state.pendingWizardStep = step; openConfirmModal("confirmModal", getMessage("M70")); return; } if (step > state.step) { for (let currentStep = state.step; currentStep < step; currentStep += 1) { updateDraft(); if (!validateStep(currentStep)) { showToast(getMessage("M12"), "warning"); return; } } } if (step === 3) prepareUnits(); setFormStep(step); }
 refs.filterForm.addEventListener("submit", (event) => { event.preventDefault(); applyFilters(); showToast(getPrototypeMessage("filtersApplied"), "info"); });
-$("filterToggle").addEventListener("click", () => { const expanded = refs.filterForm.classList.toggle("is-expanded"); $("filterToggle").setAttribute("aria-expanded", String(expanded)); $("filterToggle").setAttribute("aria-label", expanded ? "Cerrar filtros" : "Abrir filtros"); });
-$("clearBtn").addEventListener("click", () => { refs.filterQuery.value = ""; $("filterId").value = ""; $("filterDescription").value = ""; $("filterSource").value = ""; refs.filterStatus.value = "Todos"; refs.filterPeriod.value = "Todos"; refs.filterIntervention.value = "Todos"; $("filterUnits").value = "Todos"; applyFilters(); showToast(getPrototypeMessage("filtersCleared"), "info"); });
+$("filterToggle").addEventListener("click", () => { const expanded = refs.filterForm.classList.toggle("is-expanded"); $("filterToggle").setAttribute("aria-expanded", String(expanded)); });
+$("clearBtn").addEventListener("click", () => { refs.filterQuery.value = ""; refs.filterSource.value = "Todos"; refs.filterStatus.value = "Todos"; applyFilters(); showToast(getPrototypeMessage("filtersCleared"), "info"); });
 $("newSampleBtn").addEventListener("click", () => { state.editingIndex = null; createDraft(); showForm(); });
 $("cancelBtn").addEventListener("click", requestCancel);
-$("backBtn").addEventListener("click", () => requestWizardStep(1));
+$("backBtn").addEventListener("click", () => requestWizardStep(state.step - 1));
 $("saveStepBtn").addEventListener("click", requestSaveStep);
-$("continueBtn").addEventListener("click", () => { updateDraft(); if (!validateStep()) { showToast(getMessage("M12"), "warning"); return; } requestWizardStep(2); });
-$("completeBtn").addEventListener("click", () => state.editingIndex !== null ? requestSaveStep() : requestComplete());
-$("sampleForm").addEventListener("input", updateDraft);
-$("sampleForm").addEventListener("change", updateDraft);
-refs.wizardSteps.forEach((button) => button.addEventListener("click", () => requestWizardStep(Number(button.dataset.wizardStep))));
+$("continueBtn").addEventListener("click", () => { updateDraft(); if (!validateStep(state.step)) { showToast(getMessage("M12"), "warning"); return; } if (state.step === 2) prepareUnits(); setFormStep(state.step + 1); });
+$("completeBtn").addEventListener("click", requestComplete);
+refs.sampleForm.addEventListener("input", (event) => { if (event.target === refs.fieldSearch) { renderAvailableFields(); return; } if (event.target === refs.unitSearch) { renderUnits(); return; } updateDraft(); });
+refs.sampleForm.addEventListener("change", (event) => { const field = event.target.closest("[data-field-key]"); if (field) updateField(Number(field.dataset.fieldIndex), field.dataset.fieldKey, field.checked); if (event.target === refs.sampleSource) { state.draft.fields = []; state.draft.units = []; state.draft.unitTotal = 0; prepareUnits(); } updateDraft(); renderAvailableFields(); renderFields(); renderUnits(); updateSelectionSummary(); });
+refs.availableFields.addEventListener("change", (event) => { const input = event.target.closest("[data-available-field]"); if (!input) return; const name = input.dataset.availableField; const index = state.draft.fields.findIndex((field) => field.name === name); if (input.checked && index < 0) state.draft.fields.push({ name, unique: state.draft.fields.length === 0, preload: false, informant: state.draft.fields.length === 1 }); if (!input.checked && index >= 0) state.draft.fields.splice(index, 1); state.dirty = true; renderAvailableFields(); renderFields(); });
 refs.samplesBody.addEventListener("click", handleAction);
-$("exportBtn").addEventListener("click", () => showToast(getMessage("M67"), "success"));
+refs.fieldsBody.addEventListener("click", handleAction);
+refs.unitsBody.addEventListener("click", handleAction);
+refs.unitsBody.addEventListener("change", (event) => { if (event.target.matches("[data-unit-select]")) event.target.closest("tr")?.classList.toggle("is-selected", event.target.checked); });
+document.querySelector("[data-unit-select-all]")?.addEventListener("change", (event) => { document.querySelectorAll("[data-unit-select]").forEach((input) => { input.checked = event.target.checked; input.closest("tr")?.classList.toggle("is-selected", event.target.checked); }); });
+refs.wizardSteps.forEach((button) => button.addEventListener("click", () => requestWizardStep(Number(button.dataset.wizardStep))));
+$("refreshUnitsBtn").addEventListener("click", () => { prepareUnits(); renderUnits(); showToast("La selección fue actualizada.", "success"); });
+$("returnSelectionBtn").addEventListener("click", () => requestWizardStep(2));
+$("unitExportBtn").addEventListener("click", () => exportRows(state.draft?.units || [], "unidades-muestrales.csv"));
+refs.replacementSearch?.addEventListener("input", renderReplacementCandidates);
+refs.replacementBody?.addEventListener("change", (event) => { const candidate = event.target.closest("input[name='replacementUnit']"); if (candidate) state.replacementCandidate = candidate.value; });
+refs.replacementSave?.addEventListener("click", confirmReplacement);
+refs.replacementModal?.addEventListener("hidden.bs.modal", () => { state.replacementSelection = null; state.replacementCandidate = null; });
+$("exportBtn").addEventListener("click", () => exportRows(state.filteredSamples, "muestras.csv", [{ key: "id", label: "Identificador" }, { key: "name", label: "Nombre de muestra" }, { key: "source", label: "Fuente de datos" }, { key: "units", label: "Registros" }, { key: "status", label: "Estado" }]));
 $("confirmBtn").addEventListener("click", confirmPendingAction);
-refs.confirmModal.querySelector(".modal-footer [data-bs-dismiss='modal']").addEventListener("click", rejectWizardStepChange);
-$("confirmModal").addEventListener("hidden.bs.modal", () => { state.pendingAction = null; state.pendingCancel = false; state.pendingWizardStep = null; });
+refs.confirmModal.querySelector(".modal-footer [data-bs-dismiss='modal']").addEventListener("click", () => { state.pendingWizardStep = null; });
+$("confirmModal").addEventListener("hidden.bs.modal", () => { state.pendingAction = null; state.pendingCancel = false; state.pendingStatus = null; state.pendingWizardStep = null; state.pendingUnitAction = null; });
+refs.sampleStatusSwitch?.addEventListener("change", (event) => { if (state.editingIndex === null) return; state.pendingStatus = { index: state.editingIndex, next: event.target.checked ? "Activa" : "Inactiva" }; event.target.checked = !event.target.checked; openConfirmModal("confirmModal", `${getMessage(state.pendingStatus.next === "Activa" ? "M5" : "M6")} ${state.draft.name}?`, { requireReason: state.pendingStatus.next === "Inactiva" }); });
 document.addEventListener("click", (event) => { if (!event.target.closest(".action-menu")) document.querySelectorAll("[data-menu-panel]").forEach((panel) => { panel.hidden = true; }); });
+renderSourceOptions();
 renderSamples();
 attachTableSorting(document.querySelector(".ssee-table"));

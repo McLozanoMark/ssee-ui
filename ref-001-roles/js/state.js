@@ -12,7 +12,6 @@ export const state = {
   permissionDirty: false,
   editingIndex: null,
   openActionMenu: null,
-  pendingStatus: null,
   pendingEditStatus: null,
   pendingSave: false,
   pendingSaveStep: null,
@@ -24,7 +23,6 @@ export const state = {
 export function resetEditingState() {
   state.editingIndex = null;
   state.openActionMenu = null;
-  state.pendingStatus = null;
   state.pendingEditStatus = null;
   state.pendingSave = false;
   state.pendingSaveStep = null;
