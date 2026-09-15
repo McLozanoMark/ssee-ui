@@ -22,6 +22,7 @@ await bundle("ref-001-roles/dist/roles.js", [
   "design-system/permission-catalog.js",
   "design-system/messages.js",
   "design-system/interaction.js",
+  "design-system/date-range.js",
   "design-system/table-sort.js",
   "ref-001-roles/js/data.js",
   "ref-001-roles/js/state.js",
@@ -46,6 +47,7 @@ await bundle("ref-002-permisos/dist/permissions.js", [
 const usersBundle = [
   "design-system/messages.js",
   "design-system/interaction.js",
+  "design-system/date-range.js",
   "design-system/table-sort.js",
   "ref-007-users/js/data.js",
   "ref-007-users/js/state.js",
@@ -61,6 +63,7 @@ await bundle("ref-007-users/dist/users.js", usersBundle);
 await bundle("ref-004-admision/dist/admission.js", [
   "design-system/messages.js",
   "design-system/interaction.js",
+  "design-system/date-range.js",
   "ref-004-admision/js/main.js"
 ]);
 
@@ -77,7 +80,10 @@ await bundle("ref-005-configuracion-autoregistro/dist/autoreg-config.js", [
 ]);
 
 await bundle("ref-008-auth-passport/dist/auth.js", [
+  "ref-017-welcome/js/data.js",
   "design-system/auth-guide.js",
+  "design-system/auth-welcome.js",
+  "design-system/auth-welcome-flow.js",
   "design-system/messages.js",
   "design-system/interaction.js",
   "design-system/auth-validation.js",
@@ -86,7 +92,10 @@ await bundle("ref-008-auth-passport/dist/auth.js", [
 ]);
 
 await bundle("ref-009-auth-document/dist/auth.js", [
+  "ref-017-welcome/js/data.js",
   "design-system/auth-guide.js",
+  "design-system/auth-welcome.js",
+  "design-system/auth-welcome-flow.js",
   "design-system/messages.js",
   "design-system/interaction.js",
   "design-system/auth-validation.js",
@@ -95,7 +104,10 @@ await bundle("ref-009-auth-document/dist/auth.js", [
 ]);
 
 await bundle("ref-010-auth-autoregistro/dist/auth.js", [
+  "ref-017-welcome/js/data.js",
   "design-system/auth-guide.js",
+  "design-system/auth-welcome.js",
+  "design-system/auth-welcome-flow.js",
   "design-system/messages.js",
   "design-system/interaction.js",
   "design-system/auth-validation.js",

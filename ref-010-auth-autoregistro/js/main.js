@@ -9,6 +9,9 @@ const refs = {
   password: document.getElementById("password"),
   feedback: document.getElementById("authFeedback"),
   success: document.getElementById("authSuccess"),
+  continueButton: document.getElementById("continueBtn"),
+  authPage: document.querySelector(".auth-page"),
+  authWelcome: document.getElementById("authWelcome"),
   toast: document.getElementById("toast")
 };
 
@@ -71,3 +74,4 @@ document.querySelector(".password-toggle").addEventListener("click", (event) => 
 });
 
 configurePeriod();
+bindAuthWelcomeFlow({ ...refs, authType: "autoregistro" });

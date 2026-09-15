@@ -9,6 +9,9 @@ const refs = {
   password: document.getElementById("password"),
   feedback: document.getElementById("authFeedback"),
   success: document.getElementById("authSuccess"),
+  continueButton: document.getElementById("continueBtn"),
+  authPage: document.querySelector(".auth-page"),
+  authWelcome: document.getElementById("authWelcome"),
   toast: document.getElementById("toast")
 };
 
@@ -57,3 +60,5 @@ document.querySelector(".password-toggle").addEventListener("click", (event) => 
   button.querySelector("i").className = `fa-regular ${visible ? "fa-eye" : "fa-eye-slash"}`;
   button.setAttribute("aria-label", visible ? "Mostrar contraseña" : "Ocultar contraseña");
 });
+
+bindAuthWelcomeFlow({ ...refs, authType: "passport" });

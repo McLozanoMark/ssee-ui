@@ -1,5 +1,88 @@
 /* source: design-system/demo-navigation.js */
+const CURRENT_DEMO_USER = "Ana Paredes";
+
+function applyCurrentDemoUser() {
+  document.querySelectorAll(".account-copy strong, #accountName").forEach((node) => {
+    node.textContent = CURRENT_DEMO_USER;
+  });
+}
+
+function mountClearableFields(root = document) {
+  root.querySelectorAll('input[type="search"], [data-clearable-input]').forEach((input) => {
+    if (input.closest(".clearable-field")) return;
+    const wrapper = document.createElement("span");
+    wrapper.className = "clearable-field";
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.append(input);
+    const clear = document.createElement("button");
+    clear.className = "field-clear";
+    clear.type = "button";
+    clear.setAttribute("aria-label", "Borrar contenido");
+    clear.title = "Borrar contenido";
+    clear.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+    wrapper.append(clear);
+
+    const syncVisibility = () => {
+      clear.hidden = !input.value;
+    };
+    input.addEventListener("input", syncVisibility);
+    clear.addEventListener("click", () => {
+      input.value = "";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.focus();
+    });
+    syncVisibility();
+  });
+}
+
+function normalizeSharedControls(root = document) {
+  root.querySelectorAll(".filter-actions [id^='clear'], .filter-actions [id^='reset']").forEach((button) => {
+    button.classList.add("filter-reset");
+    button.setAttribute("aria-label", "Restablecer filtros");
+    button.title = "Restablecer filtros";
+    button.innerHTML = '<i class="fa-solid fa-xmark icon" aria-hidden="true"></i>';
+  });
+
+  root.querySelectorAll("#newUserBtn, #newSourceBtn, #newSampleBtn, #newAssignmentBtn, #newConfigBtn, #newRoleBtn").forEach((button) => {
+    const icon = button.querySelector("i")?.outerHTML || "";
+    button.innerHTML = `${icon}Nuevo`;
+  });
+  root.querySelectorAll("#syncBtn").forEach((button) => {
+    if (button.dataset.syncRunning === "true") return;
+    const icon = button.querySelector("i")?.outerHTML || "";
+    button.innerHTML = `${icon}Sincronizar`;
+  });
+
+  const identityForm = root.querySelector("#identityForm");
+  const identityClear = identityForm?.querySelector("#clearBtn");
+  const documentNumber = identityForm?.querySelector("#documentNumber");
+  if (identityClear && documentNumber && !identityClear.closest(".clearable-field")) {
+    const wrapper = document.createElement("span");
+    wrapper.className = "clearable-field";
+    documentNumber.parentNode.insertBefore(wrapper, documentNumber);
+    wrapper.append(documentNumber, identityClear);
+    identityClear.className = "field-clear";
+    identityClear.removeAttribute("id");
+    identityClear.setAttribute("aria-label", "Borrar contenido");
+    identityClear.title = "Borrar contenido";
+    identityClear.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+    const syncVisibility = () => { identityClear.hidden = !documentNumber.value; };
+    documentNumber.addEventListener("input", syncVisibility);
+    syncVisibility();
+  }
+
+  root.querySelectorAll(".form-actions > #clearBtn").forEach((button) => {
+    button.classList.add("form-reset");
+    button.setAttribute("aria-label", "Restablecer formulario");
+    button.title = "Restablecer formulario";
+    button.innerHTML = '<i class="fa-solid fa-xmark icon" aria-hidden="true"></i>';
+  });
+}
+
 function mountDemoIndexLink() {
+  applyCurrentDemoUser();
+  mountClearableFields();
+  normalizeSharedControls();
   if (document.querySelector(".demo-index-link")) return;
   const link = document.createElement("a");
   link.className = "demo-index-link";
@@ -51,7 +134,7 @@ if (document.readyState === "loading") {
   function getSteps() {
     if (kind === "password") {
       return authType === "Passport"
-        ? [["#passportRedirect", "Continúa en Passport", "El cambio de contraseña se gestiona en el mecanismo oficial de Passport.", "click"]]
+        ? [["#passportRecoveryForm select", "Selecciona el documento", "Elige el tipo de documento en el formulario oficial simulado de Passport.", "click"], ["#passportRecoveryDocumentNumber", "Ingresa el documento", "Escribe el número de documento válido para solicitar la recuperación.", "input"], ["#passportRecoveryCaptcha", "Ingresa el captcha", "Escribe el código que aparece en la imagen de seguridad.", "input"], ["#passportRecoveryForm button[type=submit]", "Envía la solicitud", "Presiona Enviar correo para finalizar el flujo de recuperación en Passport.", "submit"]]
         : authType === "Documento"
           ? [["#documentPanel", "Revisa el acceso", "Este tipo de acceso no administra una contraseña local.", "click"]]
         : [
@@ -63,13 +146,13 @@ if (document.readyState === "loading") {
     }
     if (kind === "recovery") {
       return authType === "Passport"
-        ? [["#passportRedirect", "Continúa en Passport", "La recuperación se gestiona en el mecanismo oficial de Passport.", "click"]]
+        ? [["#passportRecoveryForm select", "Selecciona el documento", "Elige el tipo de documento en el formulario oficial simulado de Passport.", "click"], ["#passportRecoveryDocumentNumber", "Ingresa el documento", "Escribe el número de documento válido para solicitar la recuperación.", "input"], ["#passportRecoveryCaptcha", "Ingresa el captcha", "Escribe el código que aparece en la imagen de seguridad.", "input"], ["#passportRecoveryForm button[type=submit]", "Envía la solicitud", "Presiona Enviar correo para finalizar el flujo de recuperación en Passport.", "submit"]]
         : authType === "Documento"
           ? [["#documentPanel", "Revisa el acceso", "Este tipo de acceso no requiere recuperación de contraseña local.", "click"]]
         : [
           ["#email", "Ingresa el correo", "Escribe el correo registrado para solicitar el enlace.", "input"],
           ["#requestForm button[type=submit]", "Solicita el enlace", "Presiona Solicitar enlace para continuar.", "request"],
-          ["#openLink", "Abre el enlace", "En la demo, este botón representa el enlace recibido por correo.", "click"],
+          ["#sentBackToLogin", "Regresa al login", "El enlace llegará al correo registrado. Presiona Ir al login para cerrar este flujo de demostración.", "click"],
           ["#newPassword", "Ingresa la contraseña", "Escribe la nueva contraseña.", "input"],
           ["#confirmPassword", "Confirma la contraseña", "Repite la nueva contraseña.", "input"],
           ["#resetForm button[type=submit]", "Restablece la contraseña", "Presiona Restablecer contraseña para finalizar.", "submit"]
@@ -87,6 +170,11 @@ if (document.readyState === "loading") {
   }
 
   const steps = getSteps();
+  const successfulContinuation = {
+    passport: ["#continueBtn", "Continúa a la bienvenida", "La autenticación se completa en Passport. La demo representa el retorno autorizado a S.S.E.E.; presiona Continuar para ver la bienvenida.", "continue"],
+    document: ["#continueBtn", "Continúa a la bienvenida", "El documento y las condiciones de acceso fueron validados correctamente. Presiona Continuar para ver la bienvenida.", "continue"],
+    autoregister: ["#continueBtn", "Continúa a la bienvenida", "La cuenta y el proceso asociado fueron validados correctamente. Presiona Continuar para ver la bienvenida.", "continue"]
+  };
   let current = 0;
 
   function isVisible(element) {
@@ -99,10 +187,25 @@ if (document.readyState === "loading") {
     cursor.classList.remove("is-visible");
   }
 
+  function showSuccessfulContinuation() {
+    if (!document.getElementById("continueBtn") || !document.getElementById("authWelcome")) {
+      return finish("El sistema muestra la confirmación del flujo.");
+    }
+    if (steps.some((step) => step[3] === "continue")) return;
+    steps.push(successfulContinuation[kind] || successfulContinuation.autoregister);
+    steps.push(["#welcomeTitle", "Revisa la bienvenida", "Esta es la pantalla de bienvenida del flujo. El recorrido terminó dentro de esta demo.", "welcome"]);
+    current += 1;
+    showStep();
+  }
+
   function bindStep(step) {
     const element = document.querySelector(step[0]);
     if (!element) return;
     const eventName = step[3] === "input" ? "blur" : "click";
+    if (step[3] === "continue") {
+      window.addEventListener("auth:welcome-ready", () => nextStep(), { once: true });
+      return;
+    }
     element.addEventListener(eventName, () => {
       if (step[3] === "submit" || step[3] === "request") return;
       window.setTimeout(nextStep, 0);
@@ -118,6 +221,7 @@ if (document.readyState === "loading") {
               ? "El sistema muestra la confirmación del flujo."
               : "El sistema muestra el resultado de la validación.";
           if (step[3] === "request" && isVisible(document.getElementById("sentView"))) nextStep();
+          else if (isVisible(success)) showSuccessfulContinuation();
           else finish(response);
         }, 80);
       }, { once: true });
@@ -229,7 +333,9 @@ const MESSAGE_CATALOG = Object.freeze({
   M65: { text: "No hay registros disponibles. Haz clic en \"Nuevo\" para empezar.", type: "Información", scope: "General" },
   M66: { text: "Complete los datos del rol para activar esta sección.", type: "Alerta", scope: "Roles" },
   M67: { text: "Registros exportados correctamente.", type: "Información", scope: "General" },
-  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" }
+  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" },
+  M130: { text: "¿Está seguro que desea cerrar sesión?\nSe finalizará tu sesión actual. Tendrás que ingresar tus datos nuevamente para acceder.", type: "Confirmación", scope: "Sesiones" },
+  M131: { text: "Sesión próxima a finalizar\nLa sesión se cerrará automáticamente en %s por inactividad.\n¿Deseas continuar en el sistema?", type: "Alerta", scope: "Sesiones" }
 });
 
 // Confirmed prototype copy pending official codes in the stakeholder workbook.
@@ -454,7 +560,7 @@ function validateResetPassword({ newPassword, confirmation, policy }) {
 
 
 const refs = {
-  passportPanel: document.getElementById("passportPanel"), passportRedirect: document.getElementById("passportRedirect"), documentPanel: document.getElementById("documentPanel"), documentRedirect: document.getElementById("documentRedirect"), requestForm: document.getElementById("requestForm"), email: document.getElementById("email"), requestFeedback: document.getElementById("requestFeedback"), backToLogin: document.getElementById("backToLogin"), requestView: document.getElementById("requestView"), sentView: document.getElementById("sentView"), resetView: document.getElementById("resetView"), expiredView: document.getElementById("expiredView"), successView: document.getElementById("successView"), openLink: document.getElementById("openLink"), requestNew: document.getElementById("requestNew"), resetForm: document.getElementById("resetForm"), newPassword: document.getElementById("newPassword"), confirmPassword: document.getElementById("confirmPassword"), resetFeedback: document.getElementById("resetFeedback"), cancelReset: document.getElementById("cancelReset"), policyLength: document.getElementById("policyLength"), policyUpper: document.getElementById("policyUpper"), policyLower: document.getElementById("policyLower"), policyNumber: document.getElementById("policyNumber"), toast: document.getElementById("toast")
+  passportPanel: document.getElementById("passportPanel"), passportRecoveryForm: document.getElementById("passportRecoveryForm"), passportRecoveryDocumentNumber: document.getElementById("passportRecoveryDocumentNumber"), passportRecoveryCaptcha: document.getElementById("passportRecoveryCaptcha"), passportCaptchaText: document.getElementById("passportCaptchaText"), passportCaptchaRefresh: document.getElementById("passportCaptchaRefresh"), passportFeedback: document.getElementById("passportFeedback"), passportCancel: document.getElementById("passportCancel"), passportSent: document.getElementById("passportSent"), passportBackLogin: document.getElementById("passportBackLogin"), documentPanel: document.getElementById("documentPanel"), documentRedirect: document.getElementById("documentRedirect"), requestForm: document.getElementById("requestForm"), email: document.getElementById("email"), requestFeedback: document.getElementById("requestFeedback"), backToLogin: document.getElementById("backToLogin"), requestView: document.getElementById("requestView"), sentView: document.getElementById("sentView"), resetView: document.getElementById("resetView"), expiredView: document.getElementById("expiredView"), successView: document.getElementById("successView"), sentBackToLogin: document.getElementById("sentBackToLogin"), requestNew: document.getElementById("requestNew"), resetForm: document.getElementById("resetForm"), newPassword: document.getElementById("newPassword"), confirmPassword: document.getElementById("confirmPassword"), resetFeedback: document.getElementById("resetFeedback"), cancelReset: document.getElementById("cancelReset"), policyLength: document.getElementById("policyLength"), policyUpper: document.getElementById("policyUpper"), policyLower: document.getElementById("policyLower"), policyNumber: document.getElementById("policyNumber"), toast: document.getElementById("toast")
 };
 
 const params = new URLSearchParams(window.location.search);
@@ -472,13 +578,24 @@ function resetToRequest() {
 }
 
 if (state.authType === "Passport") {
+  document.body.classList.add("passport-external-mode");
   refs.requestView.hidden = true;
   refs.passportPanel.hidden = false;
-  refs.passportRedirect.addEventListener("click", () => { window.location.href = "../ref-008-auth-passport/index.html"; });
+  refs.passportRecoveryForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const valid = document.getElementById("passportRecoveryDocumentType").value && /^\d{8,12}$/.test(refs.passportRecoveryDocumentNumber.value.trim()) && refs.passportRecoveryCaptcha.value.trim().toUpperCase() === refs.passportCaptchaText.textContent;
+    refs.passportFeedback.hidden = valid;
+    refs.passportFeedback.classList.toggle("is-valid", valid);
+    refs.passportFeedback.textContent = valid ? "" : "Verifica el número de documento y el captcha ingresado.";
+    if (valid) { refs.passportRecoveryForm.hidden = true; refs.passportSent.hidden = false; showToast(refs, "Solicitud enviada en Passport.", "success"); }
+  });
+  refs.passportCaptchaRefresh.addEventListener("click", () => { refs.passportCaptchaText.textContent = refs.passportCaptchaText.textContent === "WXY7MZ" ? "K7P4QX" : "WXY7MZ"; refs.passportRecoveryCaptcha.value = ""; });
+  refs.passportCancel.addEventListener("click", () => { window.location.href = "login.html?auth=passport"; });
+  refs.passportBackLogin.addEventListener("click", () => { window.location.href = "login.html?auth=passport"; });
 } else if (state.authType === "Documento") {
   refs.requestView.hidden = true;
   refs.documentPanel.hidden = false;
-  refs.documentRedirect.addEventListener("click", () => { window.location.href = "../ref-009-auth-document/index.html"; });
+  refs.documentRedirect.addEventListener("click", () => { showToast(refs, "Este tipo de acceso no requiere recuperación de contraseña local.", "info"); });
 } else if (state.tokenState === "expired") {
   refs.requestView.hidden = true;
   refs.expiredView.hidden = false;
@@ -501,11 +618,7 @@ if (state.authType === "Passport") {
     showToast(refs, getMessage("M35"), "info");
   });
 
-  refs.openLink.addEventListener("click", () => {
-    state.tokenState = "available";
-    recordAuditEvent({ user: state.email, authType: state.authType, operation: "Utilización del mecanismo de recuperación", result: "Exitosa" });
-    showOnly(refs, "resetView");
-  });
+  refs.sentBackToLogin.addEventListener("click", () => { window.location.href = "login.html?auth=autoregistro"; });
 
   refs.resetForm.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -529,7 +642,7 @@ refs.newPassword.addEventListener("input", () => updatePolicy(refs, refs.newPass
 refs.requestNew.addEventListener("click", resetToRequest);
 refs.cancelReset.addEventListener("click", resetToRequest);
 refs.backToLogin.addEventListener("click", () => {
-  window.location.href = authType === "Passport" ? "../ref-008-auth-passport/index.html" : "../ref-010-auth-autoregistro/index.html";
+  window.location.href = "login.html?auth=" + (authType === "Passport" ? "passport" : "autoregistro");
 });
 
 document.querySelectorAll(".password-toggle").forEach((button) => button.addEventListener("click", (event) => {

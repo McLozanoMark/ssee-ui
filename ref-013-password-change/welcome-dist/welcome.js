@@ -99,171 +99,6 @@ if (document.readyState === "loading") {
 }
 
 
-/* source: design-system/auth-guide.js */
-(function () {
-  const guide = document.getElementById("authGuide");
-  const cursor = document.getElementById("authCursor");
-  const root = document.querySelector("[data-auth-guide]");
-  if (!guide || !cursor || !root) return;
-
-  const title = document.getElementById("authGuideTitle");
-  const copy = document.getElementById("authGuideCopy");
-  const kind = root.dataset.authGuide;
-  const authParam = new URLSearchParams(window.location.search).get("auth");
-  const authType = authParam === "passport" ? "Passport" : authParam === "document" ? "Documento" : "Autoregistro";
-
-  const loginSteps = {
-    passport: [
-      ["#documentNumber", "Ingresa el documento", "Escribe el número de documento del usuario registrado en Passport.", "input"],
-      ["#password", "Ingresa la contraseña", "Escribe la contraseña asociada al usuario.", "input"],
-      ["#loginForm button[type=submit]", "Envía los datos", "Presiona Ingresar para ejecutar la validación del acceso.", "submit"]
-    ],
-    document: [
-      ["#documentNumber", "Ingresa el documento", "Escribe el número de documento para iniciar la validación.", "input"],
-      ["#birthDate", "Ingresa la fecha", "Completa la fecha de nacimiento del documento.", "input"],
-      ["#issueDate", "Ingresa la fecha", "Completa la fecha de emisión del documento.", "input"],
-      ["#loginForm button[type=submit]", "Envía los datos", "Presiona Ingresar para ejecutar la validación del acceso.", "submit"]
-    ],
-    autoregister: [
-      ["#email", "Ingresa el correo", "Escribe el correo de la cuenta creada mediante Autoregistro.", "input"],
-      ["#password", "Ingresa la contraseña", "Escribe la contraseña de la cuenta.", "input"],
-      ["#loginForm button[type=submit]", "Envía los datos", "Presiona Ingresar para validar el acceso.", "submit"]
-    ]
-  };
-
-  function getSteps() {
-    if (kind === "password") {
-      return authType === "Passport"
-        ? [["#passportRecoveryForm select", "Selecciona el documento", "Elige el tipo de documento en el formulario oficial simulado de Passport.", "click"], ["#passportRecoveryDocumentNumber", "Ingresa el documento", "Escribe el número de documento válido para solicitar la recuperación.", "input"], ["#passportRecoveryCaptcha", "Ingresa el captcha", "Escribe el código que aparece en la imagen de seguridad.", "input"], ["#passportRecoveryForm button[type=submit]", "Envía la solicitud", "Presiona Enviar correo para finalizar el flujo de recuperación en Passport.", "submit"]]
-        : authType === "Documento"
-          ? [["#documentPanel", "Revisa el acceso", "Este tipo de acceso no administra una contraseña local.", "click"]]
-        : [
-          ["#currentPassword", "Ingresa la contraseña", "Escribe la contraseña actual de la cuenta.", "input"],
-          ["#newPassword", "Ingresa la contraseña", "Escribe la nueva contraseña.", "input"],
-          ["#confirmPassword", "Confirma la contraseña", "Repite la nueva contraseña.", "input"],
-          ["#passwordForm button[type=submit]", "Guarda el cambio", "Presiona Cambiar contraseña para completar el flujo.", "submit"]
-        ];
-    }
-    if (kind === "recovery") {
-      return authType === "Passport"
-        ? [["#passportRecoveryForm select", "Selecciona el documento", "Elige el tipo de documento en el formulario oficial simulado de Passport.", "click"], ["#passportRecoveryDocumentNumber", "Ingresa el documento", "Escribe el número de documento válido para solicitar la recuperación.", "input"], ["#passportRecoveryCaptcha", "Ingresa el captcha", "Escribe el código que aparece en la imagen de seguridad.", "input"], ["#passportRecoveryForm button[type=submit]", "Envía la solicitud", "Presiona Enviar correo para finalizar el flujo de recuperación en Passport.", "submit"]]
-        : authType === "Documento"
-          ? [["#documentPanel", "Revisa el acceso", "Este tipo de acceso no requiere recuperación de contraseña local.", "click"]]
-        : [
-          ["#email", "Ingresa el correo", "Escribe el correo registrado para solicitar el enlace.", "input"],
-          ["#requestForm button[type=submit]", "Solicita el enlace", "Presiona Solicitar enlace para continuar.", "request"],
-          ["#sentBackToLogin", "Regresa al login", "El enlace llegará al correo registrado. Presiona Ir al login para cerrar este flujo de demostración.", "click"],
-          ["#newPassword", "Ingresa la contraseña", "Escribe la nueva contraseña.", "input"],
-          ["#confirmPassword", "Confirma la contraseña", "Repite la nueva contraseña.", "input"],
-          ["#resetForm button[type=submit]", "Restablece la contraseña", "Presiona Restablecer contraseña para finalizar.", "submit"]
-        ];
-    }
-    if (kind === "logout") {
-      return [
-        ["#accountMenuTrigger", "Abre tu cuenta", "Selecciona tu nombre para ver las opciones de sesión.", "click"],
-        ["#logoutOption", "Cierra sesión", "Selecciona esta opción para finalizar la sesión actual.", "click"]
-      ];
-    }
-    if (kind === "validation") return loginSteps.passport.map((step) => [step[0], step[1], "Este paso evidencia la validación general de autenticación.", step[3]]);
-    if (kind === "audit") return loginSteps.passport.map((step) => [step[0], step[1], "Este paso genera la trazabilidad del intento de autenticación.", step[3]]);
-    return loginSteps[kind] || [];
-  }
-
-  const steps = getSteps();
-  const successfulContinuation = {
-    passport: ["#continueBtn", "Continúa a la bienvenida", "La autenticación se completa en Passport. La demo representa el retorno autorizado a S.S.E.E.; presiona Continuar para ver la bienvenida.", "continue"],
-    document: ["#continueBtn", "Continúa a la bienvenida", "El documento y las condiciones de acceso fueron validados correctamente. Presiona Continuar para ver la bienvenida.", "continue"],
-    autoregister: ["#continueBtn", "Continúa a la bienvenida", "La cuenta y el proceso asociado fueron validados correctamente. Presiona Continuar para ver la bienvenida.", "continue"]
-  };
-  let current = 0;
-
-  function isVisible(element) {
-    return element && !element.hidden && getComputedStyle(element).display !== "none";
-  }
-
-  function finish(message) {
-    title.textContent = "Recorrido completo";
-    copy.textContent = message;
-    cursor.classList.remove("is-visible");
-  }
-
-  function showSuccessfulContinuation() {
-    if (!document.getElementById("continueBtn") || !document.getElementById("authWelcome")) {
-      return finish("El sistema muestra la confirmación del flujo.");
-    }
-    if (steps.some((step) => step[3] === "continue")) return;
-    steps.push(successfulContinuation[kind] || successfulContinuation.autoregister);
-    steps.push(["#welcomeTitle", "Revisa la bienvenida", "Esta es la pantalla de bienvenida del flujo. El recorrido terminó dentro de esta demo.", "welcome"]);
-    current += 1;
-    showStep();
-  }
-
-  function bindStep(step) {
-    const element = document.querySelector(step[0]);
-    if (!element) return;
-    const eventName = step[3] === "input" ? "blur" : "click";
-    if (step[3] === "continue") {
-      window.addEventListener("auth:welcome-ready", () => nextStep(), { once: true });
-      return;
-    }
-    element.addEventListener(eventName, () => {
-      if (step[3] === "submit" || step[3] === "request") return;
-      window.setTimeout(nextStep, 0);
-    }, { once: true });
-    if (step[3] === "submit" || step[3] === "request") {
-      const form = element.form;
-      form?.addEventListener("submit", () => {
-        window.setTimeout(() => {
-          const success = document.querySelector(".auth-success, #successView");
-          const response = step[3] === "request" && isVisible(document.getElementById("sentView"))
-            ? "El enlace de recuperación está disponible para continuar."
-            : isVisible(success)
-              ? "El sistema muestra la confirmación del flujo."
-              : "El sistema muestra el resultado de la validación.";
-          if (step[3] === "request" && isVisible(document.getElementById("sentView"))) nextStep();
-          else if (isVisible(success)) showSuccessfulContinuation();
-          else finish(response);
-        }, 80);
-      }, { once: true });
-    }
-  }
-
-  function position(step, bind = true) {
-    const element = document.querySelector(step[0]);
-    if (!isVisible(element)) {
-      current += 1;
-      return showStep();
-    }
-    const box = element.getBoundingClientRect();
-    cursor.style.left = `${box.left + box.width / 2 - 8}px`;
-    cursor.style.top = `${box.top + box.height / 2 - 8}px`;
-    title.textContent = step[1];
-    copy.textContent = step[2];
-    cursor.classList.remove("is-visible");
-    requestAnimationFrame(() => cursor.classList.add("is-visible"));
-    if (bind) bindStep(step);
-  }
-
-  function showStep() {
-    if (current >= steps.length) return finish("El flujo terminó correctamente.");
-    position(steps[current]);
-  }
-
-  function nextStep() {
-    current += 1;
-    showStep();
-  }
-
-  window.setTimeout(() => {
-    guide.hidden = false;
-    showStep();
-  }, 0);
-  window.addEventListener("resize", () => {
-    if (steps[current]) position(steps[current], false);
-  });
-})();
-
-
 /* source: design-system/messages.js */
 const MESSAGE_CATALOG = Object.freeze({
   M1: { text: "¿Está seguro que desea guardar esta información?", type: "Confirmación", scope: "General" },
@@ -333,9 +168,7 @@ const MESSAGE_CATALOG = Object.freeze({
   M65: { text: "No hay registros disponibles. Haz clic en \"Nuevo\" para empezar.", type: "Información", scope: "General" },
   M66: { text: "Complete los datos del rol para activar esta sección.", type: "Alerta", scope: "Roles" },
   M67: { text: "Registros exportados correctamente.", type: "Información", scope: "General" },
-  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" },
-  M130: { text: "¿Está seguro que desea cerrar sesión?\nSe finalizará tu sesión actual. Tendrás que ingresar tus datos nuevamente para acceder.", type: "Confirmación", scope: "Sesiones" },
-  M131: { text: "Sesión próxima a finalizar\nLa sesión se cerrará automáticamente en %s por inactividad.\n¿Deseas continuar en el sistema?", type: "Alerta", scope: "Sesiones" }
+  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" }
 });
 
 // Confirmed prototype copy pending official codes in the stakeholder workbook.
@@ -471,130 +304,139 @@ function closeConfirmModal(id) {
 }
 
 
-/* source: design-system/auth-validation.js */
-function hasRequiredValues(values) {
-  return values.every((value) => String(value ?? "").trim().length > 0);
-}
-
-function validatePassportAccess({ documentNumber, password, user }) {
-  return Boolean(user)
-    && user.password === password
-    && user.documentNumber === documentNumber
-    && user.active
-    && user.synchronized
-    && user.projects > 0
-    && user.roles > 0;
-}
-
-function validateDocumentAccess({ documentNumber, birthDate, issueDate, user }) {
-  return Boolean(user)
-    && user.number === documentNumber
-    && user.birthDate === birthDate
-    && user.issueDate === issueDate
-    && user.active
-    && user.valid
-    && user.projects > 0
-    && user.roles > 0;
-}
-
-function validateAutoregisterAccess({ email, password, account, periodState }) {
-  return periodState === "open"
-    && Boolean(account)
-    && account.email === email
-    && account.password === password
-    && account.active;
-}
-
-
-/* source: design-system/auth-audit.js */
-const AUDIT_STORAGE_KEY = "ssee-auth-audit";
-
-function recordAuditEvent({ user, authType, operation = "Inicio de sesión", closureType = "", result, reason = "" }) {
-  const entry = {
-    timestamp: new Date().toISOString(),
-    user,
-    authenticationType: authType,
-    operation,
-    closureType,
-    result,
-    reason
-  };
-  try {
-    const current = JSON.parse(sessionStorage.getItem(AUDIT_STORAGE_KEY) || "[]");
-    sessionStorage.setItem(AUDIT_STORAGE_KEY, JSON.stringify([entry, ...current].slice(0, 50)));
-  } catch {
-    // The demo remains usable when browser storage is unavailable.
+/* source: ref-017-welcome/js/data.js */
+const welcomeProfiles = {
+  passport: {
+    name: "Ana Paredes",
+    role: "Supervisor de Seguimiento",
+    authType: "Passport",
+    site: "Unidad de Seguimiento y Evaluación",
+    institution: "Ministerio de Educación",
+    process: "",
+    modules: [
+      { name: "Seguimiento", description: "Consulta y supervisa avances.", icon: "fa-chart-line" },
+      { name: "Evaluación", description: "Revisa resultados e indicadores.", icon: "fa-clipboard-check" },
+      { name: "Instrumentos", description: "Atiende instrumentos asignados.", icon: "fa-file-lines" },
+      { name: "Reportes", description: "Consulta reportes disponibles.", icon: "fa-chart-column" }
+    ],
+    projects: [{ name: "Seguimiento 2026", period: "2026", assigned: 12, pending: 4, sent: 8, contact: "Equipo de Seguimiento" }],
+    notifications: [
+      { title: "Instrumentos pendientes", text: "Tienes 4 instrumentos pendientes de atención.", icon: "fa-clipboard-list" },
+      { title: "Nuevo reporte disponible", text: "El reporte de avance del periodo 2026 está disponible.", icon: "fa-file-lines" },
+      { title: "Actualización de proyecto", text: "Se actualizó la información de Seguimiento 2026.", icon: "fa-circle-info" }
+    ]
+  },
+  document: {
+    name: "Ana Paredes",
+    role: "Supervisor de Seguimiento",
+    authType: "Documento",
+    site: "Unidad de Seguimiento y Evaluación",
+    institution: "Ministerio de Educación",
+    process: "",
+    modules: [
+      { name: "Seguimiento", description: "Consulta y supervisa avances.", icon: "fa-chart-line" },
+      { name: "Evaluación", description: "Revisa resultados e indicadores.", icon: "fa-clipboard-check" },
+      { name: "Instrumentos", description: "Atiende instrumentos asignados.", icon: "fa-file-lines" },
+      { name: "Reportes", description: "Consulta reportes disponibles.", icon: "fa-chart-column" }
+    ],
+    projects: [{ name: "Seguimiento 2026", period: "2026", assigned: 12, pending: 4, sent: 8, contact: "Equipo de Seguimiento" }],
+    notifications: [
+      { title: "Instrumentos pendientes", text: "Tienes 4 instrumentos pendientes de atención.", icon: "fa-clipboard-list" },
+      { title: "Nuevo reporte disponible", text: "El reporte de avance del periodo 2026 está disponible.", icon: "fa-file-lines" },
+      { title: "Actualización de proyecto", text: "Se actualizó la información de Seguimiento 2026.", icon: "fa-circle-info" }
+    ]
+  },
+  autoregistro: {
+    name: "Ana Paredes",
+    role: "Administrador USE",
+    authType: "Autoregistro",
+    site: "Unidad de Seguimiento y Evaluación",
+    institution: "Ministerio de Educación",
+    process: "Autoregistro 2026",
+    modules: [
+      { name: "Seguimiento", description: "Consulta el avance de tu proceso.", icon: "fa-chart-line" },
+      { name: "Instrumentos", description: "Revisa los instrumentos asignados.", icon: "fa-file-lines" },
+      { name: "Reportes", description: "Consulta reportes disponibles.", icon: "fa-chart-column" }
+    ],
+    projects: [{ name: "Seguimiento 2026", period: "2026", assigned: 8, pending: 2, sent: 6, contact: "Mesa de ayuda USE" }],
+    notifications: [
+      { title: "Instrumentos pendientes", text: "Tienes 2 instrumentos pendientes de atención.", icon: "fa-clipboard-list" },
+      { title: "Registro habilitado", text: "Tu acceso al proceso Autoregistro 2026 está habilitado.", icon: "fa-circle-check" }
+    ]
   }
-  return entry;
+};
+
+
+/* source: ref-017-welcome/js/state.js */
+function getWelcomeState(params, profiles) {
+  const requested = ["passport", "document", "autoregistro"].includes(params.get("auth")) ? params.get("auth") : "autoregistro";
+  return { profileKey: requested, profile: profiles[requested], notificationsOpen: false };
 }
 
-function recordAuthAttempt(args) {
-  return recordAuditEvent(args);
+
+/* source: ref-017-welcome/js/ui.js */
+
+
+function showToast(refs, message, type = "info") {
+  renderToast(refs.toast, message, type);
+}
+
+function renderProfile(refs, profile) {
+  refs.accountName.textContent = profile.name;
+  refs.accountRole.textContent = profile.role;
+  refs.accountInitial.textContent = profile.name.charAt(0);
+  refs.welcomeTitle.textContent = `Bienvenido, ${profile.name}`;
+  refs.welcomeSubtitle.textContent = profile.authType === "Autoregistro" ? "Consulta las opciones disponibles para tu proceso de registro." : "Consulta los módulos y proyectos disponibles para tu acceso.";
+  refs.processContext.hidden = !profile.process;
+  refs.processText.textContent = profile.process;
+  refs.moduleCount.textContent = `${profile.modules.length} módulos`;
+  refs.projectCount.textContent = `${profile.projects.length} ${profile.projects.length === 1 ? "proyecto" : "proyectos"}`;
+  refs.moduleGrid.innerHTML = profile.modules.map((module) => `<a href="#" class="module-item" data-module="${module.name}"><span class="module-icon"><i class="fa-solid ${module.icon}" aria-hidden="true"></i></span><span><strong>${module.name}</strong><span>${module.description}</span></span><i class="fa-solid fa-chevron-right module-arrow" aria-hidden="true"></i></a>`).join("");
+  refs.projectList.innerHTML = profile.projects.map((project) => `<article class="project-item"><div class="project-item-head"><strong>${project.name}</strong><span class="count-label">Periodo ${project.period}</span></div><div class="project-meta"><span class="metric"><i class="fa-solid fa-layer-group" aria-hidden="true"></i>${project.assigned} asignados</span><span class="metric pending"><i class="fa-solid fa-clock" aria-hidden="true"></i>${project.pending} pendientes</span><span class="metric sent"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i>${project.sent} enviados</span></div><div class="project-contact"><i class="fa-regular fa-address-book" aria-hidden="true"></i><span>Contacto: ${project.contact}</span></div></article>`).join("");
+  refs.userSummary.innerHTML = `<div><span>Nombre completo</span><strong>${profile.name}</strong></div><div><span>Tipo de autenticación</span><strong>${profile.authType}</strong></div><div><span>Rol referencial</span><strong>${profile.role}</strong></div><div><span>Sede</span><strong>${profile.site}</strong></div>`;
+}
+
+function renderNotifications(refs, notifications) {
+  refs.notificationCount.textContent = notifications.length;
+  refs.notificationList.innerHTML = notifications.map((notification) => `<article class="notification-item"><span class="notification-icon"><i class="fa-solid ${notification.icon}" aria-hidden="true"></i></span><div><strong>${notification.title}</strong><span>${notification.text}</span></div></article>`).join("");
+}
+
+function setNotificationPanel(refs, isOpen) {
+  refs.notificationPanel.hidden = !isOpen;
+  refs.notificationButton.setAttribute("aria-expanded", String(isOpen));
 }
 
 
-/* source: ref-008-auth-passport/js/main.js */
-
+/* source: ref-017-welcome/js/main.js */
 
 
 
 
 const refs = {
-  form: document.getElementById("loginForm"),
-  number: document.getElementById("documentNumber"),
-  password: document.getElementById("password"),
-  feedback: document.getElementById("authFeedback"),
-  success: document.getElementById("authSuccess"),
-  continueButton: document.getElementById("continueBtn"),
-  authPage: document.querySelector(".auth-page"),
-  authWelcome: document.getElementById("authWelcome"),
-  toast: document.getElementById("toast")
+  accountName: document.getElementById("accountName"), accountRole: document.getElementById("accountRole"), accountInitial: document.getElementById("accountInitial"), welcomeTitle: document.getElementById("welcomeTitle"), welcomeSubtitle: document.getElementById("welcomeSubtitle"), processContext: document.getElementById("processContext"), processText: document.getElementById("processText"), moduleCount: document.getElementById("moduleCount"), projectCount: document.getElementById("projectCount"), moduleGrid: document.getElementById("moduleGrid"), projectList: document.getElementById("projectList"), userSummary: document.getElementById("userSummary"), notificationButton: document.getElementById("notificationButton"), notificationCount: document.getElementById("notificationCount"), notificationPanel: document.getElementById("notificationPanel"), notificationList: document.getElementById("notificationList"), closeNotifications: document.getElementById("closeNotifications"), toast: document.getElementById("toast")
 };
 
-const passportUsers = {
-  "12345678": { documentNumber: "12345678", password: "ClaveSegura1", synchronized: true, active: true, projects: 1, roles: 1 },
-  "87654321": { documentNumber: "87654321", password: "ClaveSegura1", synchronized: true, active: true, projects: 0, roles: 0 },
-  "99999999": { documentNumber: "99999999", password: "ClaveSegura1", synchronized: true, active: false, projects: 1, roles: 1 }
-};
+const state = getWelcomeState(new URLSearchParams(window.location.search), welcomeProfiles);
+renderProfile(refs, state.profile);
+renderNotifications(refs, state.profile.notifications);
 
-function showToast(message, type = "info") {
-  renderToast(refs.toast, message, type);
-}
-
-function showError(message) {
-  refs.feedback.hidden = false;
-  refs.feedback.textContent = message;
-}
-
-refs.form.addEventListener("submit", (event) => {
+refs.notificationButton.addEventListener("click", () => {
+  state.notificationsOpen = !state.notificationsOpen;
+  setNotificationPanel(refs, state.notificationsOpen);
+});
+refs.closeNotifications.addEventListener("click", () => {
+  state.notificationsOpen = false;
+  setNotificationPanel(refs, false);
+});
+document.addEventListener("click", (event) => {
+  if (state.notificationsOpen && !refs.notificationPanel.contains(event.target) && !refs.notificationButton.contains(event.target)) {
+    state.notificationsOpen = false;
+    setNotificationPanel(refs, false);
+  }
+});
+refs.moduleGrid.addEventListener("click", (event) => {
+  const module = event.target.closest("[data-module]");
+  if (!module) return;
   event.preventDefault();
-  refs.feedback.hidden = true;
-  refs.success.hidden = true;
-  if (!hasRequiredValues([refs.number.value, refs.password.value])) {
-    recordAuthAttempt({ user: refs.number.value.trim() || "No identificado", authType: "Passport", result: "Fallida", reason: "Datos incompletos" });
-    showError(getMessage("M11"));
-    showToast(getMessage("M11"), "warning");
-    return;
-  }
-  const user = passportUsers[refs.number.value.trim()];
-  if (!validatePassportAccess({ documentNumber: refs.number.value.trim(), password: refs.password.value, user })) {
-    recordAuthAttempt({ user: refs.number.value.trim(), authType: "Passport", result: "Fallida", reason: "Credenciales inválidas o acceso no autorizado" });
-    showError(getMessage("M27"));
-    showToast(getMessage("M27"), "warning");
-    return;
-  }
-  refs.form.hidden = true;
-  refs.success.hidden = false;
-  recordAuthAttempt({ user: refs.number.value.trim(), authType: "Passport", result: "Exitosa" });
-  showToast(getPrototypeMessage("authenticationSuccess"), "success");
+  showToast(refs, `Acceso a ${module.dataset.module} disponible para revisión.`, "info");
 });
-
-document.querySelector(".password-toggle").addEventListener("click", (event) => {
-  const button = event.currentTarget;
-  const visible = refs.password.type === "text";
-  refs.password.type = visible ? "password" : "text";
-  button.querySelector("i").className = `fa-regular ${visible ? "fa-eye" : "fa-eye-slash"}`;
-  button.setAttribute("aria-label", visible ? "Mostrar contraseña" : "Ocultar contraseña");
-});
-
-bindAuthWelcomeFlow({ ...refs, authType: "passport" });

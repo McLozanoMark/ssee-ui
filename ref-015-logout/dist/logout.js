@@ -1,5 +1,88 @@
 /* source: design-system/demo-navigation.js */
+const CURRENT_DEMO_USER = "Ana Paredes";
+
+function applyCurrentDemoUser() {
+  document.querySelectorAll(".account-copy strong, #accountName").forEach((node) => {
+    node.textContent = CURRENT_DEMO_USER;
+  });
+}
+
+function mountClearableFields(root = document) {
+  root.querySelectorAll('input[type="search"], [data-clearable-input]').forEach((input) => {
+    if (input.closest(".clearable-field")) return;
+    const wrapper = document.createElement("span");
+    wrapper.className = "clearable-field";
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.append(input);
+    const clear = document.createElement("button");
+    clear.className = "field-clear";
+    clear.type = "button";
+    clear.setAttribute("aria-label", "Borrar contenido");
+    clear.title = "Borrar contenido";
+    clear.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+    wrapper.append(clear);
+
+    const syncVisibility = () => {
+      clear.hidden = !input.value;
+    };
+    input.addEventListener("input", syncVisibility);
+    clear.addEventListener("click", () => {
+      input.value = "";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.focus();
+    });
+    syncVisibility();
+  });
+}
+
+function normalizeSharedControls(root = document) {
+  root.querySelectorAll(".filter-actions [id^='clear'], .filter-actions [id^='reset']").forEach((button) => {
+    button.classList.add("filter-reset");
+    button.setAttribute("aria-label", "Restablecer filtros");
+    button.title = "Restablecer filtros";
+    button.innerHTML = '<i class="fa-solid fa-xmark icon" aria-hidden="true"></i>';
+  });
+
+  root.querySelectorAll("#newUserBtn, #newSourceBtn, #newSampleBtn, #newAssignmentBtn, #newConfigBtn, #newRoleBtn").forEach((button) => {
+    const icon = button.querySelector("i")?.outerHTML || "";
+    button.innerHTML = `${icon}Nuevo`;
+  });
+  root.querySelectorAll("#syncBtn").forEach((button) => {
+    if (button.dataset.syncRunning === "true") return;
+    const icon = button.querySelector("i")?.outerHTML || "";
+    button.innerHTML = `${icon}Sincronizar`;
+  });
+
+  const identityForm = root.querySelector("#identityForm");
+  const identityClear = identityForm?.querySelector("#clearBtn");
+  const documentNumber = identityForm?.querySelector("#documentNumber");
+  if (identityClear && documentNumber && !identityClear.closest(".clearable-field")) {
+    const wrapper = document.createElement("span");
+    wrapper.className = "clearable-field";
+    documentNumber.parentNode.insertBefore(wrapper, documentNumber);
+    wrapper.append(documentNumber, identityClear);
+    identityClear.className = "field-clear";
+    identityClear.removeAttribute("id");
+    identityClear.setAttribute("aria-label", "Borrar contenido");
+    identityClear.title = "Borrar contenido";
+    identityClear.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+    const syncVisibility = () => { identityClear.hidden = !documentNumber.value; };
+    documentNumber.addEventListener("input", syncVisibility);
+    syncVisibility();
+  }
+
+  root.querySelectorAll(".form-actions > #clearBtn").forEach((button) => {
+    button.classList.add("form-reset");
+    button.setAttribute("aria-label", "Restablecer formulario");
+    button.title = "Restablecer formulario";
+    button.innerHTML = '<i class="fa-solid fa-xmark icon" aria-hidden="true"></i>';
+  });
+}
+
 function mountDemoIndexLink() {
+  applyCurrentDemoUser();
+  mountClearableFields();
+  normalizeSharedControls();
   if (document.querySelector(".demo-index-link")) return;
   const link = document.createElement("a");
   link.className = "demo-index-link";
@@ -51,7 +134,7 @@ if (document.readyState === "loading") {
   function getSteps() {
     if (kind === "password") {
       return authType === "Passport"
-        ? [["#passportRedirect", "Continúa en Passport", "El cambio de contraseña se gestiona en el mecanismo oficial de Passport.", "click"]]
+        ? [["#passportRecoveryForm select", "Selecciona el documento", "Elige el tipo de documento en el formulario oficial simulado de Passport.", "click"], ["#passportRecoveryDocumentNumber", "Ingresa el documento", "Escribe el número de documento válido para solicitar la recuperación.", "input"], ["#passportRecoveryCaptcha", "Ingresa el captcha", "Escribe el código que aparece en la imagen de seguridad.", "input"], ["#passportRecoveryForm button[type=submit]", "Envía la solicitud", "Presiona Enviar correo para finalizar el flujo de recuperación en Passport.", "submit"]]
         : authType === "Documento"
           ? [["#documentPanel", "Revisa el acceso", "Este tipo de acceso no administra una contraseña local.", "click"]]
         : [
@@ -63,13 +146,13 @@ if (document.readyState === "loading") {
     }
     if (kind === "recovery") {
       return authType === "Passport"
-        ? [["#passportRedirect", "Continúa en Passport", "La recuperación se gestiona en el mecanismo oficial de Passport.", "click"]]
+        ? [["#passportRecoveryForm select", "Selecciona el documento", "Elige el tipo de documento en el formulario oficial simulado de Passport.", "click"], ["#passportRecoveryDocumentNumber", "Ingresa el documento", "Escribe el número de documento válido para solicitar la recuperación.", "input"], ["#passportRecoveryCaptcha", "Ingresa el captcha", "Escribe el código que aparece en la imagen de seguridad.", "input"], ["#passportRecoveryForm button[type=submit]", "Envía la solicitud", "Presiona Enviar correo para finalizar el flujo de recuperación en Passport.", "submit"]]
         : authType === "Documento"
           ? [["#documentPanel", "Revisa el acceso", "Este tipo de acceso no requiere recuperación de contraseña local.", "click"]]
         : [
           ["#email", "Ingresa el correo", "Escribe el correo registrado para solicitar el enlace.", "input"],
           ["#requestForm button[type=submit]", "Solicita el enlace", "Presiona Solicitar enlace para continuar.", "request"],
-          ["#openLink", "Abre el enlace", "En la demo, este botón representa el enlace recibido por correo.", "click"],
+          ["#sentBackToLogin", "Regresa al login", "El enlace llegará al correo registrado. Presiona Ir al login para cerrar este flujo de demostración.", "click"],
           ["#newPassword", "Ingresa la contraseña", "Escribe la nueva contraseña.", "input"],
           ["#confirmPassword", "Confirma la contraseña", "Repite la nueva contraseña.", "input"],
           ["#resetForm button[type=submit]", "Restablece la contraseña", "Presiona Restablecer contraseña para finalizar.", "submit"]
@@ -87,6 +170,11 @@ if (document.readyState === "loading") {
   }
 
   const steps = getSteps();
+  const successfulContinuation = {
+    passport: ["#continueBtn", "Continúa a la bienvenida", "La autenticación se completa en Passport. La demo representa el retorno autorizado a S.S.E.E.; presiona Continuar para ver la bienvenida.", "continue"],
+    document: ["#continueBtn", "Continúa a la bienvenida", "El documento y las condiciones de acceso fueron validados correctamente. Presiona Continuar para ver la bienvenida.", "continue"],
+    autoregister: ["#continueBtn", "Continúa a la bienvenida", "La cuenta y el proceso asociado fueron validados correctamente. Presiona Continuar para ver la bienvenida.", "continue"]
+  };
   let current = 0;
 
   function isVisible(element) {
@@ -99,10 +187,25 @@ if (document.readyState === "loading") {
     cursor.classList.remove("is-visible");
   }
 
+  function showSuccessfulContinuation() {
+    if (!document.getElementById("continueBtn") || !document.getElementById("authWelcome")) {
+      return finish("El sistema muestra la confirmación del flujo.");
+    }
+    if (steps.some((step) => step[3] === "continue")) return;
+    steps.push(successfulContinuation[kind] || successfulContinuation.autoregister);
+    steps.push(["#welcomeTitle", "Revisa la bienvenida", "Esta es la pantalla de bienvenida del flujo. El recorrido terminó dentro de esta demo.", "welcome"]);
+    current += 1;
+    showStep();
+  }
+
   function bindStep(step) {
     const element = document.querySelector(step[0]);
     if (!element) return;
     const eventName = step[3] === "input" ? "blur" : "click";
+    if (step[3] === "continue") {
+      window.addEventListener("auth:welcome-ready", () => nextStep(), { once: true });
+      return;
+    }
     element.addEventListener(eventName, () => {
       if (step[3] === "submit" || step[3] === "request") return;
       window.setTimeout(nextStep, 0);
@@ -118,6 +221,7 @@ if (document.readyState === "loading") {
               ? "El sistema muestra la confirmación del flujo."
               : "El sistema muestra el resultado de la validación.";
           if (step[3] === "request" && isVisible(document.getElementById("sentView"))) nextStep();
+          else if (isVisible(success)) showSuccessfulContinuation();
           else finish(response);
         }, 80);
       }, { once: true });
@@ -229,7 +333,9 @@ const MESSAGE_CATALOG = Object.freeze({
   M65: { text: "No hay registros disponibles. Haz clic en \"Nuevo\" para empezar.", type: "Información", scope: "General" },
   M66: { text: "Complete los datos del rol para activar esta sección.", type: "Alerta", scope: "Roles" },
   M67: { text: "Registros exportados correctamente.", type: "Información", scope: "General" },
-  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" }
+  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" },
+  M130: { text: "¿Está seguro que desea cerrar sesión?\nSe finalizará tu sesión actual. Tendrás que ingresar tus datos nuevamente para acceder.", type: "Confirmación", scope: "Sesiones" },
+  M131: { text: "Sesión próxima a finalizar\nLa sesión se cerrará automáticamente en %s por inactividad.\n¿Deseas continuar en el sistema?", type: "Alerta", scope: "Sesiones" }
 });
 
 // Confirmed prototype copy pending official codes in the stakeholder workbook.
@@ -395,9 +501,29 @@ function recordAuthAttempt(args) {
 /* source: ref-017-welcome/js/data.js */
 const welcomeProfiles = {
   passport: {
-    name: "Luis Ramos",
+    name: "Ana Paredes",
     role: "Supervisor de Seguimiento",
     authType: "Passport",
+    site: "Unidad de Seguimiento y Evaluación",
+    institution: "Ministerio de Educación",
+    process: "",
+    modules: [
+      { name: "Seguimiento", description: "Consulta y supervisa avances.", icon: "fa-chart-line" },
+      { name: "Evaluación", description: "Revisa resultados e indicadores.", icon: "fa-clipboard-check" },
+      { name: "Instrumentos", description: "Atiende instrumentos asignados.", icon: "fa-file-lines" },
+      { name: "Reportes", description: "Consulta reportes disponibles.", icon: "fa-chart-column" }
+    ],
+    projects: [{ name: "Seguimiento 2026", period: "2026", assigned: 12, pending: 4, sent: 8, contact: "Equipo de Seguimiento" }],
+    notifications: [
+      { title: "Instrumentos pendientes", text: "Tienes 4 instrumentos pendientes de atención.", icon: "fa-clipboard-list" },
+      { title: "Nuevo reporte disponible", text: "El reporte de avance del periodo 2026 está disponible.", icon: "fa-file-lines" },
+      { title: "Actualización de proyecto", text: "Se actualizó la información de Seguimiento 2026.", icon: "fa-circle-info" }
+    ]
+  },
+  document: {
+    name: "Ana Paredes",
+    role: "Supervisor de Seguimiento",
+    authType: "Documento",
     site: "Unidad de Seguimiento y Evaluación",
     institution: "Ministerio de Educación",
     process: "",
@@ -437,7 +563,7 @@ const welcomeProfiles = {
 
 /* source: ref-017-welcome/js/state.js */
 function getWelcomeState(params, profiles) {
-  const requested = params.get("auth") === "passport" ? "passport" : "autoregistro";
+  const requested = ["passport", "document", "autoregistro"].includes(params.get("auth")) ? params.get("auth") : "autoregistro";
   return { profileKey: requested, profile: profiles[requested], notificationsOpen: false };
 }
 

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>S.S.E.E. - Cambiar contraseña</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="../design-system/app.css?v=20260827-form-controls">
+  <link rel="stylesheet" href="../design-system/auth.css?v=20260914-auth-family">
+  <link rel="stylesheet" href="welcome.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="system.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Navegación principal">
+      <div class="side-brand"><div class="logo-symbol" aria-hidden="true">S</div><div><strong>S.S.E.E.</strong><span>Seguimiento y Evaluación Estratégica</span></div></div>
+      <nav class="side-nav" aria-label="Menú lateral"><a href="welcome.html?auth=autoregistro" class="nav-item"><i class="fa-solid fa-house me-2" aria-hidden="true"></i>Inicio</a></nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-button top-menu" type="button" aria-label="Abrir menú"><span></span><span></span><span></span></button>
+        <div class="top-divider" aria-hidden="true"></div>
+        <div class="top-info"><div class="info-card"><span class="info-icon" aria-hidden="true"><i class="fa-regular fa-clock"></i></span><div><strong>Último acceso</strong><span>5:00 PM - 25/12/2024</span></div></div><div class="info-card location-card"><span class="info-icon" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></span><div><strong>Sede</strong><span>Unidad de Seguimiento y Evaluación</span></div><i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i></div></div>
+        <div class="top-divider" aria-hidden="true"></div>
+        <div class="account account-menu-wrap"><button class="account-menu-trigger" id="accountMenuTrigger" type="button" aria-expanded="false" aria-controls="accountMenu"><span class="account-copy"><strong>Ana Paredes</strong><span>Administrador USE</span></span><span class="avatar" aria-hidden="true">A</span><i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i></button><div class="account-dropdown" id="accountMenu" hidden><button class="dropdown-item" id="backHomeOption" type="button"><i class="fa-solid fa-house" aria-hidden="true"></i>Volver al inicio</button></div></div>
+      </header>
+
+      <section class="view is-active password-system-view" aria-labelledby="passwordPageTitle">
+        <nav class="breadcrumb" aria-label="Ruta"><a href="welcome.html?auth=autoregistro">Inicio</a> / Mi perfil / Cambiar contraseña</nav>
+        <div class="page-head compact"><div><div class="title-row"><div class="title-icon" aria-hidden="true"><i class="fa-solid fa-key"></i></div><div><h1 id="passwordPageTitle">Cambiar contraseña</h1><p>Actualiza la contraseña de acceso a tu cuenta.</p></div></div></div></div>
+        <section class="surface-card password-system-card" aria-labelledby="passwordSectionTitle">
+          <div class="section-heading"><div><p class="eyebrow">Seguridad de la cuenta</p><h2 id="passwordSectionTitle">Datos de acceso</h2><p>Completa los campos para establecer una nueva contraseña.</p></div></div>
+          <div class="account-summary"><span class="avatar">A</span><div><strong id="accountName">Ana Paredes</strong><span id="accountEmail">ana.paredes@ejemplo.gob.pe</span></div><span class="status" id="accountType">Autoregistro</span></div>
+          <form id="passwordForm" novalidate>
+            <label class="field-label password-field" for="currentPassword"><span class="field-caption">Contraseña actual <b>*</b></span><span class="password-input"><input class="form-control" id="currentPassword" type="password" autocomplete="current-password" value="ClaveSegura1" required><button class="password-toggle" type="button" aria-label="Mostrar contraseña"><i class="fa-regular fa-eye"></i></button></span></label>
+            <label class="field-label password-field" for="newPassword"><span class="field-caption">Nueva contraseña <b>*</b></span><span class="password-input"><input class="form-control" id="newPassword" type="password" autocomplete="new-password" required><button class="password-toggle" type="button" aria-label="Mostrar contraseña"><i class="fa-regular fa-eye"></i></button></span></label>
+            <label class="field-label password-field" for="confirmPassword"><span class="field-caption">Confirmar nueva contraseña <b>*</b></span><span class="password-input"><input class="form-control" id="confirmPassword" type="password" autocomplete="new-password" required><button class="password-toggle" type="button" aria-label="Mostrar contraseña"><i class="fa-regular fa-eye"></i></button></span></label>
+            <div class="password-policy-help"><span>La contraseña debe cumplir con la política de seguridad.</span><button class="policy-tooltip-trigger" id="passwordPolicyTrigger" type="button" aria-label="Ver requisitos de contraseña" data-bs-toggle="tooltip" data-bs-placement="top" title="Ver requisitos de contraseña"><i class="fa-solid fa-circle-info" aria-hidden="true"></i></button></div>
+            <div class="password-policy-content" id="passwordPolicyContent" hidden><strong>La contraseña debe cumplir con los siguientes requerimientos:</strong><ul><li id="policyLower">Al menos debería tener una letra en minúscula</li><li id="policyUpper">Al menos debería tener una letra en mayúscula</li><li id="policyNumber">Al menos debería tener un número</li><li id="policyLength">Debería tener 8 caracteres como mínimo</li><li id="policyMaxLength">Debería tener 15 caracteres como máximo</li><li id="policyForbidden">No debería tener los siguientes caracteres +/-^?$&amp;%|&lt;&gt;*</li></ul></div>
+            <div class="auth-feedback" id="passwordFeedback" hidden></div>
+            <div class="form-actions"><button class="btn btn-outline-ssee" id="cancelPassword" type="button">Cancelar</button><button class="btn btn-ssee" type="submit"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Guardar</button></div>
+          </form>
+          <div id="passwordSuccess" hidden><section class="auth-success"><span><i class="fa-solid fa-circle-check"></i></span><div><h2>Contraseña actualizada</h2><p>La contraseña se ha restablecido correctamente.</p></div></section><div class="auth-success-actions"><button class="btn btn-ssee" id="returnHome" type="button"><i class="fa-solid fa-house" aria-hidden="true"></i> Volver al inicio</button></div></div>
+        </section>
+      </section>
+      <footer class="footer"><div class="minedu-mark"><img class="minedu-logo" src="../assets/minedu.jpg" alt="Ministerio de Educación"></div><div><p>2026. Todos los derechos reservados.</p><p>Ministerio de Educación - S.S.E.E. - Versión 0.1</p></div></footer>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="dist/password.js"></script>
+  <script src="system.js"></script>
+</body>
+</html>

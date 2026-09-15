@@ -6,7 +6,7 @@ import { showFeedback, showOnly, showToast, updatePolicy } from "./ui.js";
 import { validateResetPassword } from "./recovery.js";
 
 const refs = {
-  passportPanel: document.getElementById("passportPanel"), passportRedirect: document.getElementById("passportRedirect"), documentPanel: document.getElementById("documentPanel"), documentRedirect: document.getElementById("documentRedirect"), requestForm: document.getElementById("requestForm"), email: document.getElementById("email"), requestFeedback: document.getElementById("requestFeedback"), backToLogin: document.getElementById("backToLogin"), requestView: document.getElementById("requestView"), sentView: document.getElementById("sentView"), resetView: document.getElementById("resetView"), expiredView: document.getElementById("expiredView"), successView: document.getElementById("successView"), openLink: document.getElementById("openLink"), requestNew: document.getElementById("requestNew"), resetForm: document.getElementById("resetForm"), newPassword: document.getElementById("newPassword"), confirmPassword: document.getElementById("confirmPassword"), resetFeedback: document.getElementById("resetFeedback"), cancelReset: document.getElementById("cancelReset"), policyLength: document.getElementById("policyLength"), policyUpper: document.getElementById("policyUpper"), policyLower: document.getElementById("policyLower"), policyNumber: document.getElementById("policyNumber"), toast: document.getElementById("toast")
+  passportPanel: document.getElementById("passportPanel"), passportRecoveryForm: document.getElementById("passportRecoveryForm"), passportRecoveryDocumentNumber: document.getElementById("passportRecoveryDocumentNumber"), passportRecoveryCaptcha: document.getElementById("passportRecoveryCaptcha"), passportCaptchaText: document.getElementById("passportCaptchaText"), passportCaptchaRefresh: document.getElementById("passportCaptchaRefresh"), passportFeedback: document.getElementById("passportFeedback"), passportCancel: document.getElementById("passportCancel"), passportSent: document.getElementById("passportSent"), passportBackLogin: document.getElementById("passportBackLogin"), documentPanel: document.getElementById("documentPanel"), documentRedirect: document.getElementById("documentRedirect"), requestForm: document.getElementById("requestForm"), email: document.getElementById("email"), requestFeedback: document.getElementById("requestFeedback"), backToLogin: document.getElementById("backToLogin"), requestView: document.getElementById("requestView"), sentView: document.getElementById("sentView"), resetView: document.getElementById("resetView"), expiredView: document.getElementById("expiredView"), successView: document.getElementById("successView"), sentBackToLogin: document.getElementById("sentBackToLogin"), requestNew: document.getElementById("requestNew"), resetForm: document.getElementById("resetForm"), newPassword: document.getElementById("newPassword"), confirmPassword: document.getElementById("confirmPassword"), resetFeedback: document.getElementById("resetFeedback"), cancelReset: document.getElementById("cancelReset"), policyLength: document.getElementById("policyLength"), policyUpper: document.getElementById("policyUpper"), policyLower: document.getElementById("policyLower"), policyNumber: document.getElementById("policyNumber"), toast: document.getElementById("toast")
 };
 
 const params = new URLSearchParams(window.location.search);
@@ -24,13 +24,24 @@ function resetToRequest() {
 }
 
 if (state.authType === "Passport") {
+  document.body.classList.add("passport-external-mode");
   refs.requestView.hidden = true;
   refs.passportPanel.hidden = false;
-  refs.passportRedirect.addEventListener("click", () => { window.location.href = "../ref-008-auth-passport/index.html"; });
+  refs.passportRecoveryForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const valid = document.getElementById("passportRecoveryDocumentType").value && /^\d{8,12}$/.test(refs.passportRecoveryDocumentNumber.value.trim()) && refs.passportRecoveryCaptcha.value.trim().toUpperCase() === refs.passportCaptchaText.textContent;
+    refs.passportFeedback.hidden = valid;
+    refs.passportFeedback.classList.toggle("is-valid", valid);
+    refs.passportFeedback.textContent = valid ? "" : "Verifica el número de documento y el captcha ingresado.";
+    if (valid) { refs.passportRecoveryForm.hidden = true; refs.passportSent.hidden = false; showToast(refs, "Solicitud enviada en Passport.", "success"); }
+  });
+  refs.passportCaptchaRefresh.addEventListener("click", () => { refs.passportCaptchaText.textContent = refs.passportCaptchaText.textContent === "WXY7MZ" ? "K7P4QX" : "WXY7MZ"; refs.passportRecoveryCaptcha.value = ""; });
+  refs.passportCancel.addEventListener("click", () => { window.location.href = "login.html?auth=passport"; });
+  refs.passportBackLogin.addEventListener("click", () => { window.location.href = "login.html?auth=passport"; });
 } else if (state.authType === "Documento") {
   refs.requestView.hidden = true;
   refs.documentPanel.hidden = false;
-  refs.documentRedirect.addEventListener("click", () => { window.location.href = "../ref-009-auth-document/index.html"; });
+  refs.documentRedirect.addEventListener("click", () => { showToast(refs, "Este tipo de acceso no requiere recuperación de contraseña local.", "info"); });
 } else if (state.tokenState === "expired") {
   refs.requestView.hidden = true;
   refs.expiredView.hidden = false;
@@ -53,11 +64,7 @@ if (state.authType === "Passport") {
     showToast(refs, getMessage("M35"), "info");
   });
 
-  refs.openLink.addEventListener("click", () => {
-    state.tokenState = "available";
-    recordAuditEvent({ user: state.email, authType: state.authType, operation: "Utilización del mecanismo de recuperación", result: "Exitosa" });
-    showOnly(refs, "resetView");
-  });
+  refs.sentBackToLogin.addEventListener("click", () => { window.location.href = "login.html?auth=autoregistro"; });
 
   refs.resetForm.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -81,7 +88,7 @@ refs.newPassword.addEventListener("input", () => updatePolicy(refs, refs.newPass
 refs.requestNew.addEventListener("click", resetToRequest);
 refs.cancelReset.addEventListener("click", resetToRequest);
 refs.backToLogin.addEventListener("click", () => {
-  window.location.href = authType === "Passport" ? "../ref-008-auth-passport/index.html" : "../ref-010-auth-autoregistro/index.html";
+  window.location.href = "login.html?auth=" + (authType === "Passport" ? "passport" : "autoregistro");
 });
 
 document.querySelectorAll(".password-toggle").forEach((button) => button.addEventListener("click", (event) => {

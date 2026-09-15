@@ -10,6 +10,9 @@ const refs = {
   issueDate: document.getElementById("issueDate"),
   feedback: document.getElementById("authFeedback"),
   success: document.getElementById("authSuccess"),
+  continueButton: document.getElementById("continueBtn"),
+  authPage: document.querySelector(".auth-page"),
+  authWelcome: document.getElementById("authWelcome"),
   toast: document.getElementById("toast")
 };
 
@@ -59,3 +62,5 @@ refs.form.addEventListener("submit", (event) => {
   recordAuthAttempt({ user: refs.number.value.trim(), authType: "Documento de identidad", result: "Exitosa" });
   showToast(getPrototypeMessage("authenticationSuccess"), "success");
 });
+
+bindAuthWelcomeFlow({ ...refs, authType: "document" });

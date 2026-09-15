@@ -17,8 +17,18 @@ export function updateAccount(refs, user) {
 }
 
 export function updatePolicy(refs, password, policy) {
-  refs.policyLength.classList.toggle("is-valid", password.length >= policy.minLength);
-  refs.policyUpper.classList.toggle("is-valid", policy.uppercase.test(password));
-  refs.policyLower.classList.toggle("is-valid", policy.lowercase.test(password));
-  refs.policyNumber.classList.toggle("is-valid", policy.number.test(password));
+  const checks = {
+    policyLength: password.length >= policy.minLength,
+    policyMaxLength: password.length > 0 && password.length <= policy.maxLength,
+    policyUpper: policy.uppercase.test(password),
+    policyLower: policy.lowercase.test(password),
+    policyNumber: policy.number.test(password),
+    policyForbidden: password.length > 0 && !policy.forbidden.test(password)
+  };
+  Object.entries(checks).forEach(([id, valid]) => {
+    const item = refs[id];
+    item.classList.toggle("is-valid", valid);
+    item.classList.toggle("is-invalid", !valid);
+  });
+  if (refs.policyTooltip) refs.policyTooltip.setContent({ ".tooltip-inner": refs.policyContent.innerHTML });
 }

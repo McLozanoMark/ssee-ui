@@ -1,0 +1,22 @@
+.auth-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;margin:0 0 1.25rem;padding:.3rem;background:#f5f7ff;border:1px solid var(--ssee-line);border-radius:.6rem}
+.auth-tab{display:flex;align-items:center;justify-content:center;gap:.45rem;min-height:2.75rem;padding:.45rem .5rem;border:1px solid transparent;border-radius:.4rem;background:transparent;color:var(--ssee-muted);font-size:.78rem;font-weight:700}
+.auth-tab i{color:var(--ssee-primary)}
+.auth-tab.is-active{background:#fff;border-color:#cfd2ff;color:var(--ssee-primary);box-shadow:0 .25rem .8rem rgba(45,43,232,.1)}
+.auth-secondary-actions{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
+.auth-secondary-actions .auth-recovery-link,.auth-secondary-actions .auth-change-link{white-space:nowrap}
+.auth-panel-form{display:grid;gap:.9rem}
+.auth-panel-form .field-grid{margin-bottom:0}
+.auth-panel-form .form-actions{margin-top:.25rem}
+.auth-panel-form .auth-secondary-actions{margin-top:-.3rem}
+.central-auth-page .auth-form-panel{justify-content:flex-start}
+.central-auth-page .auth-brand{margin-bottom:2.25rem}
+.central-auth-page .auth-heading{margin-bottom:1.25rem}
+.central-auth-page .auth-success{margin-top:1rem}
+.central-auth-page .demo-cursor{position:fixed;z-index:1080;color:#111827;font-size:2rem;line-height:1;pointer-events:none;opacity:0;filter:drop-shadow(0 2px 2px rgba(255,255,255,.9));transition:left .25s ease,top .25s ease}
+.central-auth-page .demo-cursor.is-visible{opacity:1;animation:central-cursor-pulse 1.4s ease-in-out infinite}
+.auth-tab:disabled{cursor:not-allowed;opacity:.5}
+.ref013-guide-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.4rem;margin-top:.7rem}
+.ref013-guide-option{min-height:2.25rem;padding:.35rem .55rem;border:1px solid rgba(255,255,255,.22);border-radius:.35rem;background:transparent;color:inherit;font-size:.78rem;font-weight:700;cursor:pointer}
+.ref013-guide-option.is-active{border-color:#fff;background:#fff;color:#172554}
+@keyframes central-cursor-pulse{50%{transform:scale(1.12)}}
+@media(max-width:600px){.auth-tabs{grid-template-columns:1fr}.auth-tab{justify-content:flex-start;padding-left:.8rem}.central-auth-page .auth-form-panel{padding:2rem 1.25rem}}

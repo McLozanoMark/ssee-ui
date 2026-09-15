@@ -1,5 +1,88 @@
 /* source: design-system/demo-navigation.js */
+const CURRENT_DEMO_USER = "Ana Paredes";
+
+function applyCurrentDemoUser() {
+  document.querySelectorAll(".account-copy strong, #accountName").forEach((node) => {
+    node.textContent = CURRENT_DEMO_USER;
+  });
+}
+
+function mountClearableFields(root = document) {
+  root.querySelectorAll('input[type="search"], [data-clearable-input]').forEach((input) => {
+    if (input.closest(".clearable-field")) return;
+    const wrapper = document.createElement("span");
+    wrapper.className = "clearable-field";
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.append(input);
+    const clear = document.createElement("button");
+    clear.className = "field-clear";
+    clear.type = "button";
+    clear.setAttribute("aria-label", "Borrar contenido");
+    clear.title = "Borrar contenido";
+    clear.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+    wrapper.append(clear);
+
+    const syncVisibility = () => {
+      clear.hidden = !input.value;
+    };
+    input.addEventListener("input", syncVisibility);
+    clear.addEventListener("click", () => {
+      input.value = "";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.focus();
+    });
+    syncVisibility();
+  });
+}
+
+function normalizeSharedControls(root = document) {
+  root.querySelectorAll(".filter-actions [id^='clear'], .filter-actions [id^='reset']").forEach((button) => {
+    button.classList.add("filter-reset");
+    button.setAttribute("aria-label", "Restablecer filtros");
+    button.title = "Restablecer filtros";
+    button.innerHTML = '<i class="fa-solid fa-xmark icon" aria-hidden="true"></i>';
+  });
+
+  root.querySelectorAll("#newUserBtn, #newSourceBtn, #newSampleBtn, #newAssignmentBtn, #newConfigBtn, #newRoleBtn").forEach((button) => {
+    const icon = button.querySelector("i")?.outerHTML || "";
+    button.innerHTML = `${icon}Nuevo`;
+  });
+  root.querySelectorAll("#syncBtn").forEach((button) => {
+    if (button.dataset.syncRunning === "true") return;
+    const icon = button.querySelector("i")?.outerHTML || "";
+    button.innerHTML = `${icon}Sincronizar`;
+  });
+
+  const identityForm = root.querySelector("#identityForm");
+  const identityClear = identityForm?.querySelector("#clearBtn");
+  const documentNumber = identityForm?.querySelector("#documentNumber");
+  if (identityClear && documentNumber && !identityClear.closest(".clearable-field")) {
+    const wrapper = document.createElement("span");
+    wrapper.className = "clearable-field";
+    documentNumber.parentNode.insertBefore(wrapper, documentNumber);
+    wrapper.append(documentNumber, identityClear);
+    identityClear.className = "field-clear";
+    identityClear.removeAttribute("id");
+    identityClear.setAttribute("aria-label", "Borrar contenido");
+    identityClear.title = "Borrar contenido";
+    identityClear.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+    const syncVisibility = () => { identityClear.hidden = !documentNumber.value; };
+    documentNumber.addEventListener("input", syncVisibility);
+    syncVisibility();
+  }
+
+  root.querySelectorAll(".form-actions > #clearBtn").forEach((button) => {
+    button.classList.add("form-reset");
+    button.setAttribute("aria-label", "Restablecer formulario");
+    button.title = "Restablecer formulario";
+    button.innerHTML = '<i class="fa-solid fa-xmark icon" aria-hidden="true"></i>';
+  });
+}
+
 function mountDemoIndexLink() {
+  applyCurrentDemoUser();
+  mountClearableFields();
+  normalizeSharedControls();
   if (document.querySelector(".demo-index-link")) return;
   const link = document.createElement("a");
   link.className = "demo-index-link";
@@ -14,6 +97,69 @@ if (document.readyState === "loading") {
 } else {
   mountDemoIndexLink();
 }
+
+
+/* source: ref-017-welcome/js/data.js */
+const welcomeProfiles = {
+  passport: {
+    name: "Ana Paredes",
+    role: "Supervisor de Seguimiento",
+    authType: "Passport",
+    site: "Unidad de Seguimiento y Evaluación",
+    institution: "Ministerio de Educación",
+    process: "",
+    modules: [
+      { name: "Seguimiento", description: "Consulta y supervisa avances.", icon: "fa-chart-line" },
+      { name: "Evaluación", description: "Revisa resultados e indicadores.", icon: "fa-clipboard-check" },
+      { name: "Instrumentos", description: "Atiende instrumentos asignados.", icon: "fa-file-lines" },
+      { name: "Reportes", description: "Consulta reportes disponibles.", icon: "fa-chart-column" }
+    ],
+    projects: [{ name: "Seguimiento 2026", period: "2026", assigned: 12, pending: 4, sent: 8, contact: "Equipo de Seguimiento" }],
+    notifications: [
+      { title: "Instrumentos pendientes", text: "Tienes 4 instrumentos pendientes de atención.", icon: "fa-clipboard-list" },
+      { title: "Nuevo reporte disponible", text: "El reporte de avance del periodo 2026 está disponible.", icon: "fa-file-lines" },
+      { title: "Actualización de proyecto", text: "Se actualizó la información de Seguimiento 2026.", icon: "fa-circle-info" }
+    ]
+  },
+  document: {
+    name: "Ana Paredes",
+    role: "Supervisor de Seguimiento",
+    authType: "Documento",
+    site: "Unidad de Seguimiento y Evaluación",
+    institution: "Ministerio de Educación",
+    process: "",
+    modules: [
+      { name: "Seguimiento", description: "Consulta y supervisa avances.", icon: "fa-chart-line" },
+      { name: "Evaluación", description: "Revisa resultados e indicadores.", icon: "fa-clipboard-check" },
+      { name: "Instrumentos", description: "Atiende instrumentos asignados.", icon: "fa-file-lines" },
+      { name: "Reportes", description: "Consulta reportes disponibles.", icon: "fa-chart-column" }
+    ],
+    projects: [{ name: "Seguimiento 2026", period: "2026", assigned: 12, pending: 4, sent: 8, contact: "Equipo de Seguimiento" }],
+    notifications: [
+      { title: "Instrumentos pendientes", text: "Tienes 4 instrumentos pendientes de atención.", icon: "fa-clipboard-list" },
+      { title: "Nuevo reporte disponible", text: "El reporte de avance del periodo 2026 está disponible.", icon: "fa-file-lines" },
+      { title: "Actualización de proyecto", text: "Se actualizó la información de Seguimiento 2026.", icon: "fa-circle-info" }
+    ]
+  },
+  autoregistro: {
+    name: "Ana Paredes",
+    role: "Administrador USE",
+    authType: "Autoregistro",
+    site: "Unidad de Seguimiento y Evaluación",
+    institution: "Ministerio de Educación",
+    process: "Autoregistro 2026",
+    modules: [
+      { name: "Seguimiento", description: "Consulta el avance de tu proceso.", icon: "fa-chart-line" },
+      { name: "Instrumentos", description: "Revisa los instrumentos asignados.", icon: "fa-file-lines" },
+      { name: "Reportes", description: "Consulta reportes disponibles.", icon: "fa-chart-column" }
+    ],
+    projects: [{ name: "Seguimiento 2026", period: "2026", assigned: 8, pending: 2, sent: 6, contact: "Mesa de ayuda USE" }],
+    notifications: [
+      { title: "Instrumentos pendientes", text: "Tienes 2 instrumentos pendientes de atención.", icon: "fa-clipboard-list" },
+      { title: "Registro habilitado", text: "Tu acceso al proceso Autoregistro 2026 está habilitado.", icon: "fa-circle-check" }
+    ]
+  }
+};
 
 
 /* source: design-system/auth-guide.js */
@@ -51,7 +197,7 @@ if (document.readyState === "loading") {
   function getSteps() {
     if (kind === "password") {
       return authType === "Passport"
-        ? [["#passportRedirect", "Continúa en Passport", "El cambio de contraseña se gestiona en el mecanismo oficial de Passport.", "click"]]
+        ? [["#passportRecoveryForm select", "Selecciona el documento", "Elige el tipo de documento en el formulario oficial simulado de Passport.", "click"], ["#passportRecoveryDocumentNumber", "Ingresa el documento", "Escribe el número de documento válido para solicitar la recuperación.", "input"], ["#passportRecoveryCaptcha", "Ingresa el captcha", "Escribe el código que aparece en la imagen de seguridad.", "input"], ["#passportRecoveryForm button[type=submit]", "Envía la solicitud", "Presiona Enviar correo para finalizar el flujo de recuperación en Passport.", "submit"]]
         : authType === "Documento"
           ? [["#documentPanel", "Revisa el acceso", "Este tipo de acceso no administra una contraseña local.", "click"]]
         : [
@@ -63,13 +209,13 @@ if (document.readyState === "loading") {
     }
     if (kind === "recovery") {
       return authType === "Passport"
-        ? [["#passportRedirect", "Continúa en Passport", "La recuperación se gestiona en el mecanismo oficial de Passport.", "click"]]
+        ? [["#passportRecoveryForm select", "Selecciona el documento", "Elige el tipo de documento en el formulario oficial simulado de Passport.", "click"], ["#passportRecoveryDocumentNumber", "Ingresa el documento", "Escribe el número de documento válido para solicitar la recuperación.", "input"], ["#passportRecoveryCaptcha", "Ingresa el captcha", "Escribe el código que aparece en la imagen de seguridad.", "input"], ["#passportRecoveryForm button[type=submit]", "Envía la solicitud", "Presiona Enviar correo para finalizar el flujo de recuperación en Passport.", "submit"]]
         : authType === "Documento"
           ? [["#documentPanel", "Revisa el acceso", "Este tipo de acceso no requiere recuperación de contraseña local.", "click"]]
         : [
           ["#email", "Ingresa el correo", "Escribe el correo registrado para solicitar el enlace.", "input"],
           ["#requestForm button[type=submit]", "Solicita el enlace", "Presiona Solicitar enlace para continuar.", "request"],
-          ["#openLink", "Abre el enlace", "En la demo, este botón representa el enlace recibido por correo.", "click"],
+          ["#sentBackToLogin", "Regresa al login", "El enlace llegará al correo registrado. Presiona Ir al login para cerrar este flujo de demostración.", "click"],
           ["#newPassword", "Ingresa la contraseña", "Escribe la nueva contraseña.", "input"],
           ["#confirmPassword", "Confirma la contraseña", "Repite la nueva contraseña.", "input"],
           ["#resetForm button[type=submit]", "Restablece la contraseña", "Presiona Restablecer contraseña para finalizar.", "submit"]
@@ -87,6 +233,11 @@ if (document.readyState === "loading") {
   }
 
   const steps = getSteps();
+  const successfulContinuation = {
+    passport: ["#continueBtn", "Continúa a la bienvenida", "La autenticación se completa en Passport. La demo representa el retorno autorizado a S.S.E.E.; presiona Continuar para ver la bienvenida.", "continue"],
+    document: ["#continueBtn", "Continúa a la bienvenida", "El documento y las condiciones de acceso fueron validados correctamente. Presiona Continuar para ver la bienvenida.", "continue"],
+    autoregister: ["#continueBtn", "Continúa a la bienvenida", "La cuenta y el proceso asociado fueron validados correctamente. Presiona Continuar para ver la bienvenida.", "continue"]
+  };
   let current = 0;
 
   function isVisible(element) {
@@ -99,10 +250,25 @@ if (document.readyState === "loading") {
     cursor.classList.remove("is-visible");
   }
 
+  function showSuccessfulContinuation() {
+    if (!document.getElementById("continueBtn") || !document.getElementById("authWelcome")) {
+      return finish("El sistema muestra la confirmación del flujo.");
+    }
+    if (steps.some((step) => step[3] === "continue")) return;
+    steps.push(successfulContinuation[kind] || successfulContinuation.autoregister);
+    steps.push(["#welcomeTitle", "Revisa la bienvenida", "Esta es la pantalla de bienvenida del flujo. El recorrido terminó dentro de esta demo.", "welcome"]);
+    current += 1;
+    showStep();
+  }
+
   function bindStep(step) {
     const element = document.querySelector(step[0]);
     if (!element) return;
     const eventName = step[3] === "input" ? "blur" : "click";
+    if (step[3] === "continue") {
+      window.addEventListener("auth:welcome-ready", () => nextStep(), { once: true });
+      return;
+    }
     element.addEventListener(eventName, () => {
       if (step[3] === "submit" || step[3] === "request") return;
       window.setTimeout(nextStep, 0);
@@ -118,6 +284,7 @@ if (document.readyState === "loading") {
               ? "El sistema muestra la confirmación del flujo."
               : "El sistema muestra el resultado de la validación.";
           if (step[3] === "request" && isVisible(document.getElementById("sentView"))) nextStep();
+          else if (isVisible(success)) showSuccessfulContinuation();
           else finish(response);
         }, 80);
       }, { once: true });
@@ -158,6 +325,144 @@ if (document.readyState === "loading") {
     if (steps[current]) position(steps[current], false);
   });
 })();
+
+
+/* source: design-system/auth-welcome.js */
+function mountAuthWelcome(container, authType) {
+  if (!container || typeof welcomeProfiles === "undefined") return;
+
+  const profile = welcomeProfiles[authType] || welcomeProfiles.autoregistro;
+  container.innerHTML = `
+    <div class="app-shell auth-welcome-shell">
+      <aside class="sidebar" aria-label="Navegación principal">
+        <div class="side-brand">
+          <div class="logo-symbol" aria-hidden="true">S</div>
+          <div><strong>S.S.E.E.</strong><span>Seguimiento y Evaluación Estratégica</span></div>
+        </div>
+        <nav class="side-nav" aria-label="Menú lateral">
+          <a href="#welcome" class="nav-item is-active"><i class="fa-solid fa-house me-2" aria-hidden="true"></i>Inicio</a>
+        </nav>
+      </aside>
+      <main class="main">
+        <header class="topbar">
+          <button class="icon-button top-menu" type="button" aria-label="Abrir menú"><span></span><span></span><span></span></button>
+          <div class="top-divider" aria-hidden="true"></div>
+          <div class="top-info">
+            <div class="info-card">
+              <span class="info-icon" aria-hidden="true"><i class="fa-regular fa-clock"></i></span>
+              <div><strong>Último acceso</strong><span>5:00 PM - 25/12/2024</span></div>
+            </div>
+            <div class="info-card location-card">
+              <span class="info-icon" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></span>
+              <div><strong>Sede</strong><span>${profile.site}</span></div>
+              <i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>
+            </div>
+          </div>
+          <div class="top-divider" aria-hidden="true"></div>
+          <div class="account">
+            <button class="bell notification-trigger" id="welcomeNotificationButton" type="button" aria-label="Ver notificaciones" aria-expanded="false">
+              <i class="fa-regular fa-bell" aria-hidden="true"></i><span class="notification-badge" id="welcomeNotificationCount">0</span>
+            </button>
+            <div class="account-separator" aria-hidden="true"></div>
+            <div class="account-copy"><strong>${profile.name}</strong><span>${profile.role}</span></div>
+            <div class="avatar" aria-hidden="true">${profile.name.charAt(0)}</div>
+            <i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>
+          </div>
+        </header>
+
+        <section class="view is-active" id="welcome" aria-labelledby="welcomeTitle">
+          <div class="page-head welcome-head">
+            <div>
+              <nav class="breadcrumb" aria-label="Ruta"><a href="../index.html">Índice de requerimientos</a> / ALI-REF-017 / Bienvenida y módulos</nav>
+              <div class="title-row">
+                <div class="title-icon" aria-hidden="true"><i class="fa-solid fa-house"></i></div>
+                <div><h1 id="welcomeTitle" tabindex="-1">Bienvenido, ${profile.name}</h1><p id="welcomeSubtitle">Consulta los módulos y proyectos disponibles para tu acceso.</p></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="context-strip" id="welcomeProcessContext" ${profile.process ? "" : "hidden"}>
+            <span class="context-icon" aria-hidden="true"><i class="fa-solid fa-user-plus"></i></span>
+            <div><strong>Proceso asociado</strong><span id="welcomeProcessText">${profile.process || ""}</span></div>
+          </div>
+
+          <div class="welcome-grid">
+            <section class="surface-card modules-card" aria-labelledby="welcomeModulesTitle">
+              <div class="section-heading"><div><p class="eyebrow">Acceso según rol y permisos</p><h2 id="welcomeModulesTitle">Módulos disponibles</h2></div><span class="count-label" id="welcomeModuleCount">0 módulos</span></div>
+              <div class="module-grid" id="welcomeModuleGrid"></div>
+            </section>
+            <section class="surface-card project-card" aria-labelledby="welcomeProjectsTitle">
+              <div class="section-heading"><div><p class="eyebrow">Asignaciones vigentes</p><h2 id="welcomeProjectsTitle">Mis proyectos</h2></div><span class="count-label" id="welcomeProjectCount">0 proyectos</span></div>
+              <div id="welcomeProjectList" class="project-list"></div>
+            </section>
+          </div>
+
+          <section class="surface-card summary-card" aria-labelledby="welcomeSummaryTitle">
+            <div class="section-heading"><div><p class="eyebrow">Información del acceso</p><h2 id="welcomeSummaryTitle">Resumen de usuario</h2></div><span class="status-chip"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Acceso habilitado</span></div>
+            <div class="user-summary" id="welcomeUserSummary"></div>
+          </section>
+        </section>
+
+        <footer class="footer"><div class="minedu-mark"><img class="minedu-logo" src="../assets/minedu.jpg" alt="Ministerio de Educación"></div><div><p>2026. Todos los derechos reservados.</p><p>Ministerio de Educación - S.S.E.E. - Versión 0.1</p></div></footer>
+      </main>
+    </div>
+    <aside class="notification-panel" id="welcomeNotificationPanel" aria-labelledby="welcomeNotificationTitle" hidden>
+      <div class="notification-panel-head"><div><p class="eyebrow">Centro de avisos</p><h2 id="welcomeNotificationTitle">Notificaciones</h2></div><button class="panel-close" id="welcomeCloseNotifications" type="button" aria-label="Cerrar notificaciones"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button></div>
+      <div id="welcomeNotificationList"></div>
+    </aside>`;
+
+  const refs = {
+    moduleGrid: container.querySelector("#welcomeModuleGrid"),
+    projectList: container.querySelector("#welcomeProjectList"),
+    userSummary: container.querySelector("#welcomeUserSummary"),
+    moduleCount: container.querySelector("#welcomeModuleCount"),
+    projectCount: container.querySelector("#welcomeProjectCount"),
+    notificationButton: container.querySelector("#welcomeNotificationButton"),
+    notificationCount: container.querySelector("#welcomeNotificationCount"),
+    notificationPanel: container.querySelector("#welcomeNotificationPanel"),
+    notificationList: container.querySelector("#welcomeNotificationList"),
+    closeNotifications: container.querySelector("#welcomeCloseNotifications"),
+    toast: document.getElementById("toast")
+  };
+
+  refs.moduleCount.textContent = `${profile.modules.length} módulos`;
+  refs.projectCount.textContent = `${profile.projects.length} ${profile.projects.length === 1 ? "proyecto" : "proyectos"}`;
+  refs.moduleGrid.innerHTML = profile.modules.map((module) => `<a href="#" class="module-item" data-module="${module.name}"><span class="module-icon"><i class="fa-solid ${module.icon}" aria-hidden="true"></i></span><span><strong>${module.name}</strong><span>${module.description}</span></span><i class="fa-solid fa-chevron-right module-arrow" aria-hidden="true"></i></a>`).join("");
+  refs.projectList.innerHTML = profile.projects.map((project) => `<article class="project-item"><div class="project-item-head"><strong>${project.name}</strong><span class="count-label">Periodo ${project.period}</span></div><div class="project-meta"><span class="metric"><i class="fa-solid fa-layer-group" aria-hidden="true"></i>${project.assigned} asignados</span><span class="metric pending"><i class="fa-solid fa-clock" aria-hidden="true"></i>${project.pending} pendientes</span><span class="metric sent"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i>${project.sent} enviados</span></div><div class="project-contact"><i class="fa-regular fa-address-book" aria-hidden="true"></i><span>Contacto: ${project.contact}</span></div></article>`).join("");
+  refs.userSummary.innerHTML = `<div><span>Nombre completo</span><strong>${profile.name}</strong></div><div><span>Tipo de autenticación</span><strong>${profile.authType}</strong></div><div><span>Rol referencial</span><strong>${profile.role}</strong></div><div><span>Sede</span><strong>${profile.site}</strong></div>`;
+  refs.notificationCount.textContent = profile.notifications.length;
+  refs.notificationList.innerHTML = profile.notifications.map((notification) => `<article class="notification-item"><span class="notification-icon"><i class="fa-solid ${notification.icon}" aria-hidden="true"></i></span><div><strong>${notification.title}</strong><span>${notification.text}</span></div></article>`).join("");
+
+  refs.notificationButton.addEventListener("click", () => {
+    const isOpen = refs.notificationPanel.hidden;
+    refs.notificationPanel.hidden = !isOpen;
+    refs.notificationButton.setAttribute("aria-expanded", String(isOpen));
+  });
+  refs.closeNotifications.addEventListener("click", () => {
+    refs.notificationPanel.hidden = true;
+    refs.notificationButton.setAttribute("aria-expanded", "false");
+  });
+  refs.moduleGrid.addEventListener("click", (event) => {
+    const module = event.target.closest("[data-module]");
+    if (!module) return;
+    event.preventDefault();
+    if (typeof renderToast === "function") renderToast(refs.toast, `Acceso a ${module.dataset.module} disponible para revisión.`, "info");
+  });
+
+  container.hidden = false;
+  container.querySelector("#welcomeTitle")?.focus({ preventScroll: true });
+  window.dispatchEvent(new CustomEvent("auth:welcome-ready"));
+}
+
+
+/* source: design-system/auth-welcome-flow.js */
+function bindAuthWelcomeFlow({ continueButton, authPage, authWelcome, authType }) {
+  if (!continueButton || !authPage || !authWelcome) return;
+  continueButton.addEventListener("click", () => {
+    authPage.hidden = true;
+    mountAuthWelcome(authWelcome, authType);
+  });
+}
 
 
 /* source: design-system/messages.js */
@@ -229,7 +534,9 @@ const MESSAGE_CATALOG = Object.freeze({
   M65: { text: "No hay registros disponibles. Haz clic en \"Nuevo\" para empezar.", type: "Información", scope: "General" },
   M66: { text: "Complete los datos del rol para activar esta sección.", type: "Alerta", scope: "Roles" },
   M67: { text: "Registros exportados correctamente.", type: "Información", scope: "General" },
-  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" }
+  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" },
+  M130: { text: "¿Está seguro que desea cerrar sesión?\nSe finalizará tu sesión actual. Tendrás que ingresar tus datos nuevamente para acceder.", type: "Confirmación", scope: "Sesiones" },
+  M131: { text: "Sesión próxima a finalizar\nLa sesión se cerrará automáticamente en %s por inactividad.\n¿Deseas continuar en el sistema?", type: "Alerta", scope: "Sesiones" }
 });
 
 // Confirmed prototype copy pending official codes in the stakeholder workbook.
@@ -439,6 +746,9 @@ const refs = {
   password: document.getElementById("password"),
   feedback: document.getElementById("authFeedback"),
   success: document.getElementById("authSuccess"),
+  continueButton: document.getElementById("continueBtn"),
+  authPage: document.querySelector(".auth-page"),
+  authWelcome: document.getElementById("authWelcome"),
   toast: document.getElementById("toast")
 };
 
@@ -487,3 +797,5 @@ document.querySelector(".password-toggle").addEventListener("click", (event) => 
   button.querySelector("i").className = `fa-regular ${visible ? "fa-eye" : "fa-eye-slash"}`;
   button.setAttribute("aria-label", visible ? "Mostrar contraseña" : "Ocultar contraseña");
 });
+
+bindAuthWelcomeFlow({ ...refs, authType: "passport" });

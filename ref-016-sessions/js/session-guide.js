@@ -26,8 +26,9 @@
       label: "flujo de inactividad",
       startEvents: ["ref016-start-inactivity"],
       steps: [
-        { target: "#inactivityAlert .confirm-modal", title: "Alerta de inactividad", copy: "Ahora iniciaremos el flujo de inactividad. A los 28 minutos el sistema avisa que la sesión se cerrará automáticamente en 2 minutos.", auto: 900 },
-        { target: "#authView", title: "Vuelve al login", copy: "Al cumplirse los 30 minutos, la sesión se invalida y el usuario vuelve a la pantalla de autenticación.", auto: 900 }
+        { target: "#inactivityAlert .confirm-modal", title: "Alerta de inactividad", copy: "La sesión muestra un contador y pregunta si deseas continuar trabajando o cerrar sesión.", auto: 1200 },
+        { target: "#continueSession", title: "Decide sobre la sesión", copy: "Selecciona Continuar trabajando para conservar la sesión o Cerrar sesión para volver a autenticación.", click: true },
+        { target: "#welcome", title: "Sesión continúa activa", copy: "La sesión se mantiene activa porque elegiste continuar trabajando.", auto: 900 }
       ]
     },
     logout: {

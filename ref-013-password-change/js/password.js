@@ -3,6 +3,6 @@ export function validatePasswordChange({ currentPassword, newPassword, confirmat
   if (currentPassword !== user.currentPassword) return { ok: false, messageCode: "M12", reason: "Contraseña actual inválida" };
   if (newPassword === currentPassword) return { ok: false, messageCode: "M31", reason: "La nueva contraseña coincide con la actual" };
   if (newPassword !== confirmation) return { ok: false, messageCode: "M32", reason: "Las contraseñas no coinciden" };
-  if (newPassword.length < policy.minLength || !policy.uppercase.test(newPassword) || !policy.lowercase.test(newPassword) || !policy.number.test(newPassword)) return { ok: false, messageCode: "M31", reason: "Política de seguridad no cumplida" };
+  if (newPassword.length < policy.minLength || newPassword.length > policy.maxLength || !policy.uppercase.test(newPassword) || !policy.lowercase.test(newPassword) || !policy.number.test(newPassword) || policy.forbidden.test(newPassword)) return { ok: false, messageCode: "M31", reason: "Política de seguridad no cumplida" };
   return { ok: true };
 }

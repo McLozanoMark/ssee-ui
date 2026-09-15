@@ -1,5 +1,88 @@
 /* source: design-system/demo-navigation.js */
+const CURRENT_DEMO_USER = "Ana Paredes";
+
+function applyCurrentDemoUser() {
+  document.querySelectorAll(".account-copy strong, #accountName").forEach((node) => {
+    node.textContent = CURRENT_DEMO_USER;
+  });
+}
+
+function mountClearableFields(root = document) {
+  root.querySelectorAll('input[type="search"], [data-clearable-input]').forEach((input) => {
+    if (input.closest(".clearable-field")) return;
+    const wrapper = document.createElement("span");
+    wrapper.className = "clearable-field";
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.append(input);
+    const clear = document.createElement("button");
+    clear.className = "field-clear";
+    clear.type = "button";
+    clear.setAttribute("aria-label", "Borrar contenido");
+    clear.title = "Borrar contenido";
+    clear.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+    wrapper.append(clear);
+
+    const syncVisibility = () => {
+      clear.hidden = !input.value;
+    };
+    input.addEventListener("input", syncVisibility);
+    clear.addEventListener("click", () => {
+      input.value = "";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.focus();
+    });
+    syncVisibility();
+  });
+}
+
+function normalizeSharedControls(root = document) {
+  root.querySelectorAll(".filter-actions [id^='clear'], .filter-actions [id^='reset']").forEach((button) => {
+    button.classList.add("filter-reset");
+    button.setAttribute("aria-label", "Restablecer filtros");
+    button.title = "Restablecer filtros";
+    button.innerHTML = '<i class="fa-solid fa-xmark icon" aria-hidden="true"></i>';
+  });
+
+  root.querySelectorAll("#newUserBtn, #newSourceBtn, #newSampleBtn, #newAssignmentBtn, #newConfigBtn, #newRoleBtn").forEach((button) => {
+    const icon = button.querySelector("i")?.outerHTML || "";
+    button.innerHTML = `${icon}Nuevo`;
+  });
+  root.querySelectorAll("#syncBtn").forEach((button) => {
+    if (button.dataset.syncRunning === "true") return;
+    const icon = button.querySelector("i")?.outerHTML || "";
+    button.innerHTML = `${icon}Sincronizar`;
+  });
+
+  const identityForm = root.querySelector("#identityForm");
+  const identityClear = identityForm?.querySelector("#clearBtn");
+  const documentNumber = identityForm?.querySelector("#documentNumber");
+  if (identityClear && documentNumber && !identityClear.closest(".clearable-field")) {
+    const wrapper = document.createElement("span");
+    wrapper.className = "clearable-field";
+    documentNumber.parentNode.insertBefore(wrapper, documentNumber);
+    wrapper.append(documentNumber, identityClear);
+    identityClear.className = "field-clear";
+    identityClear.removeAttribute("id");
+    identityClear.setAttribute("aria-label", "Borrar contenido");
+    identityClear.title = "Borrar contenido";
+    identityClear.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+    const syncVisibility = () => { identityClear.hidden = !documentNumber.value; };
+    documentNumber.addEventListener("input", syncVisibility);
+    syncVisibility();
+  }
+
+  root.querySelectorAll(".form-actions > #clearBtn").forEach((button) => {
+    button.classList.add("form-reset");
+    button.setAttribute("aria-label", "Restablecer formulario");
+    button.title = "Restablecer formulario";
+    button.innerHTML = '<i class="fa-solid fa-xmark icon" aria-hidden="true"></i>';
+  });
+}
+
 function mountDemoIndexLink() {
+  applyCurrentDemoUser();
+  mountClearableFields();
+  normalizeSharedControls();
   if (document.querySelector(".demo-index-link")) return;
   const link = document.createElement("a");
   link.className = "demo-index-link";
@@ -85,7 +168,9 @@ const MESSAGE_CATALOG = Object.freeze({
   M65: { text: "No hay registros disponibles. Haz clic en \"Nuevo\" para empezar.", type: "Información", scope: "General" },
   M66: { text: "Complete los datos del rol para activar esta sección.", type: "Alerta", scope: "Roles" },
   M67: { text: "Registros exportados correctamente.", type: "Información", scope: "General" },
-  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" }
+  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" },
+  M130: { text: "¿Está seguro que desea cerrar sesión?\nSe finalizará tu sesión actual. Tendrás que ingresar tus datos nuevamente para acceder.", type: "Confirmación", scope: "Sesiones" },
+  M131: { text: "Sesión próxima a finalizar\nLa sesión se cerrará automáticamente en %s por inactividad.\n¿Deseas continuar en el sistema?", type: "Alerta", scope: "Sesiones" }
 });
 
 // Confirmed prototype copy pending official codes in the stakeholder workbook.
@@ -251,9 +336,29 @@ function recordAuthAttempt(args) {
 /* source: ref-017-welcome/js/data.js */
 const welcomeProfiles = {
   passport: {
-    name: "Luis Ramos",
+    name: "Ana Paredes",
     role: "Supervisor de Seguimiento",
     authType: "Passport",
+    site: "Unidad de Seguimiento y Evaluación",
+    institution: "Ministerio de Educación",
+    process: "",
+    modules: [
+      { name: "Seguimiento", description: "Consulta y supervisa avances.", icon: "fa-chart-line" },
+      { name: "Evaluación", description: "Revisa resultados e indicadores.", icon: "fa-clipboard-check" },
+      { name: "Instrumentos", description: "Atiende instrumentos asignados.", icon: "fa-file-lines" },
+      { name: "Reportes", description: "Consulta reportes disponibles.", icon: "fa-chart-column" }
+    ],
+    projects: [{ name: "Seguimiento 2026", period: "2026", assigned: 12, pending: 4, sent: 8, contact: "Equipo de Seguimiento" }],
+    notifications: [
+      { title: "Instrumentos pendientes", text: "Tienes 4 instrumentos pendientes de atención.", icon: "fa-clipboard-list" },
+      { title: "Nuevo reporte disponible", text: "El reporte de avance del periodo 2026 está disponible.", icon: "fa-file-lines" },
+      { title: "Actualización de proyecto", text: "Se actualizó la información de Seguimiento 2026.", icon: "fa-circle-info" }
+    ]
+  },
+  document: {
+    name: "Ana Paredes",
+    role: "Supervisor de Seguimiento",
+    authType: "Documento",
     site: "Unidad de Seguimiento y Evaluación",
     institution: "Ministerio de Educación",
     process: "",
@@ -293,7 +398,7 @@ const welcomeProfiles = {
 
 /* source: ref-017-welcome/js/state.js */
 function getWelcomeState(params, profiles) {
-  const requested = params.get("auth") === "passport" ? "passport" : "autoregistro";
+  const requested = ["passport", "document", "autoregistro"].includes(params.get("auth")) ? params.get("auth") : "autoregistro";
   return { profileKey: requested, profile: profiles[requested], notificationsOpen: false };
 }
 
@@ -339,12 +444,14 @@ function setNotificationPanel(refs, isOpen) {
 
 
 const refs = {
-  welcomeShell: document.getElementById("welcomeShell"), accountName: document.getElementById("accountName"), accountRole: document.getElementById("accountRole"), accountInitial: document.getElementById("accountInitial"), welcomeTitle: document.getElementById("welcomeTitle"), welcomeSubtitle: document.getElementById("welcomeSubtitle"), processContext: document.getElementById("processContext"), processText: document.getElementById("processText"), moduleCount: document.getElementById("moduleCount"), projectCount: document.getElementById("projectCount"), moduleGrid: document.getElementById("moduleGrid"), projectList: document.getElementById("projectList"), userSummary: document.getElementById("userSummary"), notificationButton: document.getElementById("notificationButton"), notificationCount: document.getElementById("notificationCount"), notificationPanel: document.getElementById("notificationPanel"), notificationList: document.getElementById("notificationList"), closeNotifications: document.getElementById("closeNotifications"), accountMenuTrigger: document.getElementById("accountMenuTrigger"), accountMenu: document.getElementById("accountMenu"), logoutOption: document.getElementById("logoutOption"), authView: document.getElementById("authView"), authMessage: document.getElementById("authMessage"), sessionLoginForm: document.getElementById("sessionLoginForm"), autoregisterFields: document.getElementById("sessionAutoregisterFields"), passportFields: document.getElementById("sessionPassportFields"), sessionEmail: document.getElementById("sessionEmail"), sessionDocumentNumber: document.getElementById("sessionDocumentNumber"), sessionPassword: document.getElementById("sessionPassword"), confirmDialog: document.getElementById("confirmDialog"), closeConfirm: document.getElementById("closeConfirm"), cancelLogout: document.getElementById("cancelLogout"), confirmLogout: document.getElementById("confirmLogout"), inactivityAlert: document.getElementById("inactivityAlert"), toast: document.getElementById("toast")
+  welcomeShell: document.getElementById("welcomeShell"), accountName: document.getElementById("accountName"), accountRole: document.getElementById("accountRole"), accountInitial: document.getElementById("accountInitial"), welcomeTitle: document.getElementById("welcomeTitle"), welcomeSubtitle: document.getElementById("welcomeSubtitle"), processContext: document.getElementById("processContext"), processText: document.getElementById("processText"), moduleCount: document.getElementById("moduleCount"), projectCount: document.getElementById("projectCount"), moduleGrid: document.getElementById("moduleGrid"), projectList: document.getElementById("projectList"), userSummary: document.getElementById("userSummary"), notificationButton: document.getElementById("notificationButton"), notificationCount: document.getElementById("notificationCount"), notificationPanel: document.getElementById("notificationPanel"), notificationList: document.getElementById("notificationList"), closeNotifications: document.getElementById("closeNotifications"), accountMenuTrigger: document.getElementById("accountMenuTrigger"), accountMenu: document.getElementById("accountMenu"), logoutOption: document.getElementById("logoutOption"), authView: document.getElementById("authView"), authMessage: document.getElementById("authMessage"), sessionAuthTabs: document.querySelectorAll("[data-session-auth-mode]"), sessionLoginForm: document.getElementById("sessionLoginForm"), authPanel: document.getElementById("sessionAuthPanel"), autoregisterFields: document.getElementById("sessionAutoregisterFields"), passportFields: document.getElementById("sessionPassportFields"), documentFields: document.getElementById("sessionDocumentFields"), passwordField: document.getElementById("sessionPasswordField"), authLinks: document.getElementById("sessionAuthLinks"), sessionEmail: document.getElementById("sessionEmail"), sessionDocumentNumber: document.getElementById("sessionDocumentNumber"), sessionDocumentNumberDocument: document.getElementById("sessionDocumentNumberDocument"), sessionBirthDate: document.getElementById("sessionBirthDate"), sessionIssueDate: document.getElementById("sessionIssueDate"), sessionPassword: document.getElementById("sessionPassword"), confirmDialog: document.getElementById("confirmDialog"), closeConfirm: document.getElementById("closeConfirm"), cancelLogout: document.getElementById("cancelLogout"), confirmLogout: document.getElementById("confirmLogout"), confirmTitle: document.getElementById("confirmTitle"), confirmMessage: document.getElementById("confirmMessage"), inactivityAlert: document.getElementById("inactivityAlert"), inactivityAlertTitle: document.getElementById("inactivityAlertTitle"), inactivityMessage: document.getElementById("inactivityMessage"), continueSession: document.getElementById("continueSession"), closeInactiveSession: document.getElementById("closeInactiveSession"), toast: document.getElementById("toast")
 };
 
 const state = getWelcomeState(new URLSearchParams(window.location.search), welcomeProfiles);
 let pendingAuthentication = null;
 let inactivityTimer = null;
+let inactivityRemaining = 0;
+let activeAuthMode = state.profile.authType === "Passport" ? "passport" : state.profile.authType === "Documento" ? "document" : "autoregistro";
 
 renderProfile(refs, state.profile);
 renderNotifications(refs, state.profile.notifications);
@@ -354,17 +461,37 @@ function setAccountMenu(isOpen) {
   refs.accountMenuTrigger.setAttribute("aria-expanded", String(isOpen));
 }
 
+function setAuthenticationMode(mode) {
+  activeAuthMode = ["passport", "document", "autoregistro"].includes(mode) ? mode : "passport";
+  const isPassport = activeAuthMode === "passport";
+  const isDocument = activeAuthMode === "document";
+  const isAutoregister = activeAuthMode === "autoregistro";
+  refs.passportFields.hidden = !isPassport;
+  refs.documentFields.hidden = !isDocument;
+  refs.autoregisterFields.hidden = !isAutoregister;
+  refs.passwordField.hidden = isDocument;
+  refs.authLinks.hidden = isDocument;
+  refs.sessionEmail.required = isAutoregister;
+  refs.sessionDocumentNumber.required = isPassport;
+  refs.sessionDocumentNumberDocument.required = isDocument;
+  refs.sessionBirthDate.required = isDocument;
+  refs.sessionIssueDate.required = isDocument;
+  refs.sessionPassword.required = !isDocument;
+  refs.sessionAuthTabs.forEach((tab) => {
+    const isActive = tab.dataset.sessionAuthMode === activeAuthMode;
+    tab.classList.toggle("is-active", isActive);
+    tab.setAttribute("aria-selected", String(isActive));
+  });
+}
+
 function showAuthentication(message, reason) {
   pendingAuthentication = reason;
   refs.welcomeShell.hidden = true;
   refs.notificationPanel.hidden = true;
   refs.authView.hidden = false;
   refs.authMessage.textContent = message;
-  refs.autoregisterFields.hidden = state.profile.authType === "Passport";
-  refs.passportFields.hidden = state.profile.authType !== "Passport";
-  refs.sessionEmail.required = state.profile.authType !== "Passport";
-  refs.sessionDocumentNumber.required = state.profile.authType === "Passport";
-  if (state.profile.authType === "Passport") refs.sessionDocumentNumber.value = "72184563";
+  refs.authMessage.hidden = !message;
+  setAuthenticationMode(activeAuthMode);
 }
 
 function showWelcome() {
@@ -382,14 +509,37 @@ function startNewSession() {
 
 function startInactivity() {
   window.clearTimeout(inactivityTimer);
+  inactivityRemaining = 5;
   refs.inactivityAlert.hidden = false;
+  updateInactivityMessage();
   window.dispatchEvent(new CustomEvent("ref016-session-warning"));
-  inactivityTimer = window.setTimeout(() => {
-    refs.inactivityAlert.hidden = true;
-    showAuthentication(getMessage("M28"), "inactivity");
-    showToast(refs, getMessage("M28"), "warning");
-    window.dispatchEvent(new CustomEvent("ref016-session-ended", { detail: { reason: "inactivity" } }));
-  }, 1200);
+  inactivityTimer = window.setInterval(() => {
+    inactivityRemaining -= 1;
+    updateInactivityMessage();
+    if (inactivityRemaining <= 0) endInactivity();
+  }, 1000);
+}
+
+function updateInactivityMessage() {
+  const minutes = String(Math.floor(inactivityRemaining / 60)).padStart(2, "0");
+  const seconds = String(inactivityRemaining % 60).padStart(2, "0");
+  const [, message, question] = getMessage("M131", [`${minutes}:${seconds}`]).split("\n");
+  refs.inactivityMessage.innerHTML = `${message}<br>${question}`;
+}
+
+function endInactivity() {
+  window.clearInterval(inactivityTimer);
+  refs.inactivityAlert.hidden = true;
+  showAuthentication(getMessage("M28"), "inactivity");
+  showToast(refs, getMessage("M28"), "warning");
+  window.dispatchEvent(new CustomEvent("ref016-session-ended", { detail: { reason: "inactivity" } }));
+}
+
+function continueSession() {
+  window.clearInterval(inactivityTimer);
+  refs.inactivityAlert.hidden = true;
+  showToast(refs, getPrototypeMessage("sessionActive"), "info");
+  window.dispatchEvent(new CustomEvent("ref016-session-continued"));
 }
 
 refs.notificationButton.addEventListener("click", () => {
@@ -423,21 +573,28 @@ function closeDialog() { refs.confirmDialog.hidden = true; }
 refs.cancelLogout.addEventListener("click", closeDialog);
 refs.closeConfirm.addEventListener("click", closeDialog);
 refs.confirmDialog.addEventListener("click", (event) => { if (event.target === refs.confirmDialog) closeDialog(); });
+refs.confirmTitle.textContent = getMessage("M130").split("\n")[0];
+refs.confirmMessage.textContent = getMessage("M130").split("\n")[1];
 refs.confirmLogout.addEventListener("click", () => {
   recordAuditEvent({ user: state.profile.name, authType: state.profile.authType, operation: "Cierre de sesión", closureType: "Voluntario", result: "Exitosa" });
   closeDialog();
-  showAuthentication(getPrototypeMessage("sessionClosed"), "logout");
-  showToast(refs, getPrototypeMessage("sessionInactive"), "success");
+  showAuthentication("", "logout");
   window.dispatchEvent(new CustomEvent("ref016-session-ended", { detail: { reason: "logout" } }));
 });
+refs.continueSession.addEventListener("click", continueSession);
+refs.closeInactiveSession.addEventListener("click", endInactivity);
 refs.sessionLoginForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const reason = pendingAuthentication;
   pendingAuthentication = null;
+  state.profile = welcomeProfiles[activeAuthMode];
+  renderProfile(refs, state.profile);
+  renderNotifications(refs, state.profile.notifications);
   showWelcome();
-  showToast(refs, reason === "new" ? getPrototypeMessage("previousSessionClosed") : getPrototypeMessage("sessionActive"), reason === "new" ? "info" : "success");
+  showToast(refs, reason === "new" ? getMessage("M29") : getPrototypeMessage("sessionActive"), reason === "new" ? "info" : "success");
   window.dispatchEvent(new CustomEvent("ref016-authenticated", { detail: { reason } }));
 });
+refs.sessionAuthTabs.forEach((tab) => tab.addEventListener("click", () => setAuthenticationMode(tab.dataset.sessionAuthMode)));
 refs.sessionLoginForm.querySelector(".password-toggle").addEventListener("click", () => {
   const showing = refs.sessionPassword.type === "text";
   refs.sessionPassword.type = showing ? "password" : "text";
@@ -477,8 +634,9 @@ window.addEventListener("ref016-start-inactivity", startInactivity);
       label: "flujo de inactividad",
       startEvents: ["ref016-start-inactivity"],
       steps: [
-        { target: "#inactivityAlert .confirm-modal", title: "Alerta de inactividad", copy: "Ahora iniciaremos el flujo de inactividad. A los 28 minutos el sistema avisa que la sesión se cerrará automáticamente en 2 minutos.", auto: 900 },
-        { target: "#authView", title: "Vuelve al login", copy: "Al cumplirse los 30 minutos, la sesión se invalida y el usuario vuelve a la pantalla de autenticación.", auto: 900 }
+        { target: "#inactivityAlert .confirm-modal", title: "Alerta de inactividad", copy: "La sesión muestra un contador y pregunta si deseas continuar trabajando o cerrar sesión.", auto: 1200 },
+        { target: "#continueSession", title: "Decide sobre la sesión", copy: "Selecciona Continuar trabajando para conservar la sesión o Cerrar sesión para volver a autenticación.", click: true },
+        { target: "#welcome", title: "Sesión continúa activa", copy: "La sesión se mantiene activa porque elegiste continuar trabajando.", auto: 900 }
       ]
     },
     logout: {
