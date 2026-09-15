@@ -32,7 +32,7 @@ export function createDraft(source = null) {
     origin: source?.origin || "",
     originDetail: source?.originDetail || "",
     usage: source?.usage || [],
-    status: source?.status || "Activa",
+    status: source?.status || "Activo",
     fields: source?.fields?.length ? source.fields.map((field) => ({ ...field })) : [
       { name: "Código modular", type: "Texto", required: true, description: "Código oficial de la unidad." },
       { name: "DNI del estudiante", type: "Texto", required: true, description: "Documento de identidad." },

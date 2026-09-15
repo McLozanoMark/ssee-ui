@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>S.S.E.E. - Ingresar</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="../design-system/app.css?v=20260827-form-controls">
+  <link rel="stylesheet" href="../design-system/auth.css?v=20260914-auth-family">
+  <link rel="stylesheet" href="../ref-017-welcome/styles.css?v=20260909-auth-welcome">
+  <link rel="stylesheet" href="styles.css?v=20260914-central-auth">
+</head>
+<body>
+  <div class="auth-page central-auth-page">
+    <main class="auth-main">
+      <section class="auth-shell">
+        <div class="auth-form-panel">
+          <div class="auth-brand"><span class="logo-symbol">S</span><span><strong>S.S.E.E.</strong><small>Seguimiento y Evaluación Estratégica</small></span></div>
+          <div class="auth-heading"><h1>Ingresar a S.S.E.E.</h1><p>Selecciona tu tipo de autenticación para continuar.</p></div>
+          <div class="auth-tabs" role="tablist" aria-label="Tipo de autenticación">
+            <button class="auth-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="authPanel" data-auth-mode="passport"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span>Passport</span></button>
+            <button class="auth-tab" type="button" role="tab" aria-selected="false" aria-controls="authPanel" data-auth-mode="document"><i class="fa-regular fa-id-card" aria-hidden="true"></i><span>Documento</span></button>
+            <button class="auth-tab" type="button" role="tab" aria-selected="false" aria-controls="authPanel" data-auth-mode="autoregistro"><i class="fa-solid fa-user-plus" aria-hidden="true"></i><span>Autoregistro</span></button>
+          </div>
+          <section id="authPanel" role="tabpanel" aria-live="polite"></section>
+          <div class="auth-feedback" id="authFeedback" hidden></div>
+          <section class="auth-success" id="authSuccess" hidden><span><i class="fa-solid fa-circle-check"></i></span><div class="auth-success-content"><h2>Acceso autorizado</h2><p id="authSuccessCopy"></p></div><div class="auth-success-actions"><button class="btn btn-ssee button button-primary" id="continueBtn" type="button"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i>Continuar</button></div></section>
+        </div>
+        <aside class="auth-visual-panel" aria-hidden="true"></aside>
+      </section>
+    </main>
+    <footer class="footer"><div class="minedu-mark"><img class="minedu-logo" src="../assets/minedu.jpg" alt="Ministerio de Educación"></div><div><p>2026. Todos los derechos reservados.</p><p>Ministerio de Educación - S.S.E.E. - Versión 0.1</p></div></footer>
+  </div>
+  <div id="authWelcome" hidden></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <aside class="demo-guide" id="authGuide" hidden><span class="demo-guide-label">Guía de demo</span><strong id="authGuideTitle">Selecciona una modalidad</strong><p id="authGuideCopy">Elige cómo deseas ingresar.</p></aside>
+  <div class="demo-cursor" id="authCursor" aria-hidden="true"><span>➤</span></div>
+  <script src="../ref-017-welcome/js/data.js"></script>
+  <script src="../design-system/auth-welcome.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

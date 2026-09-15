@@ -74,3 +74,22 @@ export const users = [
     expires: "-",
   },
 ];
+
+try {
+  const pendingUpdate = sessionStorage.getItem("ssee-pending-user-update");
+  if (pendingUpdate) {
+    const updatedUser = JSON.parse(pendingUpdate);
+    const userIndex = users.findIndex((user) => user.username === updatedUser.username);
+    if (userIndex >= 0) users[userIndex] = updatedUser;
+    sessionStorage.removeItem("ssee-pending-user-update");
+  }
+  const pendingAdmissionKey = "ssee-pending-admission-user:ref-007-users";
+  const pendingAdmission = sessionStorage.getItem(pendingAdmissionKey) || localStorage.getItem(pendingAdmissionKey);
+  if (pendingAdmission) {
+    users.push(JSON.parse(pendingAdmission));
+    sessionStorage.removeItem(pendingAdmissionKey);
+    localStorage.removeItem(pendingAdmissionKey);
+  }
+} catch {
+  // Keep the static demo data available when session storage is unavailable.
+}

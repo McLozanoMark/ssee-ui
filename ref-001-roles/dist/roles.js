@@ -1,5 +1,88 @@
 /* source: design-system/demo-navigation.js */
+const CURRENT_DEMO_USER = "Ana Paredes";
+
+function applyCurrentDemoUser() {
+  document.querySelectorAll(".account-copy strong, #accountName").forEach((node) => {
+    node.textContent = CURRENT_DEMO_USER;
+  });
+}
+
+function mountClearableFields(root = document) {
+  root.querySelectorAll('input[type="search"], [data-clearable-input]').forEach((input) => {
+    if (input.closest(".clearable-field")) return;
+    const wrapper = document.createElement("span");
+    wrapper.className = "clearable-field";
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.append(input);
+    const clear = document.createElement("button");
+    clear.className = "field-clear";
+    clear.type = "button";
+    clear.setAttribute("aria-label", "Borrar contenido");
+    clear.title = "Borrar contenido";
+    clear.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+    wrapper.append(clear);
+
+    const syncVisibility = () => {
+      clear.hidden = !input.value;
+    };
+    input.addEventListener("input", syncVisibility);
+    clear.addEventListener("click", () => {
+      input.value = "";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.focus();
+    });
+    syncVisibility();
+  });
+}
+
+function normalizeSharedControls(root = document) {
+  root.querySelectorAll(".filter-actions [id^='clear'], .filter-actions [id^='reset']").forEach((button) => {
+    button.classList.add("filter-reset");
+    button.setAttribute("aria-label", "Restablecer filtros");
+    button.title = "Restablecer filtros";
+    button.innerHTML = '<i class="fa-solid fa-xmark icon" aria-hidden="true"></i>';
+  });
+
+  root.querySelectorAll("#newUserBtn, #newSourceBtn, #newSampleBtn, #newAssignmentBtn, #newConfigBtn, #newRoleBtn").forEach((button) => {
+    const icon = button.querySelector("i")?.outerHTML || "";
+    button.innerHTML = `${icon}Nuevo`;
+  });
+  root.querySelectorAll("#syncBtn").forEach((button) => {
+    if (button.dataset.syncRunning === "true") return;
+    const icon = button.querySelector("i")?.outerHTML || "";
+    button.innerHTML = `${icon}Sincronizar`;
+  });
+
+  const identityForm = root.querySelector("#identityForm");
+  const identityClear = identityForm?.querySelector("#clearBtn");
+  const documentNumber = identityForm?.querySelector("#documentNumber");
+  if (identityClear && documentNumber && !identityClear.closest(".clearable-field")) {
+    const wrapper = document.createElement("span");
+    wrapper.className = "clearable-field";
+    documentNumber.parentNode.insertBefore(wrapper, documentNumber);
+    wrapper.append(documentNumber, identityClear);
+    identityClear.className = "field-clear";
+    identityClear.removeAttribute("id");
+    identityClear.setAttribute("aria-label", "Borrar contenido");
+    identityClear.title = "Borrar contenido";
+    identityClear.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+    const syncVisibility = () => { identityClear.hidden = !documentNumber.value; };
+    documentNumber.addEventListener("input", syncVisibility);
+    syncVisibility();
+  }
+
+  root.querySelectorAll(".form-actions > #clearBtn").forEach((button) => {
+    button.classList.add("form-reset");
+    button.setAttribute("aria-label", "Restablecer formulario");
+    button.title = "Restablecer formulario";
+    button.innerHTML = '<i class="fa-solid fa-xmark icon" aria-hidden="true"></i>';
+  });
+}
+
 function mountDemoIndexLink() {
+  applyCurrentDemoUser();
+  mountClearableFields();
+  normalizeSharedControls();
   if (document.querySelector(".demo-index-link")) return;
   const link = document.createElement("a");
   link.className = "demo-index-link";
@@ -112,7 +195,9 @@ const MESSAGE_CATALOG = Object.freeze({
   M65: { text: "No hay registros disponibles. Haz clic en \"Nuevo\" para empezar.", type: "Información", scope: "General" },
   M66: { text: "Complete los datos del rol para activar esta sección.", type: "Alerta", scope: "Roles" },
   M67: { text: "Registros exportados correctamente.", type: "Información", scope: "General" },
-  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" }
+  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" },
+  M130: { text: "¿Está seguro que desea cerrar sesión?\nSe finalizará tu sesión actual. Tendrás que ingresar tus datos nuevamente para acceder.", type: "Confirmación", scope: "Sesiones" },
+  M131: { text: "Sesión próxima a finalizar\nLa sesión se cerrará automáticamente en %s por inactividad.\n¿Deseas continuar en el sistema?", type: "Alerta", scope: "Sesiones" }
 });
 
 // Confirmed prototype copy pending official codes in the stakeholder workbook.
@@ -245,6 +330,223 @@ function validateConfirmReason(id, message = "Debe completar los campos obligato
 function closeConfirmModal(id) {
   const modal = document.getElementById(id);
   if (modal && window.bootstrap) bootstrap.Modal.getOrCreateInstance(modal).hide();
+}
+
+
+/* source: design-system/date-range.js */
+const DAY_NAMES = ["D", "L", "M", "X", "J", "V", "S"];
+const MONTH_FORMATTER = new Intl.DateTimeFormat("es-PE", { month: "long", year: "numeric", timeZone: "UTC" });
+
+function parseDate(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value || "")) return null;
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day));
+}
+
+function formatInputDate(date) {
+  if (!date) return "";
+  return [date.getUTCFullYear(), String(date.getUTCMonth() + 1).padStart(2, "0"), String(date.getUTCDate()).padStart(2, "0")].join("-");
+}
+
+function formatDisplayDate(value) {
+  const date = parseDate(value);
+  return date ? `${String(date.getUTCDate()).padStart(2, "0")}/${String(date.getUTCMonth() + 1).padStart(2, "0")}/${date.getUTCFullYear()}` : "";
+}
+
+function monthStart(date) {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
+}
+
+function addMonths(date, amount) {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + amount, 1));
+}
+
+function capitalize(value) {
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+function isSameMonth(left, right) {
+  return left.getUTCFullYear() === right.getUTCFullYear() && left.getUTCMonth() === right.getUTCMonth();
+}
+
+function createDateRangeFilter(root) {
+  if (!root) return null;
+  const picker = root.querySelector(".date-range-picker");
+  const start = root.querySelector("[data-date-range-start]");
+  const end = root.querySelector("[data-date-range-end]");
+  const trigger = root.querySelector("[data-date-range-trigger]");
+  const label = root.querySelector("[data-date-range-label]");
+  const clearButton = root.querySelector("[data-date-range-clear]");
+  const popover = root.querySelector("[data-date-range-popover]");
+  const summary = root.querySelector("[data-date-range-summary]");
+  const months = root.querySelector("[data-date-range-months]");
+  const monthLabels = root.querySelector("[data-date-range-month-labels]");
+  const error = root.querySelector("[data-date-range-error]");
+  if (!picker || !start || !end || !trigger || !label || !popover || !months || !monthLabels) return null;
+
+  const today = new Date();
+  let viewMonth = monthStart(parseDate(start.value) || new Date(Date.UTC(today.getFullYear(), today.getMonth(), 1)));
+  let draftStart = start.value;
+  let draftEnd = end.value;
+
+  function validate() {
+    const invalid = Boolean(start.value && end.value && start.value > end.value);
+    start.setAttribute("aria-invalid", String(invalid));
+    end.setAttribute("aria-invalid", String(invalid));
+    root.toggleAttribute("data-invalid", invalid);
+    if (error) {
+      if (invalid) error.removeAttribute("hidden");
+      else error.setAttribute("hidden", "");
+      error.textContent = invalid ? "La fecha inicial debe ser anterior o igual a la fecha final." : "";
+    }
+    return !invalid;
+  }
+
+  function updateSummary() {
+    if (draftStart && draftEnd) summary.textContent = `${formatDisplayDate(draftStart)} a ${formatDisplayDate(draftEnd)}`;
+    else if (draftStart) summary.textContent = `${formatDisplayDate(draftStart)} a ...`;
+    else summary.textContent = "Selecciona una fecha inicial y final";
+  }
+
+  function updateTrigger() {
+    if (start.value && end.value) label.textContent = `${formatDisplayDate(start.value)} - ${formatDisplayDate(end.value)}`;
+    else if (start.value) label.textContent = `Desde ${formatDisplayDate(start.value)}`;
+    else if (end.value) label.textContent = `Hasta ${formatDisplayDate(end.value)}`;
+    else label.textContent = "Seleccionar rango";
+    clearButton.hidden = !(start.value || end.value);
+  }
+
+  function renderMonth(month) {
+    const firstDay = month.getUTCDay();
+    const weekdays = DAY_NAMES.map((day) => `<span class="date-range-weekday">${day}</span>`).join("");
+    const dates = [];
+    for (let day = 1; ; day += 1) {
+      const date = new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth(), day));
+      if (date.getUTCMonth() !== month.getUTCMonth()) break;
+      dates.push(date);
+    }
+    const dayCells = [
+      ...Array.from({ length: firstDay }, () => `<span class="date-range-day is-empty" aria-hidden="true"></span>`),
+      ...dates.map((date) => {
+      const day = date.getUTCDate();
+      const value = formatInputDate(date);
+      const selectedStart = value === draftStart;
+      const selectedEnd = value === draftEnd;
+      const inRange = Boolean(draftStart && draftEnd && value > draftStart && value < draftEnd);
+      const todayValue = formatInputDate(new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())));
+      const classes = ["date-range-day", selectedStart || selectedEnd ? "is-selected" : "", inRange ? "is-in-range" : "", value === todayValue ? "is-today" : ""].filter(Boolean).join(" ");
+      const labelText = `${day} de ${capitalize(MONTH_FORMATTER.format(month).split(" de ")[0])} de ${month.getUTCFullYear()}`;
+      return `<button class="${classes}" type="button" data-date-range-day="${value}" aria-label="${labelText}"${selectedStart ? " aria-current=\"date\"" : ""}>${day}</button>`;
+      })
+    ].join("");
+    return `<section class="date-range-month" aria-label="${capitalize(MONTH_FORMATTER.format(month))}"><h4>${capitalize(MONTH_FORMATTER.format(month))}</h4><div class="date-range-weekdays">${weekdays}</div><div class="date-range-day-grid">${dayCells}</div></section>`;
+  }
+
+  function renderCalendar() {
+    monthLabels.innerHTML = `<span>${capitalize(MONTH_FORMATTER.format(viewMonth))}</span><span>${capitalize(MONTH_FORMATTER.format(addMonths(viewMonth, 1)))}</span>`;
+    months.innerHTML = `${renderMonth(viewMonth)}${renderMonth(addMonths(viewMonth, 1))}`;
+    updateSummary();
+  }
+
+  function positionPopover() {
+    if (popover.hidden) return;
+    const pickerRect = picker.getBoundingClientRect();
+    const triggerRect = trigger.getBoundingClientRect();
+    const popoverWidth = popover.offsetWidth;
+    const viewportGutter = 12;
+    const preferredLeft = triggerRect.left - pickerRect.left;
+    const minimumLeft = viewportGutter - pickerRect.left;
+    const maximumLeft = Math.max(minimumLeft, window.innerWidth - viewportGutter - popoverWidth - pickerRect.left);
+    const boundedLeft = Math.min(Math.max(preferredLeft, minimumLeft), maximumLeft);
+
+    popover.style.left = `${boundedLeft}px`;
+    popover.style.right = "auto";
+  }
+
+  function open() {
+    draftStart = start.value;
+    draftEnd = end.value;
+    const anchor = parseDate(draftStart) || parseDate(draftEnd);
+    if (anchor) viewMonth = monthStart(anchor);
+    renderCalendar();
+    popover.hidden = false;
+    trigger.setAttribute("aria-expanded", "true");
+    positionPopover();
+  }
+
+  function close() {
+    popover.hidden = true;
+    trigger.setAttribute("aria-expanded", "false");
+  }
+
+  function resetDraft() {
+    draftStart = "";
+    draftEnd = "";
+    renderCalendar();
+  }
+
+  trigger.addEventListener("click", () => (popover.hidden ? open() : close()));
+  clearButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    start.value = "";
+    end.value = "";
+    resetDraft();
+    updateTrigger();
+    validate();
+  });
+  root.querySelector("[data-date-range-prev]")?.addEventListener("click", () => { viewMonth = addMonths(viewMonth, -1); renderCalendar(); });
+  root.querySelector("[data-date-range-next]")?.addEventListener("click", () => { viewMonth = addMonths(viewMonth, 1); renderCalendar(); });
+  popover.addEventListener("click", (event) => event.stopPropagation());
+  months.addEventListener("click", (event) => {
+    const day = event.target.closest("[data-date-range-day]");
+    if (!day) return;
+    const value = day.dataset.dateRangeDay;
+    if (!draftStart || (draftStart && draftEnd)) {
+      draftStart = value;
+      draftEnd = "";
+    } else if (value < draftStart) {
+      draftEnd = draftStart;
+      draftStart = value;
+    } else {
+      draftEnd = value;
+    }
+    renderCalendar();
+  });
+  root.querySelector("[data-date-range-cancel]")?.addEventListener("click", () => { draftStart = start.value; draftEnd = end.value; close(); });
+  root.querySelector("[data-date-range-apply]")?.addEventListener("click", () => {
+    start.value = draftStart;
+    end.value = draftEnd;
+    updateTrigger();
+    validate();
+    close();
+  });
+  document.addEventListener("click", (event) => {
+    if (!picker.contains(event.target)) close();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !popover.hidden) close();
+  });
+  window.addEventListener("resize", positionPopover);
+
+  function reset() {
+    start.value = "";
+    end.value = "";
+    resetDraft();
+    updateTrigger();
+    validate();
+    close();
+  }
+
+  updateTrigger();
+  renderCalendar();
+  validate();
+  return { start, end, validate, reset, open };
+}
+
+function toDateInputValue(value) {
+  const date = String(value || "").split(" ")[0];
+  const [day, month, year] = date.split("/");
+  return day && month && year ? `${year}-${month}-${day}` : "";
 }
 
 
@@ -418,6 +720,8 @@ const refs = {
   filterForm: document.getElementById("filterForm"),
   filterName: document.getElementById("filterName"),
   filterNameAdvanced: document.getElementById("filterNameAdvanced"),
+  filterUpdatedStart: document.getElementById("filterUpdatedStart"),
+  filterUpdatedEnd: document.getElementById("filterUpdatedEnd"),
   filterStatus: document.getElementById("filterStatus"),
   filterToggle: document.getElementById("filterToggle"),
   roleCount: document.getElementById("roleCount"),
@@ -477,8 +781,8 @@ function showForm(role = null, sourceRequirement = "ALI-REF-001") {
   refs.formView.classList.add("is-active");
   refs.roleName.value = role?.name || "";
   refs.roleDescription.value = role?.description || "";
-  const label = role ? "Editar rol" : "Registrar rol";
-  refs.formTitle.textContent = role ? "Editar rol" : "Registrar rol";
+  const label = role ? "Editar" : "Registrar";
+  refs.formTitle.textContent = label;
   refs.formBreadcrumb.innerHTML = `<a href="../index.html">Índice de requerimientos</a> / ${sourceRequirement} / Gestión de roles / ${label}`;
   refs.editStatusControls.forEach((control) => { control.hidden = !role; });
   const statusBlocked = Boolean(role && role.users > 0);
@@ -604,6 +908,7 @@ function selectedPermissionLabels() {
 
 
 
+
 function renderRoles() {
   refs.rolesBody.innerHTML = state.filteredRoles.map((role) => {
     const originalIndex = roles.findIndex((item) => item.name === role.name);
@@ -648,7 +953,8 @@ function applyFilters() {
   const query = refs.filterName.value.trim().toLowerCase();
   const nameAdvanced = refs.filterNameAdvanced.value;
   const permission = document.getElementById("filterPermission").value;
-  const updated = document.getElementById("filterUpdated").value;
+  const updatedStart = refs.filterUpdatedStart.value;
+  const updatedEnd = refs.filterUpdatedEnd.value;
   const status = refs.filterStatus.value;
   state.filteredRoles = roles.filter((role) => {
     const originalIndex = roles.findIndex((item) => item.id === role.id);
@@ -656,7 +962,8 @@ function applyFilters() {
     return searchable.includes(query)
       && (nameAdvanced === "Todos" || role.name === nameAdvanced)
       && (permission === "Todos" || role.permissions.includes(permission))
-      && (updated === "Todos" || role.updated === updated)
+      && (!updatedStart || toDateInputValue(role.updated) >= updatedStart)
+      && (!updatedEnd || toDateInputValue(role.updated) <= updatedEnd)
       && (status === "Todos" || role.status === status);
   });
   renderRoles();
@@ -732,6 +1039,9 @@ function confirmStatus() {
 
 
 
+
+
+const updatedRange = createDateRangeFilter(document.querySelector("[data-date-range]"));
 
 function validateInfo() {
   clearErrors();
@@ -865,7 +1175,7 @@ function confirmPendingAction() {
   if (state.pendingSave) {
     state.pendingSave = false;
     closeConfirmModal("confirmModal");
-    commitRoleSave({ stay: state.editingIndex !== null });
+    commitRoleSave();
     return;
   }
   if (state.pendingCancel) {
@@ -880,6 +1190,10 @@ function confirmPendingAction() {
 
 refs.filterForm.addEventListener("submit", (event) => {
   event.preventDefault();
+  if (updatedRange && !updatedRange.validate()) {
+    showToast(getMessage("M12"), "warning");
+    return;
+  }
   applyFilters();
   showToast(getPrototypeMessage("filtersApplied"), "info");
 });
@@ -894,7 +1208,7 @@ document.getElementById("clearBtn").addEventListener("click", () => {
   refs.filterName.value = "";
   refs.filterNameAdvanced.value = "Todos";
   document.getElementById("filterPermission").value = "Todos";
-  document.getElementById("filterUpdated").value = "Todos";
+  updatedRange?.reset();
   refs.filterStatus.value = "Todos";
   applyFilters();
   showToast(getPrototypeMessage("filtersCleared"), "info");

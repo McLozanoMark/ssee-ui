@@ -24,7 +24,7 @@ document.querySelectorAll("[data-demo-scenario]").forEach((option) => {
       // La guía sigue funcionando cuando el navegador bloquea el almacenamiento en file://.
     }
     guideTitle.textContent = "Ahora prueba la sincronización";
-    guideCopy.textContent = "Haz clic en Sincronizar usuarios para continuar.";
+    guideCopy.textContent = "Haz clic en Sincronizar para continuar.";
     guideOptions.hidden = true;
     guide.hidden = false;
     const target = syncButton.getBoundingClientRect();

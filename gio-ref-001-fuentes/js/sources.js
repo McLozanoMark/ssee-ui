@@ -13,7 +13,7 @@ function showDetail(source) {
     ["Última modificación", `${source.updated || "No registrada"} · ${source.updatedBy || "Administrador"}`],
     ["Relaciones", source.relations || "Sin relaciones registradas"]
   ];
-  if (source.status === "Inactiva") trace.push(["Inactivada por", source.inactivatedBy || "Administrador"], ["Motivo", source.inactivationReason || "No registrado"]);
+  if (source.status === "Inactivo") trace.push(["Inactivada por", source.inactivatedBy || "Administrador"], ["Motivo", source.inactivationReason || "No registrado"]);
   const fields = source.fields || [];
   const previewRows = source.previewRecords || [];
   const recordsMarkup = fields.length && previewRows.length
@@ -25,7 +25,7 @@ function showDetail(source) {
 }
 
 function statusClass(status) {
-  return { Activa: "active", Inactiva: "inactive" }[status] || "";
+  return { Activo: "active", Inactivo: "inactive" }[status] || "";
 }
 
 function sortValue(source, key) {
@@ -285,24 +285,23 @@ export function confirmPendingAction() {
   }
   if (state.pendingStatus) {
     const { index, next } = state.pendingStatus;
-    if (next === "Inactiva" && !validateConfirmReason("confirmModal", getMessage("M11"))) return;
+    if (next === "Inactivo" && !validateConfirmReason("confirmModal", getMessage("M11"))) return;
     sources[index].status = next;
     sources[index].updated = "21/08/2026 12:00";
     sources[index].updatedBy = "Administrador";
-    if (next === "Inactiva") {
+    if (next === "Inactivo") {
       sources[index].inactivationReason = getConfirmReason("confirmModal");
       sources[index].inactivatedBy = "Administrador";
-      sources[index].history = [...(sources[index].history || []), { date: "21/08/2026 12:00", action: "Inactivación", user: "Administrador" }];
+      sources[index].history = [...(sources[index].history || []), { date: "21/08/2026 12:00", action: "Inactivoción", user: "Administrador" }];
     }
     if (state.editingIndex === index && state.draft) {
       state.draft.status = next;
-      document.getElementById("sourceStatusSwitch").checked = next === "Activa";
-      document.getElementById("sourceStatusLabel").textContent = next;
+      document.getElementById("sourceStatusSwitch").checked = next === "Activo";
     }
     state.pendingStatus = null;
     closeConfirmModal("confirmModal");
     applyFilters();
-    showToast(getMessage(next === "Activa" ? "M7" : "M8"), "success");
+    showToast(getMessage(next === "Activo" ? "M7" : "M8"), "success");
     return;
   }
   if (!state.pendingAction) return;
@@ -327,7 +326,7 @@ export function confirmPendingAction() {
       originDetail: state.draft.originDetail,
       usage: [...state.draft.usage],
       records: state.loadMode === "manual" ? String(state.manualRecords.length) : String(state.draft.massValidation.processed),
-      status: "Activa",
+      status: "Activo",
       updated: "21/08/2026 12:00",
       fields: state.draft.fields.map((field) => ({ ...field })),
       keyFields: [...state.draft.keyFields],

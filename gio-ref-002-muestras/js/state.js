@@ -25,7 +25,7 @@ export function createDraft(sample = null) {
     fields: sample?.fields?.length ? sample.fields.map((field, index) => ({ informant: false, user: index === 0, ...field })) : defaultFields.map((field) => ({ ...field })),
     units: sample?.unitList?.length ? sample.unitList.map((unit) => ({ ...unit })) : [],
     instruments: sample?.instruments?.length ? [...sample.instruments] : [],
-    status: sample?.status || "Activa"
+    status: sample?.status || "Activo"
   };
   state.step = 1;
   state.dirty = false;

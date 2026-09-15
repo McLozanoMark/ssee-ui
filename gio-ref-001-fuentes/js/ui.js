@@ -63,30 +63,26 @@ export function showList() {
 
 export function updateWizardFooter() {
   const editing = state.editingIndex !== null;
-  const binaryStatus = ["Activa", "Inactiva"].includes(state.draft?.status);
+  const binaryStatus = ["Activo", "Inactivo"].includes(state.draft?.status);
   const sourceStatusSwitchWrap = document.getElementById("sourceStatusSwitchWrap");
-  const sourceStatusLabel = document.getElementById("sourceStatusLabel");
   document.getElementById("backBtn").hidden = state.step === 1;
   document.getElementById("continueBtn").hidden = state.step === 4;
   document.getElementById("completeBtn").hidden = state.step !== 4;
   document.getElementById("saveStepBtn").hidden = !editing || state.step === 4;
   document.getElementById("editStatusControl").hidden = !editing;
   sourceStatusSwitchWrap.hidden = !binaryStatus;
-  sourceStatusSwitchWrap.dataset.onLabel = "Activa";
-  sourceStatusSwitchWrap.dataset.offLabel = "Inactiva";
-  sourceStatusLabel.hidden = binaryStatus;
+  sourceStatusSwitchWrap.dataset.onLabel = "Activo";
+  sourceStatusSwitchWrap.dataset.offLabel = "Inactivo";
   if (editing && state.draft) {
-    document.getElementById("sourceStatusSwitch").checked = state.draft.status === "Activa";
-    sourceStatusLabel.className = `status ${state.draft.status === "Activa" ? "active" : "inactive"}`;
-    sourceStatusLabel.textContent = state.draft.status;
+    document.getElementById("sourceStatusSwitch").checked = state.draft.status === "Activo";
   }
 }
 
 export function showForm(source = null) {
   refs.listView.classList.remove("is-active");
   refs.formView.classList.add("is-active");
-  refs.formTitle.textContent = source ? "Editar fuente" : "Registrar fuente";
-  refs.formBreadcrumb.innerHTML = `<a href="../index.html">Índice de requerimientos</a> / GIO-REF-001 / Fuentes de datos / ${source ? "Editar fuente" : "Registrar fuente"}`;
+  refs.formTitle.textContent = source ? "Editar" : "Registrar";
+  refs.formBreadcrumb.innerHTML = `<a href="../index.html">Índice de requerimientos</a> / GIO-REF-001 / Fuentes de datos / ${source ? "Editar" : "Registrar"}`;
   refs.sourceForm.reset();
   syncGeneralFields();
   setWizardStep(1);

@@ -1,5 +1,88 @@
 /* source: design-system/demo-navigation.js */
+const CURRENT_DEMO_USER = "Ana Paredes";
+
+function applyCurrentDemoUser() {
+  document.querySelectorAll(".account-copy strong, #accountName").forEach((node) => {
+    node.textContent = CURRENT_DEMO_USER;
+  });
+}
+
+function mountClearableFields(root = document) {
+  root.querySelectorAll('input[type="search"], [data-clearable-input]').forEach((input) => {
+    if (input.closest(".clearable-field")) return;
+    const wrapper = document.createElement("span");
+    wrapper.className = "clearable-field";
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.append(input);
+    const clear = document.createElement("button");
+    clear.className = "field-clear";
+    clear.type = "button";
+    clear.setAttribute("aria-label", "Borrar contenido");
+    clear.title = "Borrar contenido";
+    clear.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+    wrapper.append(clear);
+
+    const syncVisibility = () => {
+      clear.hidden = !input.value;
+    };
+    input.addEventListener("input", syncVisibility);
+    clear.addEventListener("click", () => {
+      input.value = "";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.focus();
+    });
+    syncVisibility();
+  });
+}
+
+function normalizeSharedControls(root = document) {
+  root.querySelectorAll(".filter-actions [id^='clear'], .filter-actions [id^='reset']").forEach((button) => {
+    button.classList.add("filter-reset");
+    button.setAttribute("aria-label", "Restablecer filtros");
+    button.title = "Restablecer filtros";
+    button.innerHTML = '<i class="fa-solid fa-xmark icon" aria-hidden="true"></i>';
+  });
+
+  root.querySelectorAll("#newUserBtn, #newSourceBtn, #newSampleBtn, #newAssignmentBtn, #newConfigBtn, #newRoleBtn").forEach((button) => {
+    const icon = button.querySelector("i")?.outerHTML || "";
+    button.innerHTML = `${icon}Nuevo`;
+  });
+  root.querySelectorAll("#syncBtn").forEach((button) => {
+    if (button.dataset.syncRunning === "true") return;
+    const icon = button.querySelector("i")?.outerHTML || "";
+    button.innerHTML = `${icon}Sincronizar`;
+  });
+
+  const identityForm = root.querySelector("#identityForm");
+  const identityClear = identityForm?.querySelector("#clearBtn");
+  const documentNumber = identityForm?.querySelector("#documentNumber");
+  if (identityClear && documentNumber && !identityClear.closest(".clearable-field")) {
+    const wrapper = document.createElement("span");
+    wrapper.className = "clearable-field";
+    documentNumber.parentNode.insertBefore(wrapper, documentNumber);
+    wrapper.append(documentNumber, identityClear);
+    identityClear.className = "field-clear";
+    identityClear.removeAttribute("id");
+    identityClear.setAttribute("aria-label", "Borrar contenido");
+    identityClear.title = "Borrar contenido";
+    identityClear.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+    const syncVisibility = () => { identityClear.hidden = !documentNumber.value; };
+    documentNumber.addEventListener("input", syncVisibility);
+    syncVisibility();
+  }
+
+  root.querySelectorAll(".form-actions > #clearBtn").forEach((button) => {
+    button.classList.add("form-reset");
+    button.setAttribute("aria-label", "Restablecer formulario");
+    button.title = "Restablecer formulario";
+    button.innerHTML = '<i class="fa-solid fa-xmark icon" aria-hidden="true"></i>';
+  });
+}
+
 function mountDemoIndexLink() {
+  applyCurrentDemoUser();
+  mountClearableFields();
+  normalizeSharedControls();
   if (document.querySelector(".demo-index-link")) return;
   const link = document.createElement("a");
   link.className = "demo-index-link";
@@ -193,7 +276,9 @@ const MESSAGE_CATALOG = Object.freeze({
   M65: { text: "No hay registros disponibles. Haz clic en \"Nuevo\" para empezar.", type: "Información", scope: "General" },
   M66: { text: "Complete los datos del rol para activar esta sección.", type: "Alerta", scope: "Roles" },
   M67: { text: "Registros exportados correctamente.", type: "Información", scope: "General" },
-  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" }
+  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" },
+  M130: { text: "¿Está seguro que desea cerrar sesión?\nSe finalizará tu sesión actual. Tendrás que ingresar tus datos nuevamente para acceder.", type: "Confirmación", scope: "Sesiones" },
+  M131: { text: "Sesión próxima a finalizar\nLa sesión se cerrará automáticamente en %s por inactividad.\n¿Deseas continuar en el sistema?", type: "Alerta", scope: "Sesiones" }
 });
 
 // Confirmed prototype copy pending official codes in the stakeholder workbook.
@@ -302,11 +387,11 @@ const sampleUnitCatalog = [
 ];
 
 const samples = [
-  { id: "MST-001", name: "Muestra nacional 2026", description: "Muestra principal para seguimiento institucional.", intervention: "Seguimiento", period: "2026", source: "Instituciones educativas", units: "1,250", sampleSize: "100", population: "1250", selectionMethod: "Aleatoria", fields: [{ name: "Código modular", unique: true, preload: true }, { name: "Nombre de la institución", unique: false, preload: true }, { name: "DRE", unique: false, preload: false }], unitList: [{ id: "IE-0001", name: "I.E. 0001 José de la Riva", status: "Seleccionada" }, { id: "IE-0042", name: "I.E. 0042 San Martín", status: "Seleccionada" }], instruments: ["Instrumento de seguimiento"], status: "Activa", updated: "18/08/2026 09:00" },
-  { id: "MST-002", name: "Muestra de directores", description: "Unidades seleccionadas para evaluación de directores.", intervention: "Evaluación", period: "2026", source: "Directores registrados", units: "420", sampleSize: "60", population: "420", selectionMethod: "Sistemática", fields: [{ name: "DNI", unique: true, preload: true }, { name: "Nombre completo", unique: false, preload: true }], unitList: [{ id: "DIR-001", name: "Director registrado 001", status: "Seleccionada" }], instruments: ["Ficha de evaluación"], status: "Activa", updated: "17/08/2026 16:45" },
-  { id: "MST-003", name: "Piloto operativo", description: "Configuración sintética para validar reglas de selección.", intervention: "Operativo", period: "2026", source: "Operativo piloto", units: "80", sampleSize: "20", population: "80", selectionMethod: "Total", fields: [{ name: "Código de unidad", unique: true, preload: false }], unitList: [{ id: "OP-001", name: "Unidad piloto 001", status: "Seleccionada" }], instruments: ["Lista de verificación"], status: "Activa", updated: "16/08/2026 11:20" },
-  { id: "MST-004", name: "Muestra histórica 2025", description: "Muestra del periodo anterior conservada para consulta.", intervention: "Seguimiento", period: "2025", source: "Instituciones 2025", units: "980", sampleSize: "80", population: "980", selectionMethod: "Aleatoria", fields: [{ name: "Código modular", unique: true, preload: true }], unitList: [], instruments: ["Instrumento de seguimiento"], status: "Inactiva", updated: "12/08/2026 10:05" },
-  { id: "MST-005", name: "Muestra de cobertura", description: "Muestra de cobertura para evaluación institucional.", intervention: "Evaluación", period: "2025", source: "Directores registrados", units: "0", sampleSize: "10", population: "0", selectionMethod: "Aleatoria", fields: [{ name: "DNI", unique: true, preload: true }], unitList: [], instruments: ["Ficha de evaluación"], status: "Inactiva", updated: "08/08/2026 14:05" }
+  { id: "MST-001", name: "Muestra nacional 2026", description: "Muestra principal para seguimiento institucional.", intervention: "Seguimiento", period: "2026", source: "Instituciones educativas", units: "1,250", sampleSize: "100", population: "1250", selectionMethod: "Aleatoria", fields: [{ name: "Código modular", unique: true, preload: true }, { name: "Nombre de la institución", unique: false, preload: true }, { name: "DRE", unique: false, preload: false }], unitList: [{ id: "IE-0001", name: "I.E. 0001 José de la Riva", status: "Seleccionada" }, { id: "IE-0042", name: "I.E. 0042 San Martín", status: "Seleccionada" }], instruments: ["Instrumento de seguimiento"], status: "Activo", updated: "18/08/2026 09:00" },
+  { id: "MST-002", name: "Muestra de directores", description: "Unidades seleccionadas para evaluación de directores.", intervention: "Evaluación", period: "2026", source: "Directores registrados", units: "420", sampleSize: "60", population: "420", selectionMethod: "Sistemática", fields: [{ name: "DNI", unique: true, preload: true }, { name: "Nombre completo", unique: false, preload: true }], unitList: [{ id: "DIR-001", name: "Director registrado 001", status: "Seleccionada" }], instruments: ["Ficha de evaluación"], status: "Activo", updated: "17/08/2026 16:45" },
+  { id: "MST-003", name: "Piloto operativo", description: "Configuración sintética para validar reglas de selección.", intervention: "Operativo", period: "2026", source: "Operativo piloto", units: "80", sampleSize: "20", population: "80", selectionMethod: "Total", fields: [{ name: "Código de unidad", unique: true, preload: false }], unitList: [{ id: "OP-001", name: "Unidad piloto 001", status: "Seleccionada" }], instruments: ["Lista de verificación"], status: "Activo", updated: "16/08/2026 11:20" },
+  { id: "MST-004", name: "Muestra histórica 2025", description: "Muestra del periodo anterior conservada para consulta.", intervention: "Seguimiento", period: "2025", source: "Instituciones 2025", units: "980", sampleSize: "80", population: "980", selectionMethod: "Aleatoria", fields: [{ name: "Código modular", unique: true, preload: true }], unitList: [], instruments: ["Instrumento de seguimiento"], status: "Inactivo", updated: "12/08/2026 10:05" },
+  { id: "MST-005", name: "Muestra de cobertura", description: "Muestra de cobertura para evaluación institucional.", intervention: "Evaluación", period: "2025", source: "Directores registrados", units: "0", sampleSize: "10", population: "0", selectionMethod: "Aleatoria", fields: [{ name: "DNI", unique: true, preload: true }], unitList: [], instruments: ["Ficha de evaluación"], status: "Inactivo", updated: "08/08/2026 14:05" }
 ];
 
 
@@ -338,7 +423,7 @@ function createDraft(sample = null) {
     fields: sample?.fields?.length ? sample.fields.map((field, index) => ({ informant: false, user: index === 0, ...field })) : defaultFields.map((field) => ({ ...field })),
     units: sample?.unitList?.length ? sample.unitList.map((unit) => ({ ...unit })) : [],
     instruments: sample?.instruments?.length ? [...sample.instruments] : [],
-    status: sample?.status || "Activa"
+    status: sample?.status || "Activo"
   };
   state.step = 1;
   state.dirty = false;
@@ -357,9 +442,9 @@ const refs = {
 
 function showToast(message, type = "info") { renderToast(refs.toast, message, type); }
 function showList() { refs.listView.classList.add("is-active"); refs.formView.classList.remove("is-active"); }
-function showForm(sample = null) { refs.listView.classList.remove("is-active"); refs.formView.classList.add("is-active"); refs.formTitle.textContent = sample ? "Editar muestra" : "Registrar muestra"; refs.formBreadcrumb.innerHTML = `<a href="../index.html">Índice de requerimientos</a><span>/</span><span>GIO-REF-002</span><span>/</span><span>Muestras</span><span>/</span><span>${sample ? "Editar muestra" : "Registrar muestra"}</span>`; renderSourceOptions(); syncFormFields(); setFormStep(1); }
+function showForm(sample = null) { refs.listView.classList.remove("is-active"); refs.formView.classList.add("is-active"); refs.formTitle.textContent = sample ? "Editar" : "Registrar"; refs.formBreadcrumb.innerHTML = `<a href="../index.html">Índice de requerimientos</a><span>/</span><span>GIO-REF-002</span><span>/</span><span>Muestras</span><span>/</span><span>${sample ? "Editar" : "Registrar"}</span>`; renderSourceOptions(); syncFormFields(); setFormStep(1); }
 function renderSourceOptions() { const current = refs.sampleSource.value; const sourceNames = [...refs.sampleSource.options].map((option) => option.value); if (!sourceNames.includes("Nexus")) refs.sampleSource.insertAdjacentHTML("beforeend", `<option>Nexus</option><option>Escale</option><option>Directores registrados</option><option>Padrón RER</option><option>Instituciones educativas</option><option>Operativo piloto</option><option>Instituciones 2025</option>`); const filterNames = [...refs.filterSource.options].map((option) => option.value); if (!filterNames.includes("Nexus")) refs.filterSource.insertAdjacentHTML("beforeend", [...refs.sampleSource.querySelectorAll("option:not(:first-child)")].map((option) => `<option>${escapeUiHtml(option.value)}</option>`).join("")); refs.sampleSource.value = current; }
-function syncFormFields() { const draft = state.draft || {}; refs.sampleName.value = draft.name || ""; refs.sampleDescription.value = draft.description || ""; refs.sampleSource.value = draft.source || ""; refs.sampleSize.value = draft.sampleSize || ""; refs.selectionMethod.value = draft.selectionMethod || "Aleatoria"; refs.editStatusControl.hidden = state.editingIndex === null; if (refs.sampleStatusSwitch) refs.sampleStatusSwitch.checked = draft.status === "Activa"; updateSourceSummary(); }
+function syncFormFields() { const draft = state.draft || {}; refs.sampleName.value = draft.name || ""; refs.sampleDescription.value = draft.description || ""; refs.sampleSource.value = draft.source || ""; refs.sampleSize.value = draft.sampleSize || ""; refs.selectionMethod.value = draft.selectionMethod || "Aleatoria"; refs.editStatusControl.hidden = state.editingIndex === null; if (refs.sampleStatusSwitch) refs.sampleStatusSwitch.checked = draft.status === "Activo"; updateSourceSummary(); }
 function updateDraft() { if (!state.draft) return; Object.assign(state.draft, { name: refs.sampleName.value.trim(), description: refs.sampleDescription.value.trim(), source: refs.sampleSource.value, sampleSize: refs.sampleSize.value, selectionMethod: refs.selectionMethod.value, instruments: refs.instrumentOptions.filter((input) => input.checked).map((input) => input.value) }); const source = getSourceConfig(state.draft.source); state.draft.population = String(source?.population || 0); state.dirty = true; updateSourceSummary(); }
 function setFormStep(step) { state.step = Math.max(1, Math.min(3, step)); refs.wizardSteps.forEach((item) => { const itemStep = Number(item.dataset.wizardStep); item.classList.toggle("is-current", itemStep === state.step); item.classList.toggle("is-complete", itemStep < state.step); }); refs.wizardPanels.forEach((panel) => panel.classList.toggle("is-active", Number(panel.dataset.wizardPanel) === state.step)); document.getElementById("backBtn").hidden = state.step === 1; document.getElementById("continueBtn").hidden = state.step === 3; document.getElementById("completeBtn").hidden = state.step !== 3; document.getElementById("saveStepBtn").hidden = state.editingIndex === null || state.step === 3; renderAvailableFields(); renderFields(); renderUnits(); renderInstruments(); updateSourceSummary(); updateSelectionSummary(); }
 function renderAvailableFields() { const source = getSourceConfig(state.draft?.source); const query = (refs.fieldSearch?.value || "").trim().toLowerCase(); const fields = (source?.fields || []).filter((field) => field.toLowerCase().includes(query)); refs.availableFields.innerHTML = fields.length ? fields.map((field) => { const selected = state.draft?.fields?.some((item) => item.name === field); return `<label class="available-field ${selected ? "is-selected" : ""}"><input type="checkbox" data-available-field="${escapeUiHtml(field)}" ${selected ? "checked" : ""}><span>${escapeUiHtml(field)}</span></label>`; }).join("") : `<p class="empty-inline">No se encontraron campos.</p>`; }
@@ -382,7 +467,7 @@ function escapeUiHtml(value = "") { return String(value).replace(/[&<>'"]/g, (ch
 
 
 const escapeHtml = (value = "") => String(value).replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character]));
-function statusClass(status) { return status === "Activa" ? "active" : status === "Inactiva" ? "inactive" : ""; }
+function statusClass(status) { return status === "Activo" ? "active" : status === "Inactivo" ? "inactive" : ""; }
 
 function renderSamples() { const header = refs.samplesBody.closest("table")?.querySelector("thead tr"); if (header && !header.querySelector("[data-column='row-number']")) header.insertAdjacentHTML("afterbegin", '<th data-column="row-number">N.°</th>'); refs.samplesBody.innerHTML = state.filteredSamples.map((sample) => { const index = samples.indexOf(sample); return `<tr><td>${index + 1}</td><td><strong>${escapeHtml(sample.id)}</strong></td><td><strong>${escapeHtml(sample.name)}</strong><div class="description">${escapeHtml(sample.description)}</div></td><td>${escapeHtml(sample.source)}</td><td>${escapeHtml(sample.units)}</td><td><span class="status ${statusClass(sample.status)}">${escapeHtml(sample.status)}</span></td><td><div class="row-actions"><button class="row-action" type="button" data-action="view" data-index="${index}" title="Ver detalle"><i class="fa-regular fa-eye" aria-hidden="true"></i><span>Ver detalle</span></button><button class="row-action" type="button" data-action="edit" data-index="${index}" title="Editar"><i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span></button></div></td></tr>`; }).join(""); refs.emptyState.hidden = state.filteredSamples.length > 0; refs.pageSummary.textContent = state.filteredSamples.length ? `Mostrando 1 a ${state.filteredSamples.length} de ${state.filteredSamples.length} registros` : "Mostrando 0 registros"; refs.sampleCount.textContent = `${samples.length} muestras registradas`; enableTooltips(); }
 function applyFilters() { const query = refs.filterQuery.value.trim().toLowerCase(); const source = refs.filterSource.value, status = refs.filterStatus.value; state.filteredSamples = samples.filter((sample) => { const searchable = [sample.id, sample.name, sample.description, sample.source, sample.units, sample.status].join(" ").toLowerCase(); return searchable.includes(query) && (source === "Todos" || sample.source === source) && (status === "Todos" || sample.status === status); }); renderSamples(); }
@@ -399,7 +484,7 @@ function requestSaveStep() { updateDraft(); if (!validateStep()) { showToast(get
 function requestComplete() { updateDraft(); if (![1, 2, 3].every((step) => validateStep(step))) { showToast(getMessage("M12"), "warning"); return; } state.pendingAction = "complete"; openConfirmModal("confirmModal", getMessage("M1")); }
 function requestCancel() { if (!state.dirty) { resetWizard(); showList(); return; } state.pendingCancel = true; openConfirmModal("confirmModal", getMessage("M14")); }
 
-function confirmPendingAction() { if (state.pendingWizardStep) { const target = state.pendingWizardStep; state.pendingWizardStep = null; closeConfirmModal("confirmModal"); setFormStep(target); return; } if (state.pendingCancel) { closeConfirmModal("confirmModal"); resetWizard(); showList(); return; } if (state.pendingUnitAction?.type === "exclude") { state.draft.units = state.draft.units.filter((unit) => unit.id !== state.pendingUnitAction.unitId); state.dirty = true; state.pendingUnitAction = null; closeConfirmModal("confirmModal"); renderUnits(); showToast(getMessage("M3"), "success"); return; } if (state.pendingStatus) { const { index, next } = state.pendingStatus; if (next === "Inactiva" && !validateConfirmReason("confirmModal", getMessage("M11"))) return; samples[index].status = next; samples[index].updated = "21/08/2026 12:00"; if (next === "Inactiva") samples[index].inactivationReason = getConfirmReason("confirmModal"); state.pendingStatus = null; closeConfirmModal("confirmModal"); applyFilters(); showToast(getMessage(next === "Activa" ? "M7" : "M8"), "success"); return; } if (state.pendingAction === "saveStep") { persistDraft(); state.pendingAction = null; closeConfirmModal("confirmModal"); showToast(getMessage("M3"), "success"); return; } if (state.pendingAction === "complete") { const wasEditing = state.editingIndex !== null; const previous = wasEditing ? samples[state.editingIndex] : null; const payload = { id: previous?.id || `MST-${String(samples.length + 1).padStart(3, "0")}`, name: state.draft.name, description: state.draft.description, source: state.draft.source, sampleSize: state.draft.sampleSize, population: state.draft.population, unitTotal: state.draft.unitTotal, selectionMethod: state.draft.selectionMethod, fields: state.draft.fields, unitList: state.draft.units, units: previous?.units || state.draft.sampleSize, instruments: state.draft.instruments, status: "Activa", updated: "21/08/2026 09:00" }; if (wasEditing) samples[state.editingIndex] = payload; else samples.unshift(payload); state.pendingAction = null; closeConfirmModal("confirmModal"); resetWizard(); applyFilters(); showList(); showToast(getMessage(wasEditing ? "M3" : "M2"), "success"); } }
+function confirmPendingAction() { if (state.pendingWizardStep) { const target = state.pendingWizardStep; state.pendingWizardStep = null; closeConfirmModal("confirmModal"); setFormStep(target); return; } if (state.pendingCancel) { closeConfirmModal("confirmModal"); resetWizard(); showList(); return; } if (state.pendingUnitAction?.type === "exclude") { state.draft.units = state.draft.units.filter((unit) => unit.id !== state.pendingUnitAction.unitId); state.dirty = true; state.pendingUnitAction = null; closeConfirmModal("confirmModal"); renderUnits(); showToast(getMessage("M3"), "success"); return; } if (state.pendingStatus) { const { index, next } = state.pendingStatus; if (next === "Inactivo" && !validateConfirmReason("confirmModal", getMessage("M11"))) return; samples[index].status = next; samples[index].updated = "21/08/2026 12:00"; if (next === "Inactivo") samples[index].inactivationReason = getConfirmReason("confirmModal"); state.pendingStatus = null; closeConfirmModal("confirmModal"); applyFilters(); showToast(getMessage(next === "Activo" ? "M7" : "M8"), "success"); return; } if (state.pendingAction === "saveStep") { persistDraft(); state.pendingAction = null; closeConfirmModal("confirmModal"); showToast(getMessage("M3"), "success"); return; } if (state.pendingAction === "complete") { const wasEditing = state.editingIndex !== null; const previous = wasEditing ? samples[state.editingIndex] : null; const payload = { id: previous?.id || `MST-${String(samples.length + 1).padStart(3, "0")}`, name: state.draft.name, description: state.draft.description, source: state.draft.source, sampleSize: state.draft.sampleSize, population: state.draft.population, unitTotal: state.draft.unitTotal, selectionMethod: state.draft.selectionMethod, fields: state.draft.fields, unitList: state.draft.units, units: previous?.units || state.draft.sampleSize, instruments: state.draft.instruments, status: "Activo", updated: "21/08/2026 09:00" }; if (wasEditing) samples[state.editingIndex] = payload; else samples.unshift(payload); state.pendingAction = null; closeConfirmModal("confirmModal"); resetWizard(); applyFilters(); showList(); showToast(getMessage(wasEditing ? "M3" : "M2"), "success"); } }
 
 function openReplacementModal(unitId) { const current = state.draft?.units?.find((unit) => unit.id === unitId); if (!current || !refs.replacementModal) return; state.replacementSelection = unitId; refs.replacementCurrent.innerHTML = `<div class="replacement-unit-icon"><i class="fa-regular fa-user" aria-hidden="true"></i></div><div class="replacement-current-info"><div><span>ID unidad</span><strong>${escapeHtml(current.id)}</strong></div><div><span>ID persona</span><strong>${escapeHtml(current.personId || "-")}</strong></div><div><span>Nombre completo</span><strong>${escapeHtml(current.name)}</strong></div><div><span>Región</span><strong>${escapeHtml(current.region || "-")}</strong></div><div><span>Distrito</span><strong>${escapeHtml(current.district || "-")}</strong></div><div><span>Fecha de nacimiento</span><strong>${escapeHtml(current.birthDate || "-")}</strong></div></div>`; refs.replacementSearch.value = ""; renderReplacementCandidates(); bootstrap.Modal.getOrCreateInstance(refs.replacementModal).show(); }
 function renderReplacementCandidates() { if (!refs.replacementBody || !state.draft) return; const query = (refs.replacementSearch?.value || "").trim().toLowerCase(); const currentIds = new Set(state.draft.units.map((unit) => unit.id)); const candidates = sampleUnitCatalog.filter((unit) => !currentIds.has(unit.id) && [unit.id, unit.personId, unit.name, unit.region, unit.district].join(" ").toLowerCase().includes(query)); refs.replacementBody.innerHTML = candidates.map((unit) => `<tr><td><input class="form-check-input" type="radio" name="replacementUnit" value="${escapeHtml(unit.id)}" ${state.replacementCandidate === unit.id ? "checked" : ""} aria-label="Seleccionar ${escapeHtml(unit.id)}"></td><td><strong>${escapeHtml(unit.id)}</strong></td><td>${escapeHtml(unit.personId)}</td><td>${escapeHtml(unit.name)}</td><td>${escapeHtml(unit.region)}</td><td>${escapeHtml(unit.district)}</td><td>${escapeHtml(unit.birthDate)}</td></tr>`).join("") || '<tr><td colspan="7" class="empty-inline">No hay unidades disponibles.</td></tr>'; }
@@ -448,7 +533,7 @@ $("exportBtn").addEventListener("click", () => exportRows(state.filteredSamples,
 $("confirmBtn").addEventListener("click", confirmPendingAction);
 refs.confirmModal.querySelector(".modal-footer [data-bs-dismiss='modal']").addEventListener("click", () => { state.pendingWizardStep = null; });
 $("confirmModal").addEventListener("hidden.bs.modal", () => { state.pendingAction = null; state.pendingCancel = false; state.pendingStatus = null; state.pendingWizardStep = null; state.pendingUnitAction = null; });
-refs.sampleStatusSwitch?.addEventListener("change", (event) => { if (state.editingIndex === null) return; state.pendingStatus = { index: state.editingIndex, next: event.target.checked ? "Activa" : "Inactiva" }; event.target.checked = !event.target.checked; openConfirmModal("confirmModal", `${getMessage(state.pendingStatus.next === "Activa" ? "M5" : "M6")} ${state.draft.name}?`, { requireReason: state.pendingStatus.next === "Inactiva" }); });
+refs.sampleStatusSwitch?.addEventListener("change", (event) => { if (state.editingIndex === null) return; state.pendingStatus = { index: state.editingIndex, next: event.target.checked ? "Activo" : "Inactivo" }; event.target.checked = !event.target.checked; openConfirmModal("confirmModal", `${getMessage(state.pendingStatus.next === "Activo" ? "M5" : "M6")} ${state.draft.name}?`, { requireReason: state.pendingStatus.next === "Inactivo" }); });
 document.addEventListener("click", (event) => { if (!event.target.closest(".action-menu")) document.querySelectorAll("[data-menu-panel]").forEach((panel) => { panel.hidden = true; }); });
 renderSourceOptions();
 renderSamples();

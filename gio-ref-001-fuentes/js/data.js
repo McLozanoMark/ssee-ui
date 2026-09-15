@@ -7,7 +7,7 @@ export const sources = [
     originDetail: "NEXUS",
     usage: ["Precarga de variables"],
     records: "12,450",
-    status: "Activa",
+    status: "Activo",
     updated: "18/08/2026 09:00",
     createdBy: "Administrador",
     updatedBy: "Administrador",
@@ -38,7 +38,7 @@ export const sources = [
     originDetail: "Carga masiva",
     usage: ["Generación de fichas"],
     records: "3,180",
-    status: "Activa",
+    status: "Activo",
     updated: "17/08/2026 16:45",
     createdBy: "Administrador",
     updatedBy: "Administrador",
@@ -60,7 +60,7 @@ export const sources = [
     ],
     keyFields: ["DNI del director"]
   },
-  { id: "FDT-003", name: "Operativo piloto", description: "Registro sintético para pruebas del operativo.", origin: "Externa", originDetail: "Manual", usage: ["Generación de fichas"], records: "620", status: "Activa", updated: "16/08/2026 11:20", fields: [], keyFields: [] },
-  { id: "FDT-004", name: "Instituciones 2025", description: "Histórico de instituciones del periodo anterior.", origin: "Externa", originDetail: "Carga masiva", usage: ["Precarga de variables"], records: "11,890", status: "Inactiva", updated: "12/08/2026 10:05", updatedBy: "Administrador", inactivatedBy: "Administrador", inactivationReason: "Cierre del periodo operativo.", fields: [], keyFields: [] },
-  { id: "FDT-005", name: "Registro observado", description: "Fuente no disponible para nuevas operaciones.", origin: "Externa", originDetail: "Manual", usage: ["Generación de fichas"], records: "0", status: "Inactiva", updated: "08/08/2026 14:05", updatedBy: "Administrador", inactivatedBy: "Administrador", inactivationReason: "Fuente reemplazada.", fields: [], keyFields: [] }
+  { id: "FDT-003", name: "Operativo piloto", description: "Registro sintético para pruebas del operativo.", origin: "Externa", originDetail: "Manual", usage: ["Generación de fichas"], records: "620", status: "Activo", updated: "16/08/2026 11:20", fields: [], keyFields: [] },
+  { id: "FDT-004", name: "Instituciones 2025", description: "Histórico de instituciones del periodo anterior.", origin: "Externa", originDetail: "Carga masiva", usage: ["Precarga de variables"], records: "11,890", status: "Inactivo", updated: "12/08/2026 10:05", updatedBy: "Administrador", inactivatedBy: "Administrador", inactivationReason: "Cierre del periodo operativo.", fields: [], keyFields: [] },
+  { id: "FDT-005", name: "Registro observado", description: "Fuente no disponible para nuevas operaciones.", origin: "Externa", originDetail: "Manual", usage: ["Generación de fichas"], records: "0", status: "Inactivo", updated: "08/08/2026 14:05", updatedBy: "Administrador", inactivatedBy: "Administrador", inactivationReason: "Fuente reemplazada.", fields: [], keyFields: [] }
 ];

@@ -7,6 +7,9 @@ body { min-width: 0; background: var(--ssee-bg); }
 .registration-heading h1 { margin: 0; color: var(--ssee-text); font-size: 2.1rem; }
 .autoregistro-mark { display: flex; align-items: center; gap: 0.65rem; color: var(--ssee-primary); font-size: 1.05rem; font-weight: 700; }
 .autoregistro-logo { width: 2.75rem; height: 2.75rem; display: grid; place-items: center; border-radius: 0.75rem; background: var(--ssee-primary-soft); color: var(--ssee-primary); font-size: 1.2rem; }
+.access-gate { width: min(42rem, 100%); margin: 0 auto 1.25rem; padding: 1.25rem; background: #fff; border: 1px solid var(--ssee-line); border-radius: 0.75rem; box-shadow: var(--ssee-shadow); }
+.access-gate-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.75rem; align-items: end; }
+.access-gate-form .button { min-width: 8rem; }
 
 .registration-layout { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(22rem, 0.92fr); gap: 1.25rem; align-items: stretch; }
 .registration-form-column { min-width: 0; }
@@ -16,6 +19,8 @@ body { min-width: 0; background: var(--ssee-bg); }
 .registration-visual img { display: block; width: 100%; max-width: 38rem; height: auto; object-fit: contain; }
 
 .registration-section + .registration-section { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--ssee-line); }
+.field-label > .field-label-text { color: var(--ssee-text); }
+.field-label .required-marker { color: var(--ssee-danger); }
 .section-heading { display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.9rem; }
 .section-icon { width: 2.35rem; height: 2.35rem; display: grid; place-items: center; flex: 0 0 auto; border-radius: 0.65rem; background: var(--ssee-primary-soft); color: var(--ssee-primary); }
 .section-heading h2 { margin: 0; font-size: 1.1rem; }
@@ -41,6 +46,9 @@ body { min-width: 0; background: var(--ssee-bg); }
 .success-copy { min-width: 0; }
 .success-meta { display: flex; align-items: center; gap: 0.4rem; color: var(--ssee-success); }
 
+.form-control.is-invalid, .form-select.is-invalid { border-color: var(--ssee-danger); box-shadow: 0 0 0 0.12rem rgba(220, 53, 69, 0.12); }
+.form-control.is-invalid:focus, .form-select.is-invalid:focus { border-color: var(--ssee-danger); box-shadow: 0 0 0 0.18rem rgba(220, 53, 69, 0.16); }
+
 .footer { width: 100%; margin-top: auto; }
 
 @media (max-width: 900px) {
@@ -52,6 +60,8 @@ body { min-width: 0; background: var(--ssee-bg); }
 }
 
 @media (max-width: 800px) {
+  .access-gate-form { grid-template-columns: 1fr; }
+  .access-gate-form .button { width: 100%; }
   .identity-query, .readonly-grid, .access-grid { grid-template-columns: 1fr; }
   .access-grid .password-field, .access-grid .password-primary, .access-grid .password-confirm { grid-row: auto; grid-column: auto; }
   .identity-query .button { width: 100%; }

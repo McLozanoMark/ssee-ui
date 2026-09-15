@@ -1,5 +1,88 @@
 /* source: design-system/demo-navigation.js */
+const CURRENT_DEMO_USER = "Ana Paredes";
+
+function applyCurrentDemoUser() {
+  document.querySelectorAll(".account-copy strong, #accountName").forEach((node) => {
+    node.textContent = CURRENT_DEMO_USER;
+  });
+}
+
+function mountClearableFields(root = document) {
+  root.querySelectorAll('input[type="search"], [data-clearable-input]').forEach((input) => {
+    if (input.closest(".clearable-field")) return;
+    const wrapper = document.createElement("span");
+    wrapper.className = "clearable-field";
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.append(input);
+    const clear = document.createElement("button");
+    clear.className = "field-clear";
+    clear.type = "button";
+    clear.setAttribute("aria-label", "Borrar contenido");
+    clear.title = "Borrar contenido";
+    clear.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+    wrapper.append(clear);
+
+    const syncVisibility = () => {
+      clear.hidden = !input.value;
+    };
+    input.addEventListener("input", syncVisibility);
+    clear.addEventListener("click", () => {
+      input.value = "";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.focus();
+    });
+    syncVisibility();
+  });
+}
+
+function normalizeSharedControls(root = document) {
+  root.querySelectorAll(".filter-actions [id^='clear'], .filter-actions [id^='reset']").forEach((button) => {
+    button.classList.add("filter-reset");
+    button.setAttribute("aria-label", "Restablecer filtros");
+    button.title = "Restablecer filtros";
+    button.innerHTML = '<i class="fa-solid fa-xmark icon" aria-hidden="true"></i>';
+  });
+
+  root.querySelectorAll("#newUserBtn, #newSourceBtn, #newSampleBtn, #newAssignmentBtn, #newConfigBtn, #newRoleBtn").forEach((button) => {
+    const icon = button.querySelector("i")?.outerHTML || "";
+    button.innerHTML = `${icon}Nuevo`;
+  });
+  root.querySelectorAll("#syncBtn").forEach((button) => {
+    if (button.dataset.syncRunning === "true") return;
+    const icon = button.querySelector("i")?.outerHTML || "";
+    button.innerHTML = `${icon}Sincronizar`;
+  });
+
+  const identityForm = root.querySelector("#identityForm");
+  const identityClear = identityForm?.querySelector("#clearBtn");
+  const documentNumber = identityForm?.querySelector("#documentNumber");
+  if (identityClear && documentNumber && !identityClear.closest(".clearable-field")) {
+    const wrapper = document.createElement("span");
+    wrapper.className = "clearable-field";
+    documentNumber.parentNode.insertBefore(wrapper, documentNumber);
+    wrapper.append(documentNumber, identityClear);
+    identityClear.className = "field-clear";
+    identityClear.removeAttribute("id");
+    identityClear.setAttribute("aria-label", "Borrar contenido");
+    identityClear.title = "Borrar contenido";
+    identityClear.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+    const syncVisibility = () => { identityClear.hidden = !documentNumber.value; };
+    documentNumber.addEventListener("input", syncVisibility);
+    syncVisibility();
+  }
+
+  root.querySelectorAll(".form-actions > #clearBtn").forEach((button) => {
+    button.classList.add("form-reset");
+    button.setAttribute("aria-label", "Restablecer formulario");
+    button.title = "Restablecer formulario";
+    button.innerHTML = '<i class="fa-solid fa-xmark icon" aria-hidden="true"></i>';
+  });
+}
+
 function mountDemoIndexLink() {
+  applyCurrentDemoUser();
+  mountClearableFields();
+  normalizeSharedControls();
   if (document.querySelector(".demo-index-link")) return;
   const link = document.createElement("a");
   link.className = "demo-index-link";
@@ -193,7 +276,9 @@ const MESSAGE_CATALOG = Object.freeze({
   M65: { text: "No hay registros disponibles. Haz clic en \"Nuevo\" para empezar.", type: "Información", scope: "General" },
   M66: { text: "Complete los datos del rol para activar esta sección.", type: "Alerta", scope: "Roles" },
   M67: { text: "Registros exportados correctamente.", type: "Información", scope: "General" },
-  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" }
+  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" },
+  M130: { text: "¿Está seguro que desea cerrar sesión?\nSe finalizará tu sesión actual. Tendrás que ingresar tus datos nuevamente para acceder.", type: "Confirmación", scope: "Sesiones" },
+  M131: { text: "Sesión próxima a finalizar\nLa sesión se cerrará automáticamente en %s por inactividad.\n¿Deseas continuar en el sistema?", type: "Alerta", scope: "Sesiones" }
 });
 
 // Confirmed prototype copy pending official codes in the stakeholder workbook.
@@ -292,7 +377,7 @@ const state = { filteredAssignments: [...assignments], editingIndex: null, pendi
 
 const refs = { assignmentsBody: document.getElementById("assignmentsBody"), emptyState: document.getElementById("emptyState"), pageSummary: document.getElementById("pageSummary"), assignmentCount: document.getElementById("assignmentCount"), toast: document.getElementById("toast"), assignmentModal: document.getElementById("assignmentModal"), assignmentTitle: document.getElementById("assignmentTitle"), assignmentContext: document.getElementById("assignmentContext"), assignmentInstrument: document.getElementById("assignmentInstrument"), assignmentUser: document.getElementById("assignmentUser"), assignmentSample: document.getElementById("assignmentSample"), assignmentStart: document.getElementById("assignmentStart"), assignmentEnd: document.getElementById("assignmentEnd"), assignmentSaveBtn: document.getElementById("assignmentSaveBtn") };
 document.querySelectorAll(".location-card strong").forEach((node) => { node.textContent = "Sede"; });
-document.querySelectorAll(".account-copy strong").forEach((node) => { node.textContent = "Administrador"; });
+document.querySelectorAll(".account-copy strong").forEach((node) => { node.textContent = "Ana Paredes"; });
 
 function showToast(first, second, third) {
   const hasElement = first && first.nodeType === 1;
@@ -311,7 +396,7 @@ refs.emptyState.textContent = getMessage("M9");
 function statusClass(status) { return status === "Finalizada" ? "active" : status === "Anulada" ? "expired" : status === "En proceso" || status === "Reasignada" ? "warning" : ""; }
 function renderAssignments() { const header = refs.assignmentsBody.closest("table")?.querySelector("thead tr"); if (header && !header.querySelector("[data-column='row-number']")) header.insertAdjacentHTML("afterbegin", '<th data-column="row-number">N.°</th>'); refs.assignmentsBody.innerHTML = state.filteredAssignments.map((assignment) => { const index = assignments.indexOf(assignment); const canReassign = !["Finalizada", "Anulada"].includes(assignment.status); return `<tr><td>${index + 1}</td><td><strong>${assignment.instrument}</strong></td><td>${assignment.user}</td><td>${assignment.sample}</td><td>${assignment.start}</td><td>${assignment.end}</td><td>${assignment.progress}</td><td><span class="status ${statusClass(assignment.status)}">${assignment.status}</span></td><td><div class="row-actions"><button class="row-action" type="button" data-action="view" data-index="${index}" title="Ver detalle"><i class="fa-regular fa-eye" aria-hidden="true"></i><span>Ver detalle</span></button>${canReassign ? `<button class="row-action" type="button" data-action="reassign" data-index="${index}" title="Reasignar"><i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i><span>Reasignar</span></button><button class="row-action" type="button" data-action="remove" data-index="${index}" title="Anular"><i class="fa-solid fa-ban" aria-hidden="true"></i><span>Anular</span></button>` : ""}</div></td></tr>`; }).join(""); refs.emptyState.hidden = state.filteredAssignments.length > 0; refs.pageSummary.textContent = state.filteredAssignments.length ? `Mostrando 1 a ${state.filteredAssignments.length} de ${state.filteredAssignments.length} registros` : "Mostrando 0 registros"; refs.assignmentCount.textContent = `${assignments.length} asignaciones registradas`; enableTooltips(); }
 function applyFilters() { const query = document.getElementById("filterQuery").value.trim().toLowerCase(); const instrument = document.getElementById("filterInstrument").value.trim().toLowerCase(); const user = document.getElementById("filterUser").value.trim().toLowerCase(); const sample = document.getElementById("filterSample").value.trim().toLowerCase(); const start = document.getElementById("filterStart").value; const end = document.getElementById("filterEnd").value; const status = document.getElementById("filterStatus").value; const period = document.getElementById("filterPeriod").value; const progress = document.getElementById("filterProgress").value; state.filteredAssignments = assignments.filter((assignment) => { const searchable = [assignments.indexOf(assignment) + 1, assignment.id, assignment.instrument, assignment.user, assignment.sample, assignment.start, assignment.end, assignment.progress, assignment.status].join(" ").toLowerCase(); const startIso = assignment.start.split("/").reverse().join("-"); const endIso = assignment.end.split("/").reverse().join("-"); return searchable.includes(query) && assignment.instrument.toLowerCase().includes(instrument) && assignment.user.toLowerCase().includes(user) && assignment.sample.toLowerCase().includes(sample) && (!start || startIso === start) && (!end || endIso === end) && (status === "Todos" || assignment.status === status) && (period === "Todos" || assignment.period === period) && (progress === "Todos" || assignment.progressGroup === progress); }); renderAssignments(); }
- function openAssignment(index = null) { state.editingIndex = index; const assignment = index === null ? null : assignments[index]; refs.assignmentTitle.textContent = assignment ? "Reasignar instrumento" : "Registrar asignación"; refs.assignmentSaveBtn.textContent = "Guardar"; refs.assignmentContext.textContent = assignment ? `Actualiza la asignación de ${assignment.instrument} para ${assignment.user}.` : "Selecciona los elementos que participarán en la asignación."; refs.assignmentInstrument.value = assignment?.instrument || "Ficha de seguimiento"; refs.assignmentUser.value = assignment?.user || "Ana Paredes"; refs.assignmentSample.value = assignment?.sample || "Muestra nacional 2026"; refs.assignmentStart.value = assignment ? assignment.start.split("/").reverse().join("-") : "2026-08-18"; refs.assignmentEnd.value = assignment ? assignment.end.split("/").reverse().join("-") : "2026-09-18"; bootstrap.Modal.getOrCreateInstance(refs.assignmentModal).show(); }
+ function openAssignment(index = null) { state.editingIndex = index; const assignment = index === null ? null : assignments[index]; refs.assignmentTitle.textContent = assignment ? "Editar" : "Registrar"; refs.assignmentSaveBtn.textContent = "Guardar"; refs.assignmentContext.textContent = assignment ? `Actualiza la asignación de ${assignment.instrument} para ${assignment.user}.` : "Selecciona los elementos que participarán en la asignación."; refs.assignmentInstrument.value = assignment?.instrument || "Ficha de seguimiento"; refs.assignmentUser.value = assignment?.user || "Ana Paredes"; refs.assignmentSample.value = assignment?.sample || "Muestra nacional 2026"; refs.assignmentStart.value = assignment ? assignment.start.split("/").reverse().join("-") : "2026-08-18"; refs.assignmentEnd.value = assignment ? assignment.end.split("/").reverse().join("-") : "2026-09-18"; bootstrap.Modal.getOrCreateInstance(refs.assignmentModal).show(); }
 function handleAction(event) { const action = event.target.closest("[data-action]"); if (!action) return; const index = Number(action.dataset.index); const assignment = assignments[index]; if (action.dataset.action === "view") showToast(refs.toast, `${assignment.instrument} está ${assignment.status} con un progreso de ${assignment.progress}.`, "info"); if (action.dataset.action === "reassign") openAssignment(index); if (action.dataset.action === "remove") { state.pendingAssignment = { index, remove: true }; openConfirmModal("confirmModal", `Vas a anular la asignación de ${assignment.instrument} para ${assignment.user}. ¿Deseas continuar?`); } }
 function openNewAssignment() { openAssignment(); }
 function saveAssignment(event) { event.preventDefault(); const payload = { instrument: refs.assignmentInstrument.value, user: refs.assignmentUser.value, sample: refs.assignmentSample.value, start: refs.assignmentStart.value.split("-").reverse().join("/"), end: refs.assignmentEnd.value.split("-").reverse().join("/"), period: refs.assignmentStart.value.slice(0, 4), progress: "0%", progressGroup: "Sin iniciar", status: "Pendiente", updated: "18/08/2026 09:30" }; if (state.editingIndex === null) { payload.id = `ASN-${String(assignments.length + 1).padStart(3, "0")}`; assignments.unshift(payload); bootstrap.Modal.getOrCreateInstance(refs.assignmentModal).hide(); renderAssignments(); showToast(refs.toast, "Asignación registrada correctamente.", "success"); return; } state.pendingAssignment = { index: state.editingIndex, payload }; openConfirmModal("confirmModal", `La reasignación cambiará el instrumento asignado a ${payload.user}. ¿Deseas continuar?`); }

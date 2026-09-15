@@ -12,11 +12,11 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     />
-    <link rel="stylesheet" href="../design-system/app.css?v=20260827-form-controls" />
-    <link rel="stylesheet" href="styles.css?v=20260824-inter" />
-    <script src="../design-system/demo-navigation.js"></script>
+    <link rel="stylesheet" href="../design-system/app.css?v=20260911-status-switch" />
+    <link rel="stylesheet" href="../design-system/user-management.css?v=20260910-user-tray" />
+    <link rel="stylesheet" href="styles.css?v=20260910-admission" />
   </head>
-  <body>
+  <body data-user-demo="ref-004-admision">
     <div class="app-shell">
       <aside class="sidebar" aria-label="Navegación principal">
         <div class="side-brand">
@@ -98,13 +98,13 @@
               </div>
             </div>
             <div class="head-actions">
-              <a class="btn btn-ssee button button-primary" id="newUserBtn" href="admitir.html?return=ref-004-admision"><i class="fa-solid fa-user-plus icon" aria-hidden="true"></i>Nuevo usuario</a>
+              <a class="btn btn-ssee button button-primary" id="newUserBtn" href="admitir.html?return=ref-004-admision"><i class="fa-solid fa-user-plus icon" aria-hidden="true"></i>Nuevo</a>
               <button
                 class="btn btn-ssee button button-primary"
                 id="syncBtn"
                 type="button"
               >
-                <i class="fa-solid fa-rotate icon" aria-hidden="true"></i>Sincronizar usuarios
+                <i class="fa-solid fa-rotate icon" aria-hidden="true"></i>Sincronizar
               </button>
               <button
                 class="btn btn-outline-ssee button button-secondary"
@@ -136,27 +136,6 @@
               <span></span><span></span><span></span>
             </button>
             <div class="advanced-filters" id="advancedFilters">
-              <label class="filter-field">
-                <span>Usuario</span>
-                <input class="form-control" id="filterUsername" type="search" placeholder="Buscar por usuario" />
-              </label>
-              <label class="filter-field">
-                <span>Bandeja</span>
-                <select class="form-select" id="filterTray" aria-label="Bandeja">
-                  <option>Todos</option>
-                  <option>Pendientes de rol</option>
-                  <option>Sin proyecto</option>
-                  <option>Por vencer</option>
-                </select>
-              </label>
-              <label class="filter-field">
-                <span>Nombres y apellidos</span>
-                <input class="form-control" id="filterDescription" type="search" placeholder="Buscar por nombres y apellidos" />
-              </label>
-              <label class="filter-field">
-                <span>Correo</span>
-                <input class="form-control" id="filterEmail" type="email" placeholder="Buscar por correo" />
-              </label>
               <label class="filter-field">
                 <span>Rol</span>
                 <select class="form-select" id="filterRole" aria-label="Rol">
@@ -195,16 +174,22 @@
                   <option>Por vencer</option>
                 </select>
               </label>
-              <label class="filter-field">
-                <span>Último acceso</span>
-                <input class="form-control" id="filterLastAccess" type="date" aria-label="Último acceso" />
-              </label>
+              <fieldset class="filter-field date-range-field" id="filterLastAccess" data-date-range>
+                <legend>Último acceso</legend>
+                <div class="date-range-picker">
+                  <button class="date-range-trigger" type="button" data-date-range-trigger aria-haspopup="dialog" aria-expanded="false"><i class="fa-regular fa-calendar" aria-hidden="true"></i><span data-date-range-label>Seleccionar rango</span><i class="fa-solid fa-chevron-down" aria-hidden="true"></i></button>
+                  <button class="date-range-clear" type="button" data-date-range-clear aria-label="Limpiar selección" title="Limpiar selección" hidden><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+                  <div class="date-range-popover" data-date-range-popover role="dialog" aria-label="Seleccionar rango de fechas" hidden><div class="date-range-summary"><span>Rango seleccionado</span><strong data-date-range-summary>Selecciona una fecha inicial y final</strong></div><div class="date-range-calendar-nav"><button class="date-range-nav" type="button" data-date-range-prev aria-label="Mes anterior"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button><div class="date-range-month-labels" data-date-range-month-labels></div><button class="date-range-nav" type="button" data-date-range-next aria-label="Mes siguiente"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button></div><div class="date-range-months" data-date-range-months></div><div class="date-range-footer"><button class="btn btn-outline-ssee button button-secondary" type="button" data-date-range-cancel>Cancelar</button><button class="btn btn-ssee button button-primary" type="button" data-date-range-apply>Aplicar</button></div></div>
+                  <input id="filterLastAccessStart" type="hidden" data-date-range-start><input id="filterLastAccessEnd" type="hidden" data-date-range-end>
+                </div>
+                <small class="field-error" data-date-range-error hidden></small>
+              </fieldset>
               <div class="filter-actions" aria-label="Acciones de filtro">
                 <button class="btn filter-action btn-ssee button button-primary" type="submit">
                   <i class="fa-solid fa-magnifying-glass icon"></i>Buscar
                 </button>
                 <button class="btn filter-action btn-outline-ssee button button-secondary" type="button" id="clearBtn">
-                  <i class="fa-solid fa-rotate-left icon"></i>Limpiar
+                  <i class="fa-solid fa-xmark icon" aria-hidden="true"></i>
                 </button>
               </div>
             </div>
@@ -284,31 +269,8 @@
       </main>
     </div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    <aside class="demo-guide demo-guide-admission" id="admissionGuide" aria-label="Guía de demo"><span class="demo-guide-label">Guía de demo</span><strong>Inicia la admisión de usuario</strong><p>Haz clic en Nuevo usuario para continuar.</p></aside>
-    <div class="demo-cursor-admission" id="admissionCursor" aria-hidden="true">➤</div>
-    <div class="modal fade" id="rolesModal" tabindex="-1" aria-labelledby="rolesModalTitle" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content role-modal">
-          <div class="modal-header">
-            <span class="modal-title-icon" aria-hidden="true"><i class="fa-solid fa-user-gear"></i></span><h2 class="modal-title" id="rolesModalTitle">Asignar roles</h2>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-          </div>
-          <div class="modal-body"><p class="modal-context" id="rolesModalContext"></p><div class="access-edit-note" id="accessEditNote" hidden></div><div class="site-picker" id="sitePicker"></div><div class="role-picker" id="rolePicker"></div><div class="project-picker" id="projectPicker"></div><label class="modal-label" id="validityField" for="validitySelect">Vigencia<select class="form-select" id="validitySelect"><option>Sin fecha de vencimiento</option><option>30 días</option><option>90 días</option><option>1 año</option></select></label><p class="modal-feedback" id="roleModalFeedback" hidden></p></div>
-          <div class="modal-footer justify-content-between">
-            <div class="edit-status-control" id="editUserStatusControl" hidden>
-              <span>Estado</span>
-              <label class="form-check form-switch switch" data-on-label="Activo" data-off-label="Inactivo">
-                <input class="form-check-input" type="checkbox" id="editUserStatusToggle" aria-label="Activar o inactivar usuario">
-              </label>
-            </div>
-            <div class="form-actions-right">
-              <button type="button" class="btn btn-outline-ssee button button-secondary" id="cancelRolesBtn">Cancelar</button>
-              <button type="button" class="btn btn-ssee button button-primary" id="saveRolesBtn">Guardar</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <aside class="demo-guide demo-guide-admission" id="admissionGuide" aria-label="Guía de demo"><span class="demo-guide-label">Guía de demo</span><strong>Inicia la admisión de usuario</strong><p>Haz clic en Nuevo para continuar.</p></aside>
+    <div class="demo-cursor-admission" id="admissionCursor" aria-hidden="true"><span>➤</span></div>
     <div class="modal fade" id="reniecModal" tabindex="-1" aria-labelledby="reniecModalTitle" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content role-modal reniec-modal">
@@ -335,15 +297,16 @@
     <div class="modal fade" id="confirmRolesModal" tabindex="-1" aria-labelledby="confirmRolesTitle" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content role-modal"><div class="modal-header"><span class="modal-title-icon" aria-hidden="true"><i class="fa-solid fa-circle-question"></i></span><h2 class="modal-title" id="confirmRolesTitle">Confirmar acción</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div><div class="modal-body"><p class="modal-context" id="confirmRolesMessage" data-confirm-message></p><label class="confirm-reason-field" data-confirm-reason-wrap hidden><span>Motivo de inactivación *</span><textarea class="form-control" data-confirm-reason rows="3" maxlength="240" aria-describedby="confirmRolesReasonError"></textarea><small class="field-error" data-confirm-reason-error id="confirmRolesReasonError" hidden></small></label></div><div class="modal-footer"><button type="button" class="btn btn-outline-ssee button button-secondary" data-bs-dismiss="modal">No</button><button type="button" class="btn btn-ssee button button-primary" id="confirmRolesBtn">Sí</button></div></div></div>
     </div>
+    <script src="dist/users.js?v=20260914-admission-persist"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="dist/users.js?v=20260901-copysearch"></script>
     <script src="../ref-003-passport/js/passport-flow.js?v=20260904-sync-button"></script>
     <script src="js/admission-guide.js?v=20260904-admission"></script>
     <script>
-      if (new URLSearchParams(window.location.search).get("admitted") === "1") {
+      const resultParam = new URLSearchParams(window.location.search);
+      if (resultParam.has("admitted") || resultParam.has("updated") || resultParam.has("mass")) {
         const toast = document.getElementById("toast");
         toast.className = "toast toast-success is-visible";
-        toast.innerHTML = '<i class="fa-solid fa-circle-check" aria-hidden="true"></i><span>La información se ha guardado correctamente.</span>';
+        toast.innerHTML = `<i class="fa-solid fa-circle-check" aria-hidden="true"></i><span>${getMessage(resultParam.has("updated") ? "M3" : "M2")}</span>`;
       }
     </script>
   </body>

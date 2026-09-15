@@ -66,7 +66,9 @@ export const MESSAGE_CATALOG = Object.freeze({
   M65: { text: "No hay registros disponibles. Haz clic en \"Nuevo\" para empezar.", type: "Información", scope: "General" },
   M66: { text: "Complete los datos del rol para activar esta sección.", type: "Alerta", scope: "Roles" },
   M67: { text: "Registros exportados correctamente.", type: "Información", scope: "General" },
-  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" }
+  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" },
+  M130: { text: "¿Está seguro que desea cerrar sesión?\nSe finalizará tu sesión actual. Tendrás que ingresar tus datos nuevamente para acceder.", type: "Confirmación", scope: "Sesiones" },
+  M131: { text: "Sesión próxima a finalizar\nLa sesión se cerrará automáticamente en %s por inactividad.\n¿Deseas continuar en el sistema?", type: "Alerta", scope: "Sesiones" }
 });
 
 // Confirmed prototype copy pending official codes in the stakeholder workbook.

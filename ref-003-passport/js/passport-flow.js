@@ -34,7 +34,7 @@ syncButton.addEventListener("click", () => {
     syncButton.disabled = false;
     syncButton.removeAttribute("aria-busy");
     syncButton.classList.remove("is-syncing");
-    syncButton.innerHTML = '<i class="fa-solid fa-rotate icon" aria-hidden="true"></i>Sincronizar usuarios';
+    syncButton.innerHTML = '<i class="fa-solid fa-rotate icon" aria-hidden="true"></i>Sincronizar';
     if (getScenario() === "error") {
       showToast("No fue posible completar la sincronización con Passport.", "error");
       window.dispatchEvent(new CustomEvent("ref003-sync-finished"));

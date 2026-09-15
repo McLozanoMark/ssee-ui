@@ -1,4 +1,4 @@
-@import url("../design-system/app.css?v=20260827-form-controls");
+@import url("../design-system/app.css?v=20260911-status-switch");
 
 .breadcrumb { display: flex; align-items: center; flex-wrap: wrap; gap: 0.45rem; }
 .breadcrumb a { text-decoration: none; }

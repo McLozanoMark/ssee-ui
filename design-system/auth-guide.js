@@ -32,7 +32,7 @@
   function getSteps() {
     if (kind === "password") {
       return authType === "Passport"
-        ? [["#passportRedirect", "Continúa en Passport", "El cambio de contraseña se gestiona en el mecanismo oficial de Passport.", "click"]]
+        ? [["#passportRecoveryForm select", "Selecciona el documento", "Elige el tipo de documento en el formulario oficial simulado de Passport.", "click"], ["#passportRecoveryDocumentNumber", "Ingresa el documento", "Escribe el número de documento válido para solicitar la recuperación.", "input"], ["#passportRecoveryCaptcha", "Ingresa el captcha", "Escribe el código que aparece en la imagen de seguridad.", "input"], ["#passportRecoveryForm button[type=submit]", "Envía la solicitud", "Presiona Enviar correo para finalizar el flujo de recuperación en Passport.", "submit"]]
         : authType === "Documento"
           ? [["#documentPanel", "Revisa el acceso", "Este tipo de acceso no administra una contraseña local.", "click"]]
         : [
@@ -44,13 +44,13 @@
     }
     if (kind === "recovery") {
       return authType === "Passport"
-        ? [["#passportRedirect", "Continúa en Passport", "La recuperación se gestiona en el mecanismo oficial de Passport.", "click"]]
+        ? [["#passportRecoveryForm select", "Selecciona el documento", "Elige el tipo de documento en el formulario oficial simulado de Passport.", "click"], ["#passportRecoveryDocumentNumber", "Ingresa el documento", "Escribe el número de documento válido para solicitar la recuperación.", "input"], ["#passportRecoveryCaptcha", "Ingresa el captcha", "Escribe el código que aparece en la imagen de seguridad.", "input"], ["#passportRecoveryForm button[type=submit]", "Envía la solicitud", "Presiona Enviar correo para finalizar el flujo de recuperación en Passport.", "submit"]]
         : authType === "Documento"
           ? [["#documentPanel", "Revisa el acceso", "Este tipo de acceso no requiere recuperación de contraseña local.", "click"]]
         : [
           ["#email", "Ingresa el correo", "Escribe el correo registrado para solicitar el enlace.", "input"],
           ["#requestForm button[type=submit]", "Solicita el enlace", "Presiona Solicitar enlace para continuar.", "request"],
-          ["#openLink", "Abre el enlace", "En la demo, este botón representa el enlace recibido por correo.", "click"],
+          ["#sentBackToLogin", "Regresa al login", "El enlace llegará al correo registrado. Presiona Ir al login para cerrar este flujo de demostración.", "click"],
           ["#newPassword", "Ingresa la contraseña", "Escribe la nueva contraseña.", "input"],
           ["#confirmPassword", "Confirma la contraseña", "Repite la nueva contraseña.", "input"],
           ["#resetForm button[type=submit]", "Restablece la contraseña", "Presiona Restablecer contraseña para finalizar.", "submit"]
@@ -68,6 +68,11 @@
   }
 
   const steps = getSteps();
+  const successfulContinuation = {
+    passport: ["#continueBtn", "Continúa a la bienvenida", "La autenticación se completa en Passport. La demo representa el retorno autorizado a S.S.E.E.; presiona Continuar para ver la bienvenida.", "continue"],
+    document: ["#continueBtn", "Continúa a la bienvenida", "El documento y las condiciones de acceso fueron validados correctamente. Presiona Continuar para ver la bienvenida.", "continue"],
+    autoregister: ["#continueBtn", "Continúa a la bienvenida", "La cuenta y el proceso asociado fueron validados correctamente. Presiona Continuar para ver la bienvenida.", "continue"]
+  };
   let current = 0;
 
   function isVisible(element) {
@@ -80,10 +85,25 @@
     cursor.classList.remove("is-visible");
   }
 
+  function showSuccessfulContinuation() {
+    if (!document.getElementById("continueBtn") || !document.getElementById("authWelcome")) {
+      return finish("El sistema muestra la confirmación del flujo.");
+    }
+    if (steps.some((step) => step[3] === "continue")) return;
+    steps.push(successfulContinuation[kind] || successfulContinuation.autoregister);
+    steps.push(["#welcomeTitle", "Revisa la bienvenida", "Esta es la pantalla de bienvenida del flujo. El recorrido terminó dentro de esta demo.", "welcome"]);
+    current += 1;
+    showStep();
+  }
+
   function bindStep(step) {
     const element = document.querySelector(step[0]);
     if (!element) return;
     const eventName = step[3] === "input" ? "blur" : "click";
+    if (step[3] === "continue") {
+      window.addEventListener("auth:welcome-ready", () => nextStep(), { once: true });
+      return;
+    }
     element.addEventListener(eventName, () => {
       if (step[3] === "submit" || step[3] === "request") return;
       window.setTimeout(nextStep, 0);
@@ -99,6 +119,7 @@
               ? "El sistema muestra la confirmación del flujo."
               : "El sistema muestra el resultado de la validación.";
           if (step[3] === "request" && isVisible(document.getElementById("sentView"))) nextStep();
+          else if (isVisible(success)) showSuccessfulContinuation();
           else finish(response);
         }, 80);
       }, { once: true });

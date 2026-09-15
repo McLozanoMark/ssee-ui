@@ -87,10 +87,10 @@ $("sourceForm").addEventListener("change", (event) => {
   markFormDirty();
 });
 $("sourceStatusSwitch").addEventListener("change", (event) => {
-  const next = event.target.checked ? "Activa" : "Inactiva";
+  const next = event.target.checked ? "Activo" : "Inactivo";
   event.target.checked = !event.target.checked;
   state.pendingStatus = { index: state.editingIndex, next };
-  openConfirmModal("confirmModal", `${getMessage(next === "Activa" ? "M5" : "M6")} ${state.draft?.name || "esta fuente"}?`, { requireReason: next === "Inactiva" });
+  openConfirmModal("confirmModal", `${getMessage(next === "Activo" ? "M5" : "M6")} ${state.draft?.name || "esta fuente"}?`, { requireReason: next === "Inactivo" });
 });
 refs.wizardSteps.forEach((button) => button.addEventListener("click", () => requestWizardStep(Number(button.dataset.wizardStep))));
 $("addFieldBtn").addEventListener("click", () => { addField(); renderFields(); markFormDirty(); });

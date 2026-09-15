@@ -46,6 +46,13 @@ change the approved icon and title, but may not add an eyebrow, subtitle,
 second title, local spacing, pseudo-element icon or runtime icon injection.
 Changing the modal width or body layout never changes this header contract.
 
+## Authenticated Demo Profile
+
+Every authenticated demo uses the same synthetic current user in its header:
+`Ana Paredes`. The shared demo-navigation component applies this value to
+`.account-copy` and `#accountName` so a requirement-specific flow cannot show a
+different session user. The role line remains the approved role for that shell.
+
 ## Inactivation Reason Contract
 
 Every explicit user action that changes a record from active to inactive uses
@@ -84,16 +91,64 @@ Authentication demos follow the same rule: `auth.css` is the canonical shell
 for the two-zone login and password surfaces, and `auth-guide.js` is the
 canonical external presentation guide. A requirement-specific flow may change
 its fields, state or branch, but it may not fork the shell or guide styling.
+After a valid authentication, the shared flow exposes `Continuar` and renders
+the current REF-017 welcome surface inside the same demo document. Passport and
+identity-service steps are represented by guide copy; external login screens
+and CAPTCHA are never recreated. The welcome structure and interaction are
+shared, while the synthetic profile is selected by authentication type.
 
 All CRUD list filters use the same contract: one global search field, one
 filter-toggle control, labelled advanced fields, and a shared action group with
-`Buscar` as the primary action followed by `Limpiar` as the secondary action.
-The filter toggle exposes `aria-expanded`, explicit submit/reset behavior, and
-the standard `Filtros aplicados.` and `Filtros limpiados.` toasts. Filter
-actions reuse the same canonical action-button component and height as header
-and footer actions. The compact table scale must not create a smaller button
-variant. The filter action group remains anchored to the right of the advanced
-fields and moves to a full-width row on narrow screens.
+`Buscar` as the primary action. Every text or search field uses the shared
+trailing `X` clear control when it has content. Resetting the complete filter
+set uses the same shared icon-only `X` with an accessible tooltip; no filter
+panel renders a visible `Limpiar` label. The filter toggle exposes
+`aria-expanded`, explicit submit/reset behavior, and the standard
+`Filtros aplicados.` and `Filtros limpiados.` toasts. Filter actions reuse the
+same canonical action-button component and height as header and footer actions.
+The compact table scale must not create a smaller button variant. The filter
+action group remains anchored to the right of the advanced fields and moves to
+a full-width row on narrow screens.
+
+Every full-size form control uses the same `--ssee-control-height` contract:
+inputs, selects, date-range triggers, regular buttons, filter controls and
+pagination are `2.75rem` high. The binary status switch is the shared compact
+exception at `1.75rem` high, with a fixed width and thumb geometry. Checkbox
+and radio glyphs keep their native accessible size, but their selectable option
+rows use the regular control height. The other compact exception is a row
+action.
+Icon-only internal utilities such as the trailing clear `X` remain part of
+their parent component's geometry and must not be used to create local
+form-control variants. Buttons outside action columns, including pagination
+and filter actions, use the shared height.
+
+When a flow offers alternative modalities in the same screen, use the shared
+`.mode-tabs` component before the flow stepper. Each modality occupies the same
+width, includes its icon before the label, and remains visible while its panel
+is active. This component standardizes the mode choice only; it does not make
+different business flows share steps that do not apply to them. For example,
+user admission may expose `Carga individual` and `Carga masiva` at entry, while
+data-source loading keeps its modality choice inside the documented `Origen y
+carga` step.
+
+When a tray searches by `Última actualización`, the advanced filter uses the
+shared `date-range.js` calendar control with one summary field, two visible
+months, and `Desde`/`Hasta` selection. The range is inclusive and rejects an
+initial date after the final date. This rule applies only to that search field;
+other dates keep their requirement-specific control.
+
+The Gestión de usuarios tray applies the same shared range control to
+`Último acceso`; it uses the same selection, validation, clear and reset
+behavior across REF-003, REF-004 and REF-007.
+
+The user-management tray is a shared presentation surface. `ref-007-users`,
+`ref-003-passport`, and `ref-004-admision` load the same
+`user-management.css` and the same tray structure; each flow may add only its
+own guide or action behavior without changing the tray layout.
+
+When a tray exposes a binary `Estado` column with `Activo`/`Inactivo`, its edit
+form places exactly one shared compact status switch in the upper-right header.
+Creation forms and modules with non-binary statuses do not add this control.
 
 The baseline uses Bootstrap 5, Font Awesome CDN, compact `rem` sizing, the
 reference-zero header, upper-right toasts, standardized confirmation modals,
@@ -110,8 +165,10 @@ mark, the same rem rhythm as the shell and the responsive size contract from
 
 ## Shared interaction rules
 
-- Creation screens use the `Registrar ...` title. The `Nuevo ...` wording stays
-  on the entry button only.
+- Creation screens use the generic `Registrar` title. The entry button uses the
+  generic `Nuevo` label. Edit screens use `Editar`; entity context belongs in
+  the breadcrumb, module title or supporting copy, not in repeated button or
+  screen labels.
 - A row may expose up to three contextual actions directly. When more than
   three actions are available for that row, use the shared dropdown pattern.
 - Direct row actions use the shared action anatomy: Font Awesome icon above a
@@ -122,9 +179,10 @@ mark, the same rem rhythm as the shell and the responsive size contract from
   `Acciones`. A row communicates state with a status tag and exposes `Editar`;
   activation or inactivation is available only in the record edit surface.
 - Any activation or inactivation control uses the shared toggle switch only in
-  the edit surface. The checked state represents `Activo`/`Activa` and the
-  unchecked state represents `Inactivo`/`Inactiva`; never render `ON` or `OFF`
-  as visible text. States that
+  the edit surface. The checked state represents `Activo` and the unchecked
+  state represents `Inactivo`; never render `Activa`/`Inactiva`, `ON` or `OFF`
+  as visible text. Disabled switches retain the visible `Activo`/`Inactivo`
+  label in the neutral disabled treatment. States that
   are not binary, such as `Borrador`, `Por vencer`, `Vencido` or `Anulada`,
   remain status tags.
 - Every record data grid begins with `N.°` as its first column, before the
@@ -133,9 +191,9 @@ mark, the same rem rhythm as the shell and the responsive size contract from
   record grids.
 - An enabled unchecked switch uses the semantic danger tint to represent an
   available inactivation state. A disabled switch uses a neutral outlined
-  silhouette with no thumb shadow and no visible `Activo`/`Inactivo` label, so
-  it cannot be confused with an actionable inactive control. The row status
-  remains visible in the informational `Estado` tag.
+  silhouette with no thumb shadow while retaining its visible `Activo`/`Inactivo`
+  label, so its state remains legible without suggesting it is actionable. The
+  row status remains visible in the informational `Estado` tag.
 - Row-action icons use the shared semantic color map while their labels retain
   the normal text color. Disabled action icons use the shared darker gray
   `--ssee-action-disabled` so the disabled state remains legible. Modules must

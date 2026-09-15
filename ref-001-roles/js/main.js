@@ -6,6 +6,9 @@ import { applyFilters, handleRoleAction, renderRoles, confirmStatus, handleEditS
 import { getMessage, getPrototypeMessage } from "../../design-system/messages.js";
 import { openConfirmModal, closeConfirmModal } from "../../design-system/interaction.js";
 import { attachTableSorting } from "../../design-system/table-sort.js";
+import { createDateRangeFilter } from "../../design-system/date-range.js";
+
+const updatedRange = createDateRangeFilter(document.querySelector("[data-date-range]"));
 
 function validateInfo() {
   clearErrors();
@@ -139,7 +142,7 @@ function confirmPendingAction() {
   if (state.pendingSave) {
     state.pendingSave = false;
     closeConfirmModal("confirmModal");
-    commitRoleSave({ stay: state.editingIndex !== null });
+    commitRoleSave();
     return;
   }
   if (state.pendingCancel) {
@@ -154,6 +157,10 @@ function confirmPendingAction() {
 
 refs.filterForm.addEventListener("submit", (event) => {
   event.preventDefault();
+  if (updatedRange && !updatedRange.validate()) {
+    showToast(getMessage("M12"), "warning");
+    return;
+  }
   applyFilters();
   showToast(getPrototypeMessage("filtersApplied"), "info");
 });
@@ -168,7 +175,7 @@ document.getElementById("clearBtn").addEventListener("click", () => {
   refs.filterName.value = "";
   refs.filterNameAdvanced.value = "Todos";
   document.getElementById("filterPermission").value = "Todos";
-  document.getElementById("filterUpdated").value = "Todos";
+  updatedRange?.reset();
   refs.filterStatus.value = "Todos";
   applyFilters();
   showToast(getPrototypeMessage("filtersCleared"), "info");

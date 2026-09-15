@@ -10,6 +10,8 @@ export const refs = {
   filterForm: document.getElementById("filterForm"),
   filterName: document.getElementById("filterName"),
   filterNameAdvanced: document.getElementById("filterNameAdvanced"),
+  filterUpdatedStart: document.getElementById("filterUpdatedStart"),
+  filterUpdatedEnd: document.getElementById("filterUpdatedEnd"),
   filterStatus: document.getElementById("filterStatus"),
   filterToggle: document.getElementById("filterToggle"),
   roleCount: document.getElementById("roleCount"),
@@ -69,8 +71,8 @@ export function showForm(role = null, sourceRequirement = "ALI-REF-001") {
   refs.formView.classList.add("is-active");
   refs.roleName.value = role?.name || "";
   refs.roleDescription.value = role?.description || "";
-  const label = role ? "Editar rol" : "Registrar rol";
-  refs.formTitle.textContent = role ? "Editar rol" : "Registrar rol";
+  const label = role ? "Editar" : "Registrar";
+  refs.formTitle.textContent = label;
   refs.formBreadcrumb.innerHTML = `<a href="../index.html">Índice de requerimientos</a> / ${sourceRequirement} / Gestión de roles / ${label}`;
   refs.editStatusControls.forEach((control) => { control.hidden = !role; });
   const statusBlocked = Boolean(role && role.users > 0);

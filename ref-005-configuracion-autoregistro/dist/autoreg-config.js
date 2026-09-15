@@ -1,5 +1,88 @@
 /* source: design-system/demo-navigation.js */
+const CURRENT_DEMO_USER = "Ana Paredes";
+
+function applyCurrentDemoUser() {
+  document.querySelectorAll(".account-copy strong, #accountName").forEach((node) => {
+    node.textContent = CURRENT_DEMO_USER;
+  });
+}
+
+function mountClearableFields(root = document) {
+  root.querySelectorAll('input[type="search"], [data-clearable-input]').forEach((input) => {
+    if (input.closest(".clearable-field")) return;
+    const wrapper = document.createElement("span");
+    wrapper.className = "clearable-field";
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.append(input);
+    const clear = document.createElement("button");
+    clear.className = "field-clear";
+    clear.type = "button";
+    clear.setAttribute("aria-label", "Borrar contenido");
+    clear.title = "Borrar contenido";
+    clear.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+    wrapper.append(clear);
+
+    const syncVisibility = () => {
+      clear.hidden = !input.value;
+    };
+    input.addEventListener("input", syncVisibility);
+    clear.addEventListener("click", () => {
+      input.value = "";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.focus();
+    });
+    syncVisibility();
+  });
+}
+
+function normalizeSharedControls(root = document) {
+  root.querySelectorAll(".filter-actions [id^='clear'], .filter-actions [id^='reset']").forEach((button) => {
+    button.classList.add("filter-reset");
+    button.setAttribute("aria-label", "Restablecer filtros");
+    button.title = "Restablecer filtros";
+    button.innerHTML = '<i class="fa-solid fa-xmark icon" aria-hidden="true"></i>';
+  });
+
+  root.querySelectorAll("#newUserBtn, #newSourceBtn, #newSampleBtn, #newAssignmentBtn, #newConfigBtn, #newRoleBtn").forEach((button) => {
+    const icon = button.querySelector("i")?.outerHTML || "";
+    button.innerHTML = `${icon}Nuevo`;
+  });
+  root.querySelectorAll("#syncBtn").forEach((button) => {
+    if (button.dataset.syncRunning === "true") return;
+    const icon = button.querySelector("i")?.outerHTML || "";
+    button.innerHTML = `${icon}Sincronizar`;
+  });
+
+  const identityForm = root.querySelector("#identityForm");
+  const identityClear = identityForm?.querySelector("#clearBtn");
+  const documentNumber = identityForm?.querySelector("#documentNumber");
+  if (identityClear && documentNumber && !identityClear.closest(".clearable-field")) {
+    const wrapper = document.createElement("span");
+    wrapper.className = "clearable-field";
+    documentNumber.parentNode.insertBefore(wrapper, documentNumber);
+    wrapper.append(documentNumber, identityClear);
+    identityClear.className = "field-clear";
+    identityClear.removeAttribute("id");
+    identityClear.setAttribute("aria-label", "Borrar contenido");
+    identityClear.title = "Borrar contenido";
+    identityClear.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+    const syncVisibility = () => { identityClear.hidden = !documentNumber.value; };
+    documentNumber.addEventListener("input", syncVisibility);
+    syncVisibility();
+  }
+
+  root.querySelectorAll(".form-actions > #clearBtn").forEach((button) => {
+    button.classList.add("form-reset");
+    button.setAttribute("aria-label", "Restablecer formulario");
+    button.title = "Restablecer formulario";
+    button.innerHTML = '<i class="fa-solid fa-xmark icon" aria-hidden="true"></i>';
+  });
+}
+
 function mountDemoIndexLink() {
+  applyCurrentDemoUser();
+  mountClearableFields();
+  normalizeSharedControls();
   if (document.querySelector(".demo-index-link")) return;
   const link = document.createElement("a");
   link.className = "demo-index-link";
@@ -85,7 +168,9 @@ const MESSAGE_CATALOG = Object.freeze({
   M65: { text: "No hay registros disponibles. Haz clic en \"Nuevo\" para empezar.", type: "Información", scope: "General" },
   M66: { text: "Complete los datos del rol para activar esta sección.", type: "Alerta", scope: "Roles" },
   M67: { text: "Registros exportados correctamente.", type: "Información", scope: "General" },
-  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" }
+  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" },
+  M130: { text: "¿Está seguro que desea cerrar sesión?\nSe finalizará tu sesión actual. Tendrás que ingresar tus datos nuevamente para acceder.", type: "Confirmación", scope: "Sesiones" },
+  M131: { text: "Sesión próxima a finalizar\nLa sesión se cerrará automáticamente en %s por inactividad.\n¿Deseas continuar en el sistema?", type: "Alerta", scope: "Sesiones" }
 });
 
 // Confirmed prototype copy pending official codes in the stakeholder workbook.
@@ -223,8 +308,8 @@ function closeConfirmModal(id) {
 
 /* source: ref-005-configuracion-autoregistro/js/main.js */
 const configs = [
-  { project: "Operativo 2026", role: "Registrador", start: "01/09/2026", startIso: "2026-09-01", end: "30/09/2026", endIso: "2026-09-30", accountExpiry: "", status: "Activa", code: "K7P4X2M9" },
-  { project: "Evaluación 2026", role: "Supervisor de Seguimiento", start: "15/09/2026", startIso: "2026-09-15", end: "15/10/2026", endIso: "2026-10-15", accountExpiry: "", status: "Inactiva", code: "R3N8C5Q1" }
+  { project: "Operativo 2026", role: "Registrador", start: "01/09/2026", startIso: "2026-09-01", end: "30/09/2026", endIso: "2026-09-30", accountExpiry: "", status: "Activo", code: "K7P4X2M9" },
+  { project: "Evaluación 2026", role: "Supervisor de Seguimiento", start: "15/09/2026", startIso: "2026-09-15", end: "15/10/2026", endIso: "2026-10-15", accountExpiry: "", status: "Inactivo", code: "R3N8C5Q1" }
 ];
 
 const refs = {
@@ -244,6 +329,8 @@ const refs = {
   form: document.getElementById("configForm"),
   configModal: document.getElementById("configModal"),
   modalTitle: document.getElementById("configModalTitle"),
+  configStatusControl: document.getElementById("configStatusControl"),
+  configStatusToggle: document.getElementById("configStatusToggle"),
   formGrid: document.querySelector("#configForm .form-grid"),
   formActions: document.getElementById("configFormActions"),
   editNote: document.getElementById("editNote"),
@@ -287,7 +374,7 @@ function renderConfigs() {
   if (header && !header.querySelector("[data-column='row-number']")) header.insertAdjacentHTML("afterbegin", '<th data-column="row-number">N.°</th>');
   refs.body.innerHTML = filteredConfigs.length ? filteredConfigs.map((config) => {
     const index = configs.indexOf(config);
-    const inactive = config.status === "Inactiva";
+    const inactive = config.status === "Inactivo";
     return `<tr><td>${index + 1}</td><td><strong>${config.project}</strong></td><td>${config.role}</td><td><div class="period"><strong>${config.start}</strong><span>hasta ${config.end}</span></div></td><td><span class="status ${inactive ? "inactive" : "active"}">${config.status}</span></td><td class="code-cell">${config.code}</td><td><div class="row-actions"><button class="row-action" type="button" data-action="edit" data-edit="${index}" data-config-action="edit" data-config-index="${index}" aria-label="Editar ${config.project}" title="Editar"><i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span></button></div></td></tr>`;
   }).join("") : "";
   refs.emptyState.hidden = filteredConfigs.length > 0;
@@ -336,12 +423,13 @@ function openConfigModal(index = null) {
   refs.generatedResult.hidden = true;
   refs.resultActions.hidden = true;
   refs.modalTitle.textContent = index === null ? "Configurar autoregistro" : "Editar configuración";
+  refs.configStatusControl.hidden = index === null;
+  refs.configStatusToggle.checked = config?.status !== "Inactivo";
   setFormValue("project", config?.project);
   setFormValue("defaultRole", config?.role);
   setFormValue("startDate", config?.startIso);
   setFormValue("endDate", config?.endIso);
   setFormValue("accountExpiry", config?.accountExpiry);
-  setFormValue("configStatus", config?.status || "Activa");
   ["startDate", "endDate", "accountExpiry"].forEach((id) => { document.getElementById(id).disabled = index !== null; });
   bootstrap.Modal.getOrCreateInstance(refs.configModal).show();
 }
@@ -401,19 +489,22 @@ refs.form.addEventListener("submit", (event) => {
   if (!project || !role || (editingIndex === null && (!startIso || !endIso))) return showToast(getMessage("M11"), "warning");
   if (editingIndex === null && startIso > endIso) return showToast(getMessage("M12"), "warning");
   if (editingIndex !== null) {
+    const config = configs[editingIndex];
+    const nextStatus = refs.configStatusToggle.checked ? "Activo" : "Inactivo";
+    const requiresReason = config.status === "Activo" && nextStatus === "Inactivo";
     showConfirm(getMessage("M1"), () => {
-      const config = configs[editingIndex];
       config.project = project;
       config.role = role;
-      config.status = document.getElementById("configStatus").value;
+      config.status = nextStatus;
+      if (requiresReason) config.inactivationReason = getConfirmReason("confirmModal");
       bootstrap.Modal.getOrCreateInstance(refs.configModal).hide();
       applyFilters(false);
       showToast(getMessage("M3"));
-    });
+    }, requiresReason);
     return;
   }
   const code = randomCode();
-  const config = { project, role, start: formatDate(startIso), startIso, end: formatDate(endIso), endIso, accountExpiry: document.getElementById("accountExpiry").value, status: document.getElementById("configStatus").value, code };
+  const config = { project, role, start: formatDate(startIso), startIso, end: formatDate(endIso), endIso, accountExpiry: document.getElementById("accountExpiry").value, status: "Activo", code };
   showConfirm(getMessage("M1"), () => {
     configs.unshift(config);
     applyFilters(false);

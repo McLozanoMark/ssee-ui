@@ -1,5 +1,88 @@
 /* source: design-system/demo-navigation.js */
+const CURRENT_DEMO_USER = "Ana Paredes";
+
+function applyCurrentDemoUser() {
+  document.querySelectorAll(".account-copy strong, #accountName").forEach((node) => {
+    node.textContent = CURRENT_DEMO_USER;
+  });
+}
+
+function mountClearableFields(root = document) {
+  root.querySelectorAll('input[type="search"], [data-clearable-input]').forEach((input) => {
+    if (input.closest(".clearable-field")) return;
+    const wrapper = document.createElement("span");
+    wrapper.className = "clearable-field";
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.append(input);
+    const clear = document.createElement("button");
+    clear.className = "field-clear";
+    clear.type = "button";
+    clear.setAttribute("aria-label", "Borrar contenido");
+    clear.title = "Borrar contenido";
+    clear.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+    wrapper.append(clear);
+
+    const syncVisibility = () => {
+      clear.hidden = !input.value;
+    };
+    input.addEventListener("input", syncVisibility);
+    clear.addEventListener("click", () => {
+      input.value = "";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.focus();
+    });
+    syncVisibility();
+  });
+}
+
+function normalizeSharedControls(root = document) {
+  root.querySelectorAll(".filter-actions [id^='clear'], .filter-actions [id^='reset']").forEach((button) => {
+    button.classList.add("filter-reset");
+    button.setAttribute("aria-label", "Restablecer filtros");
+    button.title = "Restablecer filtros";
+    button.innerHTML = '<i class="fa-solid fa-xmark icon" aria-hidden="true"></i>';
+  });
+
+  root.querySelectorAll("#newUserBtn, #newSourceBtn, #newSampleBtn, #newAssignmentBtn, #newConfigBtn, #newRoleBtn").forEach((button) => {
+    const icon = button.querySelector("i")?.outerHTML || "";
+    button.innerHTML = `${icon}Nuevo`;
+  });
+  root.querySelectorAll("#syncBtn").forEach((button) => {
+    if (button.dataset.syncRunning === "true") return;
+    const icon = button.querySelector("i")?.outerHTML || "";
+    button.innerHTML = `${icon}Sincronizar`;
+  });
+
+  const identityForm = root.querySelector("#identityForm");
+  const identityClear = identityForm?.querySelector("#clearBtn");
+  const documentNumber = identityForm?.querySelector("#documentNumber");
+  if (identityClear && documentNumber && !identityClear.closest(".clearable-field")) {
+    const wrapper = document.createElement("span");
+    wrapper.className = "clearable-field";
+    documentNumber.parentNode.insertBefore(wrapper, documentNumber);
+    wrapper.append(documentNumber, identityClear);
+    identityClear.className = "field-clear";
+    identityClear.removeAttribute("id");
+    identityClear.setAttribute("aria-label", "Borrar contenido");
+    identityClear.title = "Borrar contenido";
+    identityClear.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+    const syncVisibility = () => { identityClear.hidden = !documentNumber.value; };
+    documentNumber.addEventListener("input", syncVisibility);
+    syncVisibility();
+  }
+
+  root.querySelectorAll(".form-actions > #clearBtn").forEach((button) => {
+    button.classList.add("form-reset");
+    button.setAttribute("aria-label", "Restablecer formulario");
+    button.title = "Restablecer formulario";
+    button.innerHTML = '<i class="fa-solid fa-xmark icon" aria-hidden="true"></i>';
+  });
+}
+
 function mountDemoIndexLink() {
+  applyCurrentDemoUser();
+  mountClearableFields();
+  normalizeSharedControls();
   if (document.querySelector(".demo-index-link")) return;
   const link = document.createElement("a");
   link.className = "demo-index-link";
@@ -85,7 +168,9 @@ const MESSAGE_CATALOG = Object.freeze({
   M65: { text: "No hay registros disponibles. Haz clic en \"Nuevo\" para empezar.", type: "Información", scope: "General" },
   M66: { text: "Complete los datos del rol para activar esta sección.", type: "Alerta", scope: "Roles" },
   M67: { text: "Registros exportados correctamente.", type: "Información", scope: "General" },
-  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" }
+  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" },
+  M130: { text: "¿Está seguro que desea cerrar sesión?\nSe finalizará tu sesión actual. Tendrás que ingresar tus datos nuevamente para acceder.", type: "Confirmación", scope: "Sesiones" },
+  M131: { text: "Sesión próxima a finalizar\nLa sesión se cerrará automáticamente en %s por inactividad.\n¿Deseas continuar en el sistema?", type: "Alerta", scope: "Sesiones" }
 });
 
 // Confirmed prototype copy pending official codes in the stakeholder workbook.
@@ -221,6 +306,223 @@ function closeConfirmModal(id) {
 }
 
 
+/* source: design-system/date-range.js */
+const DAY_NAMES = ["D", "L", "M", "X", "J", "V", "S"];
+const MONTH_FORMATTER = new Intl.DateTimeFormat("es-PE", { month: "long", year: "numeric", timeZone: "UTC" });
+
+function parseDate(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value || "")) return null;
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day));
+}
+
+function formatInputDate(date) {
+  if (!date) return "";
+  return [date.getUTCFullYear(), String(date.getUTCMonth() + 1).padStart(2, "0"), String(date.getUTCDate()).padStart(2, "0")].join("-");
+}
+
+function formatDisplayDate(value) {
+  const date = parseDate(value);
+  return date ? `${String(date.getUTCDate()).padStart(2, "0")}/${String(date.getUTCMonth() + 1).padStart(2, "0")}/${date.getUTCFullYear()}` : "";
+}
+
+function monthStart(date) {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
+}
+
+function addMonths(date, amount) {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + amount, 1));
+}
+
+function capitalize(value) {
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+function isSameMonth(left, right) {
+  return left.getUTCFullYear() === right.getUTCFullYear() && left.getUTCMonth() === right.getUTCMonth();
+}
+
+function createDateRangeFilter(root) {
+  if (!root) return null;
+  const picker = root.querySelector(".date-range-picker");
+  const start = root.querySelector("[data-date-range-start]");
+  const end = root.querySelector("[data-date-range-end]");
+  const trigger = root.querySelector("[data-date-range-trigger]");
+  const label = root.querySelector("[data-date-range-label]");
+  const clearButton = root.querySelector("[data-date-range-clear]");
+  const popover = root.querySelector("[data-date-range-popover]");
+  const summary = root.querySelector("[data-date-range-summary]");
+  const months = root.querySelector("[data-date-range-months]");
+  const monthLabels = root.querySelector("[data-date-range-month-labels]");
+  const error = root.querySelector("[data-date-range-error]");
+  if (!picker || !start || !end || !trigger || !label || !popover || !months || !monthLabels) return null;
+
+  const today = new Date();
+  let viewMonth = monthStart(parseDate(start.value) || new Date(Date.UTC(today.getFullYear(), today.getMonth(), 1)));
+  let draftStart = start.value;
+  let draftEnd = end.value;
+
+  function validate() {
+    const invalid = Boolean(start.value && end.value && start.value > end.value);
+    start.setAttribute("aria-invalid", String(invalid));
+    end.setAttribute("aria-invalid", String(invalid));
+    root.toggleAttribute("data-invalid", invalid);
+    if (error) {
+      if (invalid) error.removeAttribute("hidden");
+      else error.setAttribute("hidden", "");
+      error.textContent = invalid ? "La fecha inicial debe ser anterior o igual a la fecha final." : "";
+    }
+    return !invalid;
+  }
+
+  function updateSummary() {
+    if (draftStart && draftEnd) summary.textContent = `${formatDisplayDate(draftStart)} a ${formatDisplayDate(draftEnd)}`;
+    else if (draftStart) summary.textContent = `${formatDisplayDate(draftStart)} a ...`;
+    else summary.textContent = "Selecciona una fecha inicial y final";
+  }
+
+  function updateTrigger() {
+    if (start.value && end.value) label.textContent = `${formatDisplayDate(start.value)} - ${formatDisplayDate(end.value)}`;
+    else if (start.value) label.textContent = `Desde ${formatDisplayDate(start.value)}`;
+    else if (end.value) label.textContent = `Hasta ${formatDisplayDate(end.value)}`;
+    else label.textContent = "Seleccionar rango";
+    clearButton.hidden = !(start.value || end.value);
+  }
+
+  function renderMonth(month) {
+    const firstDay = month.getUTCDay();
+    const weekdays = DAY_NAMES.map((day) => `<span class="date-range-weekday">${day}</span>`).join("");
+    const dates = [];
+    for (let day = 1; ; day += 1) {
+      const date = new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth(), day));
+      if (date.getUTCMonth() !== month.getUTCMonth()) break;
+      dates.push(date);
+    }
+    const dayCells = [
+      ...Array.from({ length: firstDay }, () => `<span class="date-range-day is-empty" aria-hidden="true"></span>`),
+      ...dates.map((date) => {
+      const day = date.getUTCDate();
+      const value = formatInputDate(date);
+      const selectedStart = value === draftStart;
+      const selectedEnd = value === draftEnd;
+      const inRange = Boolean(draftStart && draftEnd && value > draftStart && value < draftEnd);
+      const todayValue = formatInputDate(new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())));
+      const classes = ["date-range-day", selectedStart || selectedEnd ? "is-selected" : "", inRange ? "is-in-range" : "", value === todayValue ? "is-today" : ""].filter(Boolean).join(" ");
+      const labelText = `${day} de ${capitalize(MONTH_FORMATTER.format(month).split(" de ")[0])} de ${month.getUTCFullYear()}`;
+      return `<button class="${classes}" type="button" data-date-range-day="${value}" aria-label="${labelText}"${selectedStart ? " aria-current=\"date\"" : ""}>${day}</button>`;
+      })
+    ].join("");
+    return `<section class="date-range-month" aria-label="${capitalize(MONTH_FORMATTER.format(month))}"><h4>${capitalize(MONTH_FORMATTER.format(month))}</h4><div class="date-range-weekdays">${weekdays}</div><div class="date-range-day-grid">${dayCells}</div></section>`;
+  }
+
+  function renderCalendar() {
+    monthLabels.innerHTML = `<span>${capitalize(MONTH_FORMATTER.format(viewMonth))}</span><span>${capitalize(MONTH_FORMATTER.format(addMonths(viewMonth, 1)))}</span>`;
+    months.innerHTML = `${renderMonth(viewMonth)}${renderMonth(addMonths(viewMonth, 1))}`;
+    updateSummary();
+  }
+
+  function positionPopover() {
+    if (popover.hidden) return;
+    const pickerRect = picker.getBoundingClientRect();
+    const triggerRect = trigger.getBoundingClientRect();
+    const popoverWidth = popover.offsetWidth;
+    const viewportGutter = 12;
+    const preferredLeft = triggerRect.left - pickerRect.left;
+    const minimumLeft = viewportGutter - pickerRect.left;
+    const maximumLeft = Math.max(minimumLeft, window.innerWidth - viewportGutter - popoverWidth - pickerRect.left);
+    const boundedLeft = Math.min(Math.max(preferredLeft, minimumLeft), maximumLeft);
+
+    popover.style.left = `${boundedLeft}px`;
+    popover.style.right = "auto";
+  }
+
+  function open() {
+    draftStart = start.value;
+    draftEnd = end.value;
+    const anchor = parseDate(draftStart) || parseDate(draftEnd);
+    if (anchor) viewMonth = monthStart(anchor);
+    renderCalendar();
+    popover.hidden = false;
+    trigger.setAttribute("aria-expanded", "true");
+    positionPopover();
+  }
+
+  function close() {
+    popover.hidden = true;
+    trigger.setAttribute("aria-expanded", "false");
+  }
+
+  function resetDraft() {
+    draftStart = "";
+    draftEnd = "";
+    renderCalendar();
+  }
+
+  trigger.addEventListener("click", () => (popover.hidden ? open() : close()));
+  clearButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    start.value = "";
+    end.value = "";
+    resetDraft();
+    updateTrigger();
+    validate();
+  });
+  root.querySelector("[data-date-range-prev]")?.addEventListener("click", () => { viewMonth = addMonths(viewMonth, -1); renderCalendar(); });
+  root.querySelector("[data-date-range-next]")?.addEventListener("click", () => { viewMonth = addMonths(viewMonth, 1); renderCalendar(); });
+  popover.addEventListener("click", (event) => event.stopPropagation());
+  months.addEventListener("click", (event) => {
+    const day = event.target.closest("[data-date-range-day]");
+    if (!day) return;
+    const value = day.dataset.dateRangeDay;
+    if (!draftStart || (draftStart && draftEnd)) {
+      draftStart = value;
+      draftEnd = "";
+    } else if (value < draftStart) {
+      draftEnd = draftStart;
+      draftStart = value;
+    } else {
+      draftEnd = value;
+    }
+    renderCalendar();
+  });
+  root.querySelector("[data-date-range-cancel]")?.addEventListener("click", () => { draftStart = start.value; draftEnd = end.value; close(); });
+  root.querySelector("[data-date-range-apply]")?.addEventListener("click", () => {
+    start.value = draftStart;
+    end.value = draftEnd;
+    updateTrigger();
+    validate();
+    close();
+  });
+  document.addEventListener("click", (event) => {
+    if (!picker.contains(event.target)) close();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !popover.hidden) close();
+  });
+  window.addEventListener("resize", positionPopover);
+
+  function reset() {
+    start.value = "";
+    end.value = "";
+    resetDraft();
+    updateTrigger();
+    validate();
+    close();
+  }
+
+  updateTrigger();
+  renderCalendar();
+  validate();
+  return { start, end, validate, reset, open };
+}
+
+function toDateInputValue(value) {
+  const date = String(value || "").split(" ")[0];
+  const [day, month, year] = date.split("/");
+  return day && month && year ? `${year}-${month}-${day}` : "";
+}
+
+
 /* source: design-system/table-sort.js */
 const collator = new Intl.Collator("es", { numeric: true, sensitivity: "base" });
 
@@ -351,11 +653,29 @@ const users = [
   },
 ];
 
+try {
+  const pendingUpdate = sessionStorage.getItem("ssee-pending-user-update");
+  if (pendingUpdate) {
+    const updatedUser = JSON.parse(pendingUpdate);
+    const userIndex = users.findIndex((user) => user.username === updatedUser.username);
+    if (userIndex >= 0) users[userIndex] = updatedUser;
+    sessionStorage.removeItem("ssee-pending-user-update");
+  }
+  const pendingAdmissionKey = "ssee-pending-admission-user:ref-007-users";
+  const pendingAdmission = sessionStorage.getItem(pendingAdmissionKey) || localStorage.getItem(pendingAdmissionKey);
+  if (pendingAdmission) {
+    users.push(JSON.parse(pendingAdmission));
+    sessionStorage.removeItem(pendingAdmissionKey);
+    localStorage.removeItem(pendingAdmissionKey);
+  }
+} catch {
+  // Keep the static demo data available when session storage is unavailable.
+}
+
 
 /* source: ref-007-users/js/state.js */
 
 const state = {
-  tray: "Todos",
   filteredUsers: [...users],
   selectedUser: null,
 };
@@ -373,22 +693,6 @@ const refs = {
   detailView: document.getElementById("detailView"),
   detailCard: document.getElementById("detailCard"),
   toast: document.getElementById("toast"),
-  rolesModal: document.getElementById("rolesModal"),
-  rolesModalTitle: document.getElementById("rolesModalTitle"),
-  editUserIdentity: document.getElementById("editUserIdentity"),
-  rolePicker: document.getElementById("rolePicker"),
-  roleSearch: document.getElementById("roleSearch"),
-  selectedRoles: document.getElementById("selectedRoles"),
-  sitePicker: document.getElementById("sitePicker"),
-  projectPicker: document.getElementById("projectPicker"),
-  projectSearch: document.getElementById("projectSearch"),
-  selectedProjects: document.getElementById("selectedProjects"),
-  validitySelect: document.getElementById("validitySelect"),
-  validityField: document.getElementById("validityField"),
-  validationSelect: document.getElementById("validationSelect"),
-  validationField: document.getElementById("validationField"),
-  accessEditNote: document.getElementById("accessEditNote"),
-  roleModalFeedback: document.getElementById("roleModalFeedback"),
   reniecModal: document.getElementById("reniecModal"),
   reniecModalContext: document.getElementById("reniecModalContext"),
   reniecDocument: document.getElementById("reniecDocument"),
@@ -399,8 +703,6 @@ const refs = {
   saveReniecBtn: document.getElementById("saveReniecBtn"),
   confirmRolesModal: document.getElementById("confirmRolesModal"),
   confirmRolesMessage: document.getElementById("confirmRolesMessage"),
-  editUserStatusControl: document.getElementById("editUserStatusControl"),
-  editUserStatusToggle: document.getElementById("editUserStatusToggle"),
 };
 function showToast(message, type = "info") {
   renderToast(refs.toast, message, type);
@@ -445,16 +747,9 @@ function showDetail(user) {
 
 
 
-const availableRoles = ["Administrador USE", "Supervisor de Seguimiento", "Evaluador", "Registrador"];
-const availableProjects = ["Operativo 2026", "Evaluación 2026", "Seguimiento 2026"];
-const availableSites = ["Unidad de Seguimiento y Evaluación", "Oficina de Operaciones"];
-let roleTarget = null;
-let pendingRoles = null;
-let pendingStatus = null;
-let pendingRenewal = null;
+
 let reniecTarget = null;
 let pendingReniec = null;
-let pendingCancel = false;
 
 const reniecRecords = {
   jcastro: { documentNumber: "87654321", name: "Juan Carlos Castro Fernández", birthDate: "12/09/1986" },
@@ -478,78 +773,23 @@ function syncValidityState() {
   });
 }
 
-function calculateExpiry(validity) {
-  if (validity === "Sin fecha de vencimiento") return "-";
-  const days = validity === "30 días" ? 30 : validity === "90 días" ? 90 : 365;
-  const expiry = new Date();
-  expiry.setHours(0, 0, 0, 0);
-  expiry.setDate(expiry.getDate() + days);
-  return expiry.toLocaleDateString("es-PE");
-}
 function calculateValidation(user, roles = user.roles, projects = user.projects || []) {
   if (!["Passport", "Documento"].includes(user.auth)) return user.validation || "Pendiente";
   return roles.length && projects.length ? "Validado" : "Pendiente";
 }
-function filterAssignmentOptions(input, picker) {
-  const query = input.value.trim().toLowerCase();
-  picker.querySelectorAll(".role-option").forEach((option) => {
-    option.hidden = query && !option.textContent.toLowerCase().includes(query);
-  });
-}
-function updateAssignmentTags(picker, selectedContainer) {
-  const selected = [...picker.querySelectorAll("input:checked")].map((input) => input.value);
-  const visible = selected.slice(0, 2);
-  const hiddenCount = selected.length - visible.length;
-  selectedContainer.innerHTML = visible.map((value) => `
-    <span class="assignment-tag">
-      <span>${value}</span>
-      <button type="button" class="selection-remove" data-remove-assignment data-picker="${picker.id}" data-value="${value}" aria-label="Quitar ${value}" title="Quitar">
-        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-      </button>
-    </span>`).join("") + (hiddenCount > 0 ? `<span class="assignment-tag assignment-count">+${hiddenCount}</span>` : "");
-  selectedContainer.hidden = selected.length === 0;
-}
-function removeAssignment(event) {
-  const removeButton = event.target.closest("[data-remove-assignment]");
-  if (!removeButton) return;
-  const picker = document.getElementById(removeButton.dataset.picker);
-  const input = [...picker.querySelectorAll("input")].find((item) => item.value === removeButton.dataset.value);
-  if (!input) return;
-  input.checked = false;
-  updateAssignmentTags(picker, removeButton.dataset.picker === "rolePicker" ? refs.selectedRoles : refs.selectedProjects);
-}
-function matchesTray(user, tray = state.tray) {
-  return (
-    tray === "Todos" ||
-    (tray === "Pendientes de rol" && !user.roles.length) ||
-    (tray === "Sin proyecto" && !user.projects?.length) ||
-    (tray === "Por vencer" && user.expiresSoon)
-  );
-}
 function applyFilters() {
   syncValidityState();
-  const tray = document.getElementById("filterTray").value;
-  state.tray = tray;
   const q = document.getElementById("filterName").value.trim().toLowerCase(),
-    username = document.getElementById("filterUsername").value.trim().toLowerCase(),
-    description = document
-      .getElementById("filterDescription")
-      .value.trim()
-      .toLowerCase(),
-    email = document.getElementById("filterEmail").value.trim().toLowerCase(),
     role = document.getElementById("filterRole").value,
     status = document.getElementById("filterStatus").value,
     auth = document.getElementById("filterAuth").value,
     project = document.getElementById("filterProject").value.trim().toLowerCase(),
     validity = document.getElementById("filterValidity").value,
-    lastAccess = document.getElementById("filterLastAccess").value;
+    lastAccessStart = document.getElementById("filterLastAccessStart").value,
+    lastAccessEnd = document.getElementById("filterLastAccessEnd").value;
   state.filteredUsers = users.filter(
     (user) =>
-      matchesTray(user, tray) &&
-      (!username || user.username.toLowerCase().includes(username)) &&
       matchesGlobalSearch(user, q) &&
-      (!description || user.name.toLowerCase().includes(description)) &&
-      (!email || user.email.toLowerCase().includes(email)) &&
       (role === "Todos" || user.roles.includes(role)) &&
       (status === "Todos" || user.status === status) &&
       (auth === "Todos" || user.auth === auth) &&
@@ -558,7 +798,8 @@ function applyFilters() {
         || (validity === "Sin vencimiento" && user.expires === "-")
         || (validity === "Por vencer" && user.expiresSoon)
         ) &&
-      (!lastAccess || user.lastAccess.slice(0, 10).split("/").reverse().join("-") === lastAccess),
+      (!lastAccessStart || toDateInputValue(user.lastAccess) >= lastAccessStart) &&
+      (!lastAccessEnd || toDateInputValue(user.lastAccess) <= lastAccessEnd),
   );
   renderUsers();
 }
@@ -626,44 +867,18 @@ function openSelected(index) {
     showDetail(user);
   }
 }
-function openRoles(index, mode = "edit") {
-  roleTarget = state.filteredUsers[index];
-  if (!roleTarget) return;
-  const canEditRoles = true;
-  const canEditProjects = true;
-  const canEditSite = roleTarget.auth === "Documento";
-  const canEditValidity = roleTarget.auth === "Documento";
-  const canEditAny = canEditRoles || canEditSite || canEditValidity;
-  const canToggleStatus = ["Documento", "Autoregistro"].includes(roleTarget.auth);
-  refs.rolesModalTitle.textContent = "Editar usuario";
-  document.getElementById("saveRolesBtn").textContent = "Guardar";
-  document.getElementById("saveRolesBtn").hidden = !canEditAny;
-  refs.editUserIdentity.innerHTML = `
-    <div><span>Usuario</span><strong>${roleTarget.username}</strong></div>
-    <div><span>Nombres y apellidos</span><strong>${roleTarget.name}</strong></div>
-    <div><span>Correo</span><strong>${roleTarget.email}</strong></div>
-    <div><span>Tipo de autenticación</span><strong>${roleTarget.auth}</strong></div>`;
-  refs.roleSearch.value = "";
-  refs.projectSearch.value = "";
-  refs.accessEditNote.hidden = true;
-  refs.sitePicker.innerHTML = canEditSite ? `<label class="modal-label" for="siteSelect">Sede<select class="form-select" id="siteSelect">${availableSites.map((site) => `<option ${site === roleTarget.site ? "selected" : ""}>${site}</option>`).join("")}</select></label>` : "";
-  refs.rolePicker.innerHTML = canEditRoles ? availableRoles.map((role) => `<label class="role-option"><span class="role-avatar">${role.charAt(0)}</span><span class="role-option-name">${role}</span><input type="checkbox" value="${role}" ${roleTarget.roles.includes(role) ? "checked" : ""}></label>`).join("") : "";
-  refs.projectPicker.innerHTML = canEditProjects ? availableProjects.map((project) => `<label class="role-option project-option"><span class="role-avatar">${project.charAt(0)}</span><span class="role-option-name">${project}</span><input type="checkbox" value="${project}" ${roleTarget.projects?.includes(project) ? "checked" : ""}></label>`).join("") : "";
-  updateAssignmentTags(refs.rolePicker, refs.selectedRoles);
-  updateAssignmentTags(refs.projectPicker, refs.selectedProjects);
-  refs.validityField.hidden = !canEditValidity;
-  refs.validitySelect.value = roleTarget.expires === "-" ? "Sin fecha de vencimiento" : "90 días";
-  refs.editUserStatusControl.hidden = !(mode === "edit" && canToggleStatus);
-  refs.editUserStatusToggle.checked = roleTarget.status === "Activo";
-  const validation = calculateValidation(roleTarget);
-  refs.validationSelect.innerHTML = roleTarget.auth === "Autoregistro"
-    ? `<option value="Pendiente" disabled>Pendiente</option><option value="Validado">Validado</option><option value="Rechazado">Rechazado</option>`
-    : `<option value="${validation}">${validation}</option>`;
-  refs.validationSelect.value = roleTarget.auth === "Autoregistro" ? roleTarget.validation || "Pendiente" : validation;
-  refs.validationSelect.disabled = roleTarget.auth !== "Autoregistro";
-  refs.validationField.hidden = false;
-  refs.roleModalFeedback.hidden = true;
-  bootstrap.Modal.getOrCreateInstance(refs.rolesModal).show();
+function openEditUser(index) {
+  const user = state.filteredUsers[index];
+  if (!user) return;
+  const demo = document.body.dataset.userDemo || "ref-007-users";
+  try {
+    sessionStorage.setItem("ssee-editing-user", JSON.stringify(user));
+  } catch {
+    showToast(getMessage("M12"), "warning");
+    return;
+  }
+  const admissionPath = demo === "ref-004-admision" ? "admitir.html" : "../ref-004-admision/admitir.html";
+  window.location.href = `${admissionPath}?mode=edit&user=${encodeURIComponent(user.username)}&return=${demo}`;
 }
 
 function openReniecUpdate(index) {
@@ -697,83 +912,10 @@ function consultReniec() {
 
 function saveReniec() {
   if (!reniecTarget || !pendingReniec) return;
-  roleTarget = reniecTarget;
   refs.confirmRolesMessage.textContent = getMessage("M1");
   openConfirmModal("confirmRolesModal", getMessage("M1"));
-}
-function saveRoles() {
-  if (!roleTarget) return;
-  const selected = [...refs.rolePicker.querySelectorAll("input:checked")].map((input) => input.value);
-  const projects = [...refs.projectPicker.querySelectorAll("input:checked")].map((input) => input.value);
-  const validity = roleTarget.auth === "Documento" ? refs.validitySelect.value : "Sin fecha de vencimiento";
-  const site = roleTarget.auth === "Documento" ? document.getElementById("siteSelect")?.value || roleTarget.site : roleTarget.site;
-  const validation = roleTarget.auth === "Autoregistro"
-    ? refs.validationSelect.value
-    : calculateValidation(roleTarget, selected, projects);
-  if (!selected.length) {
-    refs.roleModalFeedback.textContent = "El usuario debe conservar al menos un rol activo.";
-    refs.roleModalFeedback.hidden = false;
-    showToast(getMessage("M11"), "warning");
-    return;
-  }
-  const currentValidity = roleTarget.expires === "-" ? "Sin fecha de vencimiento" : "90 días";
-  pendingRoles = { roles: selected, projects, validity, site, validation, preserveValidity: validity === currentValidity };
-  refs.confirmRolesMessage.textContent = getMessage("M1");
-  openConfirmModal("confirmRolesModal", getMessage("M1"));
-}
-function toggleEditedUserStatus(event) {
-  if (!roleTarget || !["Documento", "Autoregistro"].includes(roleTarget.auth)) return;
-  const next = event.target.checked ? "Activo" : "Inactivo";
-  refs.editUserStatusToggle.checked = roleTarget.status === "Activo";
-  pendingStatus = { user: roleTarget, next };
-  refs.confirmRolesMessage.textContent = `${getMessage(next === "Activo" ? "M5" : "M6")} ${roleTarget.name}?`;
-  openConfirmModal("confirmRolesModal", `${getMessage(next === "Activo" ? "M5" : "M6")} ${roleTarget.name}?`, { requireReason: next === "Inactivo" });
-}
-function renewValidity(index) {
-  const user = state.filteredUsers[index];
-  if (!user || user.auth !== "Documento" || user.expires === "-") return;
-  pendingRenewal = { user };
-  refs.confirmRolesMessage.textContent = getMessage("M1");
-  openConfirmModal("confirmRolesModal", getMessage("M1"));
-}
-function cancelRoleEdit() {
-  pendingCancel = true;
-  refs.confirmRolesMessage.textContent = getMessage("M14");
-  openConfirmModal("confirmRolesModal", getMessage("M14"));
 }
 function confirmRoles() {
-  if (pendingCancel) {
-    pendingCancel = false;
-    pendingRoles = null;
-    pendingStatus = null;
-    pendingRenewal = null;
-    pendingReniec = null;
-    reniecTarget = null;
-    bootstrap.Modal.getOrCreateInstance(refs.confirmRolesModal).hide();
-    bootstrap.Modal.getOrCreateInstance(refs.rolesModal).hide();
-    return;
-  }
-  if (pendingStatus) {
-    const { user, next } = pendingStatus;
-    if (next === "Inactivo" && !validateConfirmReason("confirmRolesModal", getMessage("M11"))) return;
-    user.status = next;
-    if (next === "Inactivo") user.inactivationReason = getConfirmReason("confirmRolesModal");
-    pendingStatus = null;
-    refs.editUserStatusToggle.checked = next === "Activo";
-    bootstrap.Modal.getOrCreateInstance(refs.confirmRolesModal).hide();
-    renderUsers();
-    showToast(getMessage(next === "Activo" ? "M7" : "M8"), "success");
-    return;
-  }
-  if (pendingRenewal) {
-    pendingRenewal.user.expires = "12/09/2027";
-    pendingRenewal.user.expiresSoon = false;
-    pendingRenewal = null;
-    bootstrap.Modal.getOrCreateInstance(refs.confirmRolesModal).hide();
-    renderUsers();
-    showToast(getMessage("M3"), "success");
-    return;
-  }
   if (pendingReniec && reniecTarget) {
     reniecTarget.documentNumber = pendingReniec.documentNumber;
     reniecTarget.name = pendingReniec.name;
@@ -786,31 +928,13 @@ function confirmRoles() {
     showToast(getMessage("M3"), "success");
     return;
   }
-  if (!roleTarget || !pendingRoles) return;
-  applyRoles(pendingRoles);
-  pendingRoles = null;
-  bootstrap.Modal.getOrCreateInstance(refs.confirmRolesModal).hide();
-}
-function applyRoles(selected) {
-  roleTarget.roles = selected.roles;
-  roleTarget.projects = selected.projects;
-  roleTarget.site = selected.site;
-  roleTarget.validation = selected.validation;
-  if (!selected.preserveValidity) roleTarget.expires = calculateExpiry(selected.validity);
-  renderUsers();
-  bootstrap.Modal.getOrCreateInstance(refs.rolesModal).hide();
-  showToast(getMessage("M3"), "success");
 }
 function exportUsers() {
   showToast(getMessage("M67"), "success");
 }
 
 function dismissPendingConfirmation() {
-  pendingRoles = null;
-  pendingStatus = null;
-  pendingRenewal = null;
   pendingReniec = null;
-  pendingCancel = false;
 }
 
 
@@ -821,8 +945,14 @@ function dismissPendingConfirmation() {
 
 
 
+
+const lastAccessRange = createDateRangeFilter(document.querySelector("[data-date-range]"));
 document.getElementById("filterForm").addEventListener("submit", (event) => {
   event.preventDefault();
+  if (lastAccessRange && !lastAccessRange.validate()) {
+    showToast(getMessage("M12"), "warning");
+    return;
+  }
   applyFilters();
   showToast(getPrototypeMessage("filtersApplied"), "info");
 });
@@ -834,30 +964,13 @@ document.getElementById("filterToggle").addEventListener("click", () => {
   filterToggle.setAttribute("aria-label", expanded ? "Cerrar filtros" : "Abrir filtros");
 });
 document.getElementById("clearBtn").addEventListener("click", () => {
-  [
-    "filterName",
-    "filterUsername",
-    "filterDescription",
-    "filterEmail",
-    "filterTray",
-    "filterRole",
-    "filterStatus",
-    "filterAuth",
-    "filterProject",
-    "filterValidity",
-    "filterLastAccess",
-  ].forEach(
-    (id) =>
-      (document.getElementById(id).value =
-        id === "filterTray" ||
-        id === "filterRole" ||
-        id === "filterStatus" ||
-        id === "filterAuth" ||
-        id === "filterValidity"
-          ? "Todos"
-          : ""),
-  );
-  state.tray = "Todos";
+  document.getElementById("filterName").value = "";
+  document.getElementById("filterRole").value = "Todos";
+  document.getElementById("filterStatus").value = "Todos";
+  document.getElementById("filterAuth").value = "Todos";
+  document.getElementById("filterProject").value = "";
+  document.getElementById("filterValidity").value = "Todos";
+  lastAccessRange?.reset();
   applyFilters();
   showToast(getPrototypeMessage("filtersCleared"), "info");
 });
@@ -865,7 +978,7 @@ refs.usersBody.addEventListener("click", (event) => {
   const action = event.target.closest("[data-user-action]");
   if (action) {
     if (action.dataset.userAction === "detail") openSelected(Number(action.dataset.user));
-    if (action.dataset.userAction === "edit") openRoles(Number(action.dataset.user), "edit");
+    if (action.dataset.userAction === "edit") openEditUser(Number(action.dataset.user));
     if (action.dataset.userAction === "reniec") openReniecUpdate(Number(action.dataset.user));
     return;
   }
@@ -877,17 +990,8 @@ refs.detailCard.addEventListener("click", (event) => {
 });
 document.getElementById("backBtn").addEventListener("click", showList);
 document.getElementById("exportBtn").addEventListener("click", exportUsers);
-document.getElementById("saveRolesBtn").addEventListener("click", saveRoles);
 document.getElementById("confirmRolesBtn").addEventListener("click", confirmRoles);
 document.getElementById("confirmRolesModal").addEventListener("hidden.bs.modal", dismissPendingConfirmation);
-refs.editUserStatusToggle.addEventListener("change", toggleEditedUserStatus);
-refs.roleSearch.addEventListener("input", () => filterAssignmentOptions(refs.roleSearch, refs.rolePicker));
-refs.projectSearch.addEventListener("input", () => filterAssignmentOptions(refs.projectSearch, refs.projectPicker));
-refs.rolePicker.addEventListener("change", () => updateAssignmentTags(refs.rolePicker, refs.selectedRoles));
-refs.projectPicker.addEventListener("change", () => updateAssignmentTags(refs.projectPicker, refs.selectedProjects));
-refs.selectedRoles.addEventListener("click", removeAssignment);
-refs.selectedProjects.addEventListener("click", removeAssignment);
-document.getElementById("cancelRolesBtn").addEventListener("click", cancelRoleEdit);
 refs.consultReniecBtn.addEventListener("click", consultReniec);
 refs.saveReniecBtn.addEventListener("click", saveReniec);
 renderUsers();
@@ -897,5 +1001,5 @@ enableTooltips();
 const accessName = new URLSearchParams(window.location.search).get("accessName");
 if (accessName) {
   const userIndex = state.filteredUsers.findIndex((user) => user.name === accessName);
-  if (userIndex >= 0) openRoles(userIndex);
+  if (userIndex >= 0) openEditUser(userIndex);
 }

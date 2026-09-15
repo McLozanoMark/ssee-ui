@@ -3,6 +3,7 @@ import { state } from "./state.js";
 import { refs, closeActionMenus, enableTooltips, showToast } from "./ui.js";
 import { getMessage } from "../../design-system/messages.js";
 import { openConfirmModal, closeConfirmModal, getConfirmReason, validateConfirmReason } from "../../design-system/interaction.js";
+import { toDateInputValue } from "../../design-system/date-range.js";
 
 export function renderRoles() {
   refs.rolesBody.innerHTML = state.filteredRoles.map((role) => {
@@ -48,7 +49,8 @@ export function applyFilters() {
   const query = refs.filterName.value.trim().toLowerCase();
   const nameAdvanced = refs.filterNameAdvanced.value;
   const permission = document.getElementById("filterPermission").value;
-  const updated = document.getElementById("filterUpdated").value;
+  const updatedStart = refs.filterUpdatedStart.value;
+  const updatedEnd = refs.filterUpdatedEnd.value;
   const status = refs.filterStatus.value;
   state.filteredRoles = roles.filter((role) => {
     const originalIndex = roles.findIndex((item) => item.id === role.id);
@@ -56,7 +58,8 @@ export function applyFilters() {
     return searchable.includes(query)
       && (nameAdvanced === "Todos" || role.name === nameAdvanced)
       && (permission === "Todos" || role.permissions.includes(permission))
-      && (updated === "Todos" || role.updated === updated)
+      && (!updatedStart || toDateInputValue(role.updated) >= updatedStart)
+      && (!updatedEnd || toDateInputValue(role.updated) <= updatedEnd)
       && (status === "Todos" || role.status === status);
   });
   renderRoles();

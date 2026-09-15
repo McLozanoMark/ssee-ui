@@ -1,5 +1,88 @@
 /* source: design-system/demo-navigation.js */
+const CURRENT_DEMO_USER = "Ana Paredes";
+
+function applyCurrentDemoUser() {
+  document.querySelectorAll(".account-copy strong, #accountName").forEach((node) => {
+    node.textContent = CURRENT_DEMO_USER;
+  });
+}
+
+function mountClearableFields(root = document) {
+  root.querySelectorAll('input[type="search"], [data-clearable-input]').forEach((input) => {
+    if (input.closest(".clearable-field")) return;
+    const wrapper = document.createElement("span");
+    wrapper.className = "clearable-field";
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.append(input);
+    const clear = document.createElement("button");
+    clear.className = "field-clear";
+    clear.type = "button";
+    clear.setAttribute("aria-label", "Borrar contenido");
+    clear.title = "Borrar contenido";
+    clear.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+    wrapper.append(clear);
+
+    const syncVisibility = () => {
+      clear.hidden = !input.value;
+    };
+    input.addEventListener("input", syncVisibility);
+    clear.addEventListener("click", () => {
+      input.value = "";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.focus();
+    });
+    syncVisibility();
+  });
+}
+
+function normalizeSharedControls(root = document) {
+  root.querySelectorAll(".filter-actions [id^='clear'], .filter-actions [id^='reset']").forEach((button) => {
+    button.classList.add("filter-reset");
+    button.setAttribute("aria-label", "Restablecer filtros");
+    button.title = "Restablecer filtros";
+    button.innerHTML = '<i class="fa-solid fa-xmark icon" aria-hidden="true"></i>';
+  });
+
+  root.querySelectorAll("#newUserBtn, #newSourceBtn, #newSampleBtn, #newAssignmentBtn, #newConfigBtn, #newRoleBtn").forEach((button) => {
+    const icon = button.querySelector("i")?.outerHTML || "";
+    button.innerHTML = `${icon}Nuevo`;
+  });
+  root.querySelectorAll("#syncBtn").forEach((button) => {
+    if (button.dataset.syncRunning === "true") return;
+    const icon = button.querySelector("i")?.outerHTML || "";
+    button.innerHTML = `${icon}Sincronizar`;
+  });
+
+  const identityForm = root.querySelector("#identityForm");
+  const identityClear = identityForm?.querySelector("#clearBtn");
+  const documentNumber = identityForm?.querySelector("#documentNumber");
+  if (identityClear && documentNumber && !identityClear.closest(".clearable-field")) {
+    const wrapper = document.createElement("span");
+    wrapper.className = "clearable-field";
+    documentNumber.parentNode.insertBefore(wrapper, documentNumber);
+    wrapper.append(documentNumber, identityClear);
+    identityClear.className = "field-clear";
+    identityClear.removeAttribute("id");
+    identityClear.setAttribute("aria-label", "Borrar contenido");
+    identityClear.title = "Borrar contenido";
+    identityClear.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+    const syncVisibility = () => { identityClear.hidden = !documentNumber.value; };
+    documentNumber.addEventListener("input", syncVisibility);
+    syncVisibility();
+  }
+
+  root.querySelectorAll(".form-actions > #clearBtn").forEach((button) => {
+    button.classList.add("form-reset");
+    button.setAttribute("aria-label", "Restablecer formulario");
+    button.title = "Restablecer formulario";
+    button.innerHTML = '<i class="fa-solid fa-xmark icon" aria-hidden="true"></i>';
+  });
+}
+
 function mountDemoIndexLink() {
+  applyCurrentDemoUser();
+  mountClearableFields();
+  normalizeSharedControls();
   if (document.querySelector(".demo-index-link")) return;
   const link = document.createElement("a");
   link.className = "demo-index-link";
@@ -193,7 +276,9 @@ const MESSAGE_CATALOG = Object.freeze({
   M65: { text: "No hay registros disponibles. Haz clic en \"Nuevo\" para empezar.", type: "Información", scope: "General" },
   M66: { text: "Complete los datos del rol para activar esta sección.", type: "Alerta", scope: "Roles" },
   M67: { text: "Registros exportados correctamente.", type: "Información", scope: "General" },
-  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" }
+  M70: { text: "Se han detectado cambios sin guardar. ¿Desea guardar los cambios y continuar?", type: "Confirmación", scope: "General" },
+  M130: { text: "¿Está seguro que desea cerrar sesión?\nSe finalizará tu sesión actual. Tendrás que ingresar tus datos nuevamente para acceder.", type: "Confirmación", scope: "Sesiones" },
+  M131: { text: "Sesión próxima a finalizar\nLa sesión se cerrará automáticamente en %s por inactividad.\n¿Deseas continuar en el sistema?", type: "Alerta", scope: "Sesiones" }
 });
 
 // Confirmed prototype copy pending official codes in the stakeholder workbook.
@@ -231,7 +316,7 @@ const sources = [
     originDetail: "NEXUS",
     usage: ["Precarga de variables"],
     records: "12,450",
-    status: "Activa",
+    status: "Activo",
     updated: "18/08/2026 09:00",
     createdBy: "Administrador",
     updatedBy: "Administrador",
@@ -262,7 +347,7 @@ const sources = [
     originDetail: "Carga masiva",
     usage: ["Generación de fichas"],
     records: "3,180",
-    status: "Activa",
+    status: "Activo",
     updated: "17/08/2026 16:45",
     createdBy: "Administrador",
     updatedBy: "Administrador",
@@ -284,9 +369,9 @@ const sources = [
     ],
     keyFields: ["DNI del director"]
   },
-  { id: "FDT-003", name: "Operativo piloto", description: "Registro sintético para pruebas del operativo.", origin: "Externa", originDetail: "Manual", usage: ["Generación de fichas"], records: "620", status: "Activa", updated: "16/08/2026 11:20", fields: [], keyFields: [] },
-  { id: "FDT-004", name: "Instituciones 2025", description: "Histórico de instituciones del periodo anterior.", origin: "Externa", originDetail: "Carga masiva", usage: ["Precarga de variables"], records: "11,890", status: "Inactiva", updated: "12/08/2026 10:05", updatedBy: "Administrador", inactivatedBy: "Administrador", inactivationReason: "Cierre del periodo operativo.", fields: [], keyFields: [] },
-  { id: "FDT-005", name: "Registro observado", description: "Fuente no disponible para nuevas operaciones.", origin: "Externa", originDetail: "Manual", usage: ["Generación de fichas"], records: "0", status: "Inactiva", updated: "08/08/2026 14:05", updatedBy: "Administrador", inactivatedBy: "Administrador", inactivationReason: "Fuente reemplazada.", fields: [], keyFields: [] }
+  { id: "FDT-003", name: "Operativo piloto", description: "Registro sintético para pruebas del operativo.", origin: "Externa", originDetail: "Manual", usage: ["Generación de fichas"], records: "620", status: "Activo", updated: "16/08/2026 11:20", fields: [], keyFields: [] },
+  { id: "FDT-004", name: "Instituciones 2025", description: "Histórico de instituciones del periodo anterior.", origin: "Externa", originDetail: "Carga masiva", usage: ["Precarga de variables"], records: "11,890", status: "Inactivo", updated: "12/08/2026 10:05", updatedBy: "Administrador", inactivatedBy: "Administrador", inactivationReason: "Cierre del periodo operativo.", fields: [], keyFields: [] },
+  { id: "FDT-005", name: "Registro observado", description: "Fuente no disponible para nuevas operaciones.", origin: "Externa", originDetail: "Manual", usage: ["Generación de fichas"], records: "0", status: "Inactivo", updated: "08/08/2026 14:05", updatedBy: "Administrador", inactivatedBy: "Administrador", inactivationReason: "Fuente reemplazada.", fields: [], keyFields: [] }
 ];
 
 
@@ -325,7 +410,7 @@ function createDraft(source = null) {
     origin: source?.origin || "",
     originDetail: source?.originDetail || "",
     usage: source?.usage || [],
-    status: source?.status || "Activa",
+    status: source?.status || "Activo",
     fields: source?.fields?.length ? source.fields.map((field) => ({ ...field })) : [
       { name: "Código modular", type: "Texto", required: true, description: "Código oficial de la unidad." },
       { name: "DNI del estudiante", type: "Texto", required: true, description: "Documento de identidad." },
@@ -436,30 +521,26 @@ function showList() {
 
 function updateWizardFooter() {
   const editing = state.editingIndex !== null;
-  const binaryStatus = ["Activa", "Inactiva"].includes(state.draft?.status);
+  const binaryStatus = ["Activo", "Inactivo"].includes(state.draft?.status);
   const sourceStatusSwitchWrap = document.getElementById("sourceStatusSwitchWrap");
-  const sourceStatusLabel = document.getElementById("sourceStatusLabel");
   document.getElementById("backBtn").hidden = state.step === 1;
   document.getElementById("continueBtn").hidden = state.step === 4;
   document.getElementById("completeBtn").hidden = state.step !== 4;
   document.getElementById("saveStepBtn").hidden = !editing || state.step === 4;
   document.getElementById("editStatusControl").hidden = !editing;
   sourceStatusSwitchWrap.hidden = !binaryStatus;
-  sourceStatusSwitchWrap.dataset.onLabel = "Activa";
-  sourceStatusSwitchWrap.dataset.offLabel = "Inactiva";
-  sourceStatusLabel.hidden = binaryStatus;
+  sourceStatusSwitchWrap.dataset.onLabel = "Activo";
+  sourceStatusSwitchWrap.dataset.offLabel = "Inactivo";
   if (editing && state.draft) {
-    document.getElementById("sourceStatusSwitch").checked = state.draft.status === "Activa";
-    sourceStatusLabel.className = `status ${state.draft.status === "Activa" ? "active" : "inactive"}`;
-    sourceStatusLabel.textContent = state.draft.status;
+    document.getElementById("sourceStatusSwitch").checked = state.draft.status === "Activo";
   }
 }
 
 function showForm(source = null) {
   refs.listView.classList.remove("is-active");
   refs.formView.classList.add("is-active");
-  refs.formTitle.textContent = source ? "Editar fuente" : "Registrar fuente";
-  refs.formBreadcrumb.innerHTML = `<a href="../index.html">Índice de requerimientos</a> / GIO-REF-001 / Fuentes de datos / ${source ? "Editar fuente" : "Registrar fuente"}`;
+  refs.formTitle.textContent = source ? "Editar" : "Registrar";
+  refs.formBreadcrumb.innerHTML = `<a href="../index.html">Índice de requerimientos</a> / GIO-REF-001 / Fuentes de datos / ${source ? "Editar" : "Registrar"}`;
   refs.sourceForm.reset();
   syncGeneralFields();
   setWizardStep(1);
@@ -574,7 +655,7 @@ function showDetail(source) {
     ["Última modificación", `${source.updated || "No registrada"} · ${source.updatedBy || "Administrador"}`],
     ["Relaciones", source.relations || "Sin relaciones registradas"]
   ];
-  if (source.status === "Inactiva") trace.push(["Inactivada por", source.inactivatedBy || "Administrador"], ["Motivo", source.inactivationReason || "No registrado"]);
+  if (source.status === "Inactivo") trace.push(["Inactivada por", source.inactivatedBy || "Administrador"], ["Motivo", source.inactivationReason || "No registrado"]);
   const fields = source.fields || [];
   const previewRows = source.previewRecords || [];
   const recordsMarkup = fields.length && previewRows.length
@@ -586,7 +667,7 @@ function showDetail(source) {
 }
 
 function statusClass(status) {
-  return { Activa: "active", Inactiva: "inactive" }[status] || "";
+  return { Activo: "active", Inactivo: "inactive" }[status] || "";
 }
 
 function sortValue(source, key) {
@@ -846,24 +927,23 @@ function confirmPendingAction() {
   }
   if (state.pendingStatus) {
     const { index, next } = state.pendingStatus;
-    if (next === "Inactiva" && !validateConfirmReason("confirmModal", getMessage("M11"))) return;
+    if (next === "Inactivo" && !validateConfirmReason("confirmModal", getMessage("M11"))) return;
     sources[index].status = next;
     sources[index].updated = "21/08/2026 12:00";
     sources[index].updatedBy = "Administrador";
-    if (next === "Inactiva") {
+    if (next === "Inactivo") {
       sources[index].inactivationReason = getConfirmReason("confirmModal");
       sources[index].inactivatedBy = "Administrador";
-      sources[index].history = [...(sources[index].history || []), { date: "21/08/2026 12:00", action: "Inactivación", user: "Administrador" }];
+      sources[index].history = [...(sources[index].history || []), { date: "21/08/2026 12:00", action: "Inactivoción", user: "Administrador" }];
     }
     if (state.editingIndex === index && state.draft) {
       state.draft.status = next;
-      document.getElementById("sourceStatusSwitch").checked = next === "Activa";
-      document.getElementById("sourceStatusLabel").textContent = next;
+      document.getElementById("sourceStatusSwitch").checked = next === "Activo";
     }
     state.pendingStatus = null;
     closeConfirmModal("confirmModal");
     applyFilters();
-    showToast(getMessage(next === "Activa" ? "M7" : "M8"), "success");
+    showToast(getMessage(next === "Activo" ? "M7" : "M8"), "success");
     return;
   }
   if (!state.pendingAction) return;
@@ -888,7 +968,7 @@ function confirmPendingAction() {
       originDetail: state.draft.originDetail,
       usage: [...state.draft.usage],
       records: state.loadMode === "manual" ? String(state.manualRecords.length) : String(state.draft.massValidation.processed),
-      status: "Activa",
+      status: "Activo",
       updated: "21/08/2026 12:00",
       fields: state.draft.fields.map((field) => ({ ...field })),
       keyFields: [...state.draft.keyFields],
@@ -1176,10 +1256,10 @@ $("sourceForm").addEventListener("change", (event) => {
   markFormDirty();
 });
 $("sourceStatusSwitch").addEventListener("change", (event) => {
-  const next = event.target.checked ? "Activa" : "Inactiva";
+  const next = event.target.checked ? "Activo" : "Inactivo";
   event.target.checked = !event.target.checked;
   state.pendingStatus = { index: state.editingIndex, next };
-  openConfirmModal("confirmModal", `${getMessage(next === "Activa" ? "M5" : "M6")} ${state.draft?.name || "esta fuente"}?`, { requireReason: next === "Inactiva" });
+  openConfirmModal("confirmModal", `${getMessage(next === "Activo" ? "M5" : "M6")} ${state.draft?.name || "esta fuente"}?`, { requireReason: next === "Inactivo" });
 });
 refs.wizardSteps.forEach((button) => button.addEventListener("click", () => requestWizardStep(Number(button.dataset.wizardStep))));
 $("addFieldBtn").addEventListener("click", () => { addField(); renderFields(); markFormDirty(); });

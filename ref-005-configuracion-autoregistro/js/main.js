@@ -1,6 +1,6 @@
 const configs = [
-  { project: "Operativo 2026", role: "Registrador", start: "01/09/2026", startIso: "2026-09-01", end: "30/09/2026", endIso: "2026-09-30", accountExpiry: "", status: "Activa", code: "K7P4X2M9" },
-  { project: "Evaluación 2026", role: "Supervisor de Seguimiento", start: "15/09/2026", startIso: "2026-09-15", end: "15/10/2026", endIso: "2026-10-15", accountExpiry: "", status: "Inactiva", code: "R3N8C5Q1" }
+  { project: "Operativo 2026", role: "Registrador", start: "01/09/2026", startIso: "2026-09-01", end: "30/09/2026", endIso: "2026-09-30", accountExpiry: "", status: "Activo", code: "K7P4X2M9" },
+  { project: "Evaluación 2026", role: "Supervisor de Seguimiento", start: "15/09/2026", startIso: "2026-09-15", end: "15/10/2026", endIso: "2026-10-15", accountExpiry: "", status: "Inactivo", code: "R3N8C5Q1" }
 ];
 
 const refs = {
@@ -20,6 +20,8 @@ const refs = {
   form: document.getElementById("configForm"),
   configModal: document.getElementById("configModal"),
   modalTitle: document.getElementById("configModalTitle"),
+  configStatusControl: document.getElementById("configStatusControl"),
+  configStatusToggle: document.getElementById("configStatusToggle"),
   formGrid: document.querySelector("#configForm .form-grid"),
   formActions: document.getElementById("configFormActions"),
   editNote: document.getElementById("editNote"),
@@ -63,7 +65,7 @@ function renderConfigs() {
   if (header && !header.querySelector("[data-column='row-number']")) header.insertAdjacentHTML("afterbegin", '<th data-column="row-number">N.°</th>');
   refs.body.innerHTML = filteredConfigs.length ? filteredConfigs.map((config) => {
     const index = configs.indexOf(config);
-    const inactive = config.status === "Inactiva";
+    const inactive = config.status === "Inactivo";
     return `<tr><td>${index + 1}</td><td><strong>${config.project}</strong></td><td>${config.role}</td><td><div class="period"><strong>${config.start}</strong><span>hasta ${config.end}</span></div></td><td><span class="status ${inactive ? "inactive" : "active"}">${config.status}</span></td><td class="code-cell">${config.code}</td><td><div class="row-actions"><button class="row-action" type="button" data-action="edit" data-edit="${index}" data-config-action="edit" data-config-index="${index}" aria-label="Editar ${config.project}" title="Editar"><i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span></button></div></td></tr>`;
   }).join("") : "";
   refs.emptyState.hidden = filteredConfigs.length > 0;
@@ -112,12 +114,13 @@ function openConfigModal(index = null) {
   refs.generatedResult.hidden = true;
   refs.resultActions.hidden = true;
   refs.modalTitle.textContent = index === null ? "Configurar autoregistro" : "Editar configuración";
+  refs.configStatusControl.hidden = index === null;
+  refs.configStatusToggle.checked = config?.status !== "Inactivo";
   setFormValue("project", config?.project);
   setFormValue("defaultRole", config?.role);
   setFormValue("startDate", config?.startIso);
   setFormValue("endDate", config?.endIso);
   setFormValue("accountExpiry", config?.accountExpiry);
-  setFormValue("configStatus", config?.status || "Activa");
   ["startDate", "endDate", "accountExpiry"].forEach((id) => { document.getElementById(id).disabled = index !== null; });
   bootstrap.Modal.getOrCreateInstance(refs.configModal).show();
 }
@@ -177,19 +180,22 @@ refs.form.addEventListener("submit", (event) => {
   if (!project || !role || (editingIndex === null && (!startIso || !endIso))) return showToast(getMessage("M11"), "warning");
   if (editingIndex === null && startIso > endIso) return showToast(getMessage("M12"), "warning");
   if (editingIndex !== null) {
+    const config = configs[editingIndex];
+    const nextStatus = refs.configStatusToggle.checked ? "Activo" : "Inactivo";
+    const requiresReason = config.status === "Activo" && nextStatus === "Inactivo";
     showConfirm(getMessage("M1"), () => {
-      const config = configs[editingIndex];
       config.project = project;
       config.role = role;
-      config.status = document.getElementById("configStatus").value;
+      config.status = nextStatus;
+      if (requiresReason) config.inactivationReason = getConfirmReason("confirmModal");
       bootstrap.Modal.getOrCreateInstance(refs.configModal).hide();
       applyFilters(false);
       showToast(getMessage("M3"));
-    });
+    }, requiresReason);
     return;
   }
   const code = randomCode();
-  const config = { project, role, start: formatDate(startIso), startIso, end: formatDate(endIso), endIso, accountExpiry: document.getElementById("accountExpiry").value, status: document.getElementById("configStatus").value, code };
+  const config = { project, role, start: formatDate(startIso), startIso, end: formatDate(endIso), endIso, accountExpiry: document.getElementById("accountExpiry").value, status: "Activo", code };
   showConfirm(getMessage("M1"), () => {
     configs.unshift(config);
     applyFilters(false);

@@ -36,7 +36,7 @@ $("exportBtn").addEventListener("click", () => exportRows(state.filteredSamples,
 $("confirmBtn").addEventListener("click", confirmPendingAction);
 refs.confirmModal.querySelector(".modal-footer [data-bs-dismiss='modal']").addEventListener("click", () => { state.pendingWizardStep = null; });
 $("confirmModal").addEventListener("hidden.bs.modal", () => { state.pendingAction = null; state.pendingCancel = false; state.pendingStatus = null; state.pendingWizardStep = null; state.pendingUnitAction = null; });
-refs.sampleStatusSwitch?.addEventListener("change", (event) => { if (state.editingIndex === null) return; state.pendingStatus = { index: state.editingIndex, next: event.target.checked ? "Activa" : "Inactiva" }; event.target.checked = !event.target.checked; openConfirmModal("confirmModal", `${getMessage(state.pendingStatus.next === "Activa" ? "M5" : "M6")} ${state.draft.name}?`, { requireReason: state.pendingStatus.next === "Inactiva" }); });
+refs.sampleStatusSwitch?.addEventListener("change", (event) => { if (state.editingIndex === null) return; state.pendingStatus = { index: state.editingIndex, next: event.target.checked ? "Activo" : "Inactivo" }; event.target.checked = !event.target.checked; openConfirmModal("confirmModal", `${getMessage(state.pendingStatus.next === "Activo" ? "M5" : "M6")} ${state.draft.name}?`, { requireReason: state.pendingStatus.next === "Inactivo" }); });
 document.addEventListener("click", (event) => { if (!event.target.closest(".action-menu")) document.querySelectorAll("[data-menu-panel]").forEach((panel) => { panel.hidden = true; }); });
 renderSourceOptions();
 renderSamples();

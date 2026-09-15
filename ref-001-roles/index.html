@@ -113,14 +113,42 @@
               <option value="Consulta">Consulta</option>
               <option value="Visualización">Visualización</option>
             </select></label>
-            <label class="filter-field"><span>Última actualización</span><select class="form-select" id="filterUpdated" aria-label="Última actualización">
-              <option value="Todos">Todos</option>
-              <option value="15/05/2024 10:30">15/05/2024 10:30</option>
-              <option value="14/05/2024 16:45">14/05/2024 16:45</option>
-              <option value="13/05/2024 09:15">13/05/2024 09:15</option>
-              <option value="10/05/2024 11:20">10/05/2024 11:20</option>
-              <option value="08/05/2024 14:05">08/05/2024 14:05</option>
-            </select></label>
+            <fieldset class="filter-field date-range-field" id="filterUpdated" data-date-range>
+              <legend>Última actualización</legend>
+              <div class="date-range-picker">
+                <button class="date-range-trigger" type="button" data-date-range-trigger aria-haspopup="dialog" aria-expanded="false">
+                  <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                  <span data-date-range-label>Seleccionar rango</span>
+                  <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                </button>
+                <button class="date-range-clear" type="button" data-date-range-clear aria-label="Limpiar selección" title="Limpiar selección" hidden>
+                  <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                </button>
+                <div class="date-range-popover" data-date-range-popover role="dialog" aria-label="Seleccionar rango de fechas" hidden>
+                  <div class="date-range-summary">
+                    <span>Rango seleccionado</span>
+                    <strong data-date-range-summary>Selecciona una fecha inicial y final</strong>
+                  </div>
+                  <div class="date-range-calendar-nav">
+                    <button class="date-range-nav" type="button" data-date-range-prev aria-label="Mes anterior">
+                      <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+                    </button>
+                    <div class="date-range-month-labels" data-date-range-month-labels></div>
+                    <button class="date-range-nav" type="button" data-date-range-next aria-label="Mes siguiente">
+                      <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                  <div class="date-range-months" data-date-range-months></div>
+                  <div class="date-range-footer">
+                    <button class="btn btn-outline-ssee button button-secondary" type="button" data-date-range-cancel>Cancelar</button>
+                    <button class="btn btn-ssee button button-primary" type="button" data-date-range-apply>Aplicar</button>
+                  </div>
+                </div>
+                <input id="filterUpdatedStart" type="hidden" data-date-range-start>
+                <input id="filterUpdatedEnd" type="hidden" data-date-range-end>
+              </div>
+              <small class="field-error" data-date-range-error hidden></small>
+            </fieldset>
             <label class="filter-field"><span>Estado</span><select class="form-select" id="filterStatus" aria-label="Estado">
               <option value="Todos">Todos</option>
               <option value="Activo">Activo</option>
@@ -130,7 +158,7 @@
               <button class="btn filter-action btn-ssee button button-primary" type="submit"><i class="fa-solid fa-magnifying-glass icon"></i>Buscar</button>
               <button class="btn filter-action btn-outline-ssee button button-secondary" type="button" id="clearBtn">
                 <i class="fa-solid fa-rotate-left icon"></i>
-                Limpiar
+
               </button>
             </div>
           </div>
@@ -177,8 +205,8 @@
       <section class="view" id="formView" aria-labelledby="formTitle">
         <div class="page-head compact">
           <div>
-            <nav class="breadcrumb" id="formBreadcrumb" aria-label="Ruta"><a href="../index.html">Índice de requerimientos</a> / ALI-REF-001 / Gestión de roles / Registrar rol</nav>
-            <h1 id="formTitle">Registrar rol</h1>
+            <nav class="breadcrumb" id="formBreadcrumb" aria-label="Ruta"><a href="../index.html">Índice de requerimientos</a> / ALI-REF-001 / Gestión de roles / Registrar</nav>
+            <h1 id="formTitle">Registrar</h1>
           </div>
           <div class="wizard-form-status edit-status-control" data-edit-status-control hidden>
             <span>Estado</span>
@@ -304,6 +332,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="dist/roles.js?v=20260825-wizard"></script>
+  <script src="dist/roles.js?v=20260914-edit-return"></script>
 </body>
 </html>
