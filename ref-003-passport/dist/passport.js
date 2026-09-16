@@ -385,7 +385,7 @@ function configureView() {
   document.querySelector(".account-copy strong").textContent = "Ana Paredes";
   document.querySelector(".location-card").insertAdjacentHTML("beforeend", '<i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>');
   document.querySelector(".account").innerHTML = '<button class="bell" type="button" aria-label="Notificaciones"><i class="fa-regular fa-bell"></i></button><div class="account-separator" aria-hidden="true"></div><div class="account-copy"><strong>Ana Paredes</strong><span>Superadministrador</span></div><div class="avatar" aria-hidden="true">A</div><i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>';
-  document.querySelector(".breadcrumb").innerHTML = '<a href="../index.html">Índice de requerimientos</a> / ALI-REF-003 / Sincronización Passport';
+  document.querySelector(".breadcrumb").innerHTML = '<a href="../index.html">Índice de requerimientos</a> / REF-IDE-003 / Sincronización Passport';
   document.querySelector("h1").textContent = "Gestión de usuarios";
   document.querySelector(".page-subtitle").textContent = "Bandeja general de usuarios y sincronización con Passport.";
   document.getElementById("syncBtn").innerHTML = '<i class="fa-solid fa-rotate"></i> Sincronizar';

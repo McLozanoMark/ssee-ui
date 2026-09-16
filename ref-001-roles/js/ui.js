@@ -66,7 +66,7 @@ export function showList() {
   refs.formView.classList.remove("is-active");
 }
 
-export function showForm(role = null, sourceRequirement = "ALI-REF-001") {
+export function showForm(role = null, sourceRequirement = "REF-IDE-001") {
   refs.listView.classList.remove("is-active");
   refs.formView.classList.add("is-active");
   refs.roleName.value = role?.name || "";

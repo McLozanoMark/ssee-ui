@@ -69,3 +69,17 @@ export function selectedPermissionLabels() {
     .slice(0, 2)
     .map((row) => row.name);
 }
+
+export function selectedPermissionPaths() {
+  return state.permissionRows
+    .filter((row) => row.type === "functionality" && Object.values(row.checks).some(Boolean))
+    .map((row) => {
+      const path = [];
+      let current = row;
+      while (current) {
+        path.unshift(current.name);
+        current = state.permissionRows.find((candidate) => candidate.id === current.parentId);
+      }
+      return path.join(" / ");
+    });
+}

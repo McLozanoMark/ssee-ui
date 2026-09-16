@@ -1,4 +1,4 @@
-@import url("../design-system/app.css?v=20260907-ref006-autoregistro");
+@import url("../design-system/app.css?v=20260916-detail-dialog");
 
 body { min-width: 0; background: var(--ssee-bg); }
 .registration-page { min-height: 100vh; display: flex; flex-direction: column; }

@@ -112,7 +112,7 @@ const row = (id, level, type, name, parentId, checks, unavailable = []) => ({
   unavailable: [...unavailable]
 });
 
-// Canonical prototype catalog shared by the role wizard and the REF-002 traceability route.
+// Canonical prototype catalog shared by the role wizard and the REF-IDE-002 traceability route.
 const sharedPermissionRows = [
   row("administracion", 1, "module", "Administración", null, { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }),
   row("usuarios", 2, "submenu", "Usuarios", "administracion", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }),
@@ -612,6 +612,12 @@ const roles = [
     description: "Gestiona configuración general del sistema.",
     permissions: ["Usuarios", "Configuración", "+8 adicionales"],
     permissionDetails: ["Seguimiento", "Evaluación", "Instrumentos", "Reportes", "Registro", "Consulta", "Auditoría", "Parámetros"],
+    permissionPaths: [
+      "Administración / Usuarios / Consultar usuarios",
+      "Administración / Usuarios / Asignar roles",
+      "Administración / Roles / Gestionar permisos de roles",
+      "Registro / Registro de instrumento / Validación de instrumento"
+    ],
     users: 3,
     status: "Activo",
     updated: "15/05/2024 10:30"
@@ -622,6 +628,10 @@ const roles = [
     description: "Consulta y supervisa avances de seguimiento.",
     permissions: ["Seguimiento", "Reportes", "+3 adicionales"],
     permissionDetails: ["Consulta", "Exportación", "Indicadores"],
+    permissionPaths: [
+      "Registro / Registro de instrumento",
+      "Registro / Registro de instrumento / Validación de instrumento"
+    ],
     users: 7,
     status: "Activo",
     updated: "14/05/2024 16:45"
@@ -632,6 +642,10 @@ const roles = [
     description: "Registra y revisa información de evaluación.",
     permissions: ["Evaluación", "Instrumentos", "+2 adicionales"],
     permissionDetails: ["Consulta", "Reportes"],
+    permissionPaths: [
+      "Registro / Registro de instrumento / Validación de instrumento",
+      "Administración / Usuarios / Consultar usuarios"
+    ],
     users: 2,
     status: "Activo",
     updated: "13/05/2024 09:15"
@@ -641,7 +655,8 @@ const roles = [
     name: "Registrador",
     description: "Ingresa información operativa del sistema.",
     permissions: ["Registro", "Consulta"],
-    permissionDetails: [],
+    permissionDetails: ["Registro de instrumento"],
+    permissionPaths: ["Registro / Registro de instrumento"],
     users: 0,
     status: "Inactivo",
     updated: "10/05/2024 11:20"
@@ -651,7 +666,8 @@ const roles = [
     name: "Consulta Estratégica",
     description: "Accede a reportes y tableros de seguimiento.",
     permissions: ["Visualización", "Reportes"],
-    permissionDetails: [],
+    permissionDetails: ["Consultar usuarios"],
+    permissionPaths: ["Administración / Usuarios / Consultar usuarios"],
     users: 0,
     status: "Inactivo",
     updated: "08/05/2024 14:05"
@@ -776,7 +792,7 @@ function showList() {
   refs.formView.classList.remove("is-active");
 }
 
-function showForm(role = null, sourceRequirement = "ALI-REF-001") {
+function showForm(role = null, sourceRequirement = "REF-IDE-001") {
   refs.listView.classList.remove("is-active");
   refs.formView.classList.add("is-active");
   refs.roleName.value = role?.name || "";
@@ -900,6 +916,20 @@ function selectedPermissionLabels() {
     .map((row) => row.name);
 }
 
+function selectedPermissionPaths() {
+  return state.permissionRows
+    .filter((row) => row.type === "functionality" && Object.values(row.checks).some(Boolean))
+    .map((row) => {
+      const path = [];
+      let current = row;
+      while (current) {
+        path.unshift(current.name);
+        current = state.permissionRows.find((candidate) => candidate.id === current.parentId);
+      }
+      return path.join(" / ");
+    });
+}
+
 
 /* source: ref-001-roles/js/roles.js */
 
@@ -912,25 +942,31 @@ function selectedPermissionLabels() {
 function renderRoles() {
   refs.rolesBody.innerHTML = state.filteredRoles.map((role) => {
     const originalIndex = roles.findIndex((item) => item.name === role.name);
-    const tooltip = role.permissionDetails.length
-      ? ` data-bs-toggle="tooltip" data-bs-title="${role.permissionDetails.join(", ")}"`
-      : "";
-    const permissionTags = role.permissions.map((permission, index) => {
-      const isMore = index > 1;
-      return `<span class="tag ${isMore ? "more" : ""}"${isMore ? tooltip : ""}>${permission}</span>`;
+    const paths = role.permissionPaths || [];
+    const pathPreview = paths.slice(0, 2).map((path) => {
+      const segments = path.split(" / ");
+      const content = segments.map((segment, index) => `${index ? '<span class="permission-path-separator">/</span>' : ""}${segment}`).join("");
+      return `<span class="permission-path"><i class="fa-solid ${segments.length === 3 ? "fa-file-lines" : "fa-folder-open"}" aria-hidden="true"></i><span>${content}</span></span>`;
     }).join("");
+    const pathMore = paths.length > 2
+      ? `<button class="permission-path-more" type="button" data-bs-toggle="tooltip" data-bs-title="${paths.slice(2).join(", ")}">+${paths.length - 2} adicionales</button>`
+      : "";
+    const permissionSummary = `<div class="permission-summary"><div class="permission-paths">${pathPreview}${pathMore}</div></div>`;
 
     return `
       <tr>
         <td>${originalIndex + 1}</td>
         <td><strong>${role.name}</strong></td>
         <td><div class="description">${role.description}</div></td>
-        <td><div class="tags">${permissionTags}</div></td>
+        <td>${permissionSummary}</td>
         <td><span class="users-count"><i class="fa-regular fa-user user-icon" aria-hidden="true"></i>${role.users}</span></td>
         <td><span class="status ${role.status === "Activo" ? "active" : "inactive"}">${role.status}</span></td>
         <td>${role.updated}</td>
         <td>
           <div class="row-actions">
+            <button type="button" class="row-action" data-action="permissions" data-permissions="${originalIndex}" aria-label="Ver permisos de ${role.name}" title="Ver permisos">
+              <i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span>Permisos</span>
+            </button>
             <button type="button" class="row-action" data-action="edit" data-edit="${originalIndex}" aria-label="Editar ${role.name}" title="Editar">
               <i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span>
             </button>
@@ -969,8 +1005,9 @@ function applyFilters() {
   renderRoles();
 }
 
-function handleRoleAction(event, onEdit) {
+function handleRoleAction(event, onEdit, onViewPermissions) {
   const editButton = event.target.closest("[data-edit]");
+  const permissionsButton = event.target.closest("[data-permissions]");
   const menuButton = event.target.closest("[data-menu]");
 
   if (menuButton) {
@@ -991,6 +1028,12 @@ function handleRoleAction(event, onEdit) {
     closeActionMenus();
     onEdit(roles[index], index);
     return;
+  }
+
+  if (permissionsButton) {
+    const index = Number(permissionsButton.dataset.permissions);
+    closeActionMenus();
+    onViewPermissions(roles[index], index);
   }
 
 }
@@ -1066,7 +1109,7 @@ function validateInfo() {
   return valid;
 }
 
-function openRoleForm(role = null, index = null, sourceRequirement = "ALI-REF-001") {
+function openRoleForm(role = null, index = null, sourceRequirement = "REF-IDE-001") {
   state.editingIndex = index;
   state.dirty = false;
   state.pendingWizardStep = null;
@@ -1075,14 +1118,21 @@ function openRoleForm(role = null, index = null, sourceRequirement = "ALI-REF-00
   renderPermissions();
 }
 
+function openRolePermissions(role, index) {
+  openRoleForm(role, index, "REF-IDE-002");
+  setFormStep("permissions");
+}
+
 function commitRoleSave({ stay = false } = {}) {
   const selectedLabels = selectedPermissionLabels();
+  const selectedPaths = selectedPermissionPaths();
   const savedRole = {
     id: state.editingIndex === null ? `role-${Date.now()}` : roles[state.editingIndex].id,
     name: refs.roleName.value.trim(),
     description: refs.roleDescription.value.trim(),
     permissions: selectedLabels.length ? [...selectedLabels, "+1 adicional"] : ["Consulta"],
     permissionDetails: selectedLabels.length ? ["Permiso adicional de configuración inicial"] : [],
+    permissionPaths: selectedPaths.length ? selectedPaths : ["Administración"],
     users: state.editingIndex === null ? 0 : roles[state.editingIndex].users,
     status: state.editingIndex === null ? "Activo" : roles[state.editingIndex].status,
     updated: "18/08/2026 09:00"
@@ -1215,7 +1265,7 @@ document.getElementById("clearBtn").addEventListener("click", () => {
 });
 document.getElementById("newRoleBtn").addEventListener("click", () => openRoleForm());
 document.getElementById("exportBtn").addEventListener("click", () => showToast(getMessage("M67"), "success"));
-refs.rolesBody.addEventListener("click", (event) => handleRoleAction(event, openRoleForm));
+refs.rolesBody.addEventListener("click", (event) => handleRoleAction(event, openRoleForm, openRolePermissions));
 refs.permissionBody.addEventListener("change", (event) => {
   const checkbox = event.target.closest("input[data-row][data-operation]");
   if (!checkbox) return;
@@ -1250,7 +1300,7 @@ const deepLink = new URLSearchParams(window.location.search);
 if (deepLink.get("step") === "permissions" && deepLink.get("role")) {
   const roleIndex = roles.findIndex((role) => role.id === deepLink.get("role"));
   if (roleIndex >= 0) {
-    openRoleForm(roles[roleIndex], roleIndex, deepLink.get("source") || "ALI-REF-002");
+  openRoleForm(roles[roleIndex], roleIndex, deepLink.get("source") || "REF-IDE-002");
     setFormStep("permissions");
   }
 }

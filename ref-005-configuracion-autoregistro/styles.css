@@ -1,4 +1,4 @@
-@import url("../design-system/app.css?v=20260907-ref005");
+@import url("../design-system/app.css?v=20260916-detail-dialog");
 
 .ssee-table th, .ssee-table td { vertical-align: middle; }
 .period { display: grid; gap: 0.2rem; line-height: 1.25; }

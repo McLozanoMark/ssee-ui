@@ -112,7 +112,7 @@ const row = (id, level, type, name, parentId, checks, unavailable = []) => ({
   unavailable: [...unavailable]
 });
 
-// Canonical prototype catalog shared by the role wizard and the REF-002 traceability route.
+// Canonical prototype catalog shared by the role wizard and the REF-IDE-002 traceability route.
 const sharedPermissionRows = [
   row("administracion", 1, "module", "Administración", null, { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }),
   row("usuarios", 2, "submenu", "Usuarios", "administracion", { Consultar: true, Registrar: true, Modificar: true, Eliminar: false, Exportar: true, Validar: false }),

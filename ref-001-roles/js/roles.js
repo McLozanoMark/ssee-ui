@@ -8,25 +8,31 @@ import { toDateInputValue } from "../../design-system/date-range.js";
 export function renderRoles() {
   refs.rolesBody.innerHTML = state.filteredRoles.map((role) => {
     const originalIndex = roles.findIndex((item) => item.name === role.name);
-    const tooltip = role.permissionDetails.length
-      ? ` data-bs-toggle="tooltip" data-bs-title="${role.permissionDetails.join(", ")}"`
-      : "";
-    const permissionTags = role.permissions.map((permission, index) => {
-      const isMore = index > 1;
-      return `<span class="tag ${isMore ? "more" : ""}"${isMore ? tooltip : ""}>${permission}</span>`;
+    const paths = role.permissionPaths || [];
+    const pathPreview = paths.slice(0, 2).map((path) => {
+      const segments = path.split(" / ");
+      const content = segments.map((segment, index) => `${index ? '<span class="permission-path-separator">/</span>' : ""}${segment}`).join("");
+      return `<span class="permission-path"><i class="fa-solid ${segments.length === 3 ? "fa-file-lines" : "fa-folder-open"}" aria-hidden="true"></i><span>${content}</span></span>`;
     }).join("");
+    const pathMore = paths.length > 2
+      ? `<button class="permission-path-more" type="button" data-bs-toggle="tooltip" data-bs-title="${paths.slice(2).join(", ")}">+${paths.length - 2} adicionales</button>`
+      : "";
+    const permissionSummary = `<div class="permission-summary"><div class="permission-paths">${pathPreview}${pathMore}</div></div>`;
 
     return `
       <tr>
         <td>${originalIndex + 1}</td>
         <td><strong>${role.name}</strong></td>
         <td><div class="description">${role.description}</div></td>
-        <td><div class="tags">${permissionTags}</div></td>
+        <td>${permissionSummary}</td>
         <td><span class="users-count"><i class="fa-regular fa-user user-icon" aria-hidden="true"></i>${role.users}</span></td>
         <td><span class="status ${role.status === "Activo" ? "active" : "inactive"}">${role.status}</span></td>
         <td>${role.updated}</td>
         <td>
           <div class="row-actions">
+            <button type="button" class="row-action" data-action="permissions" data-permissions="${originalIndex}" aria-label="Ver permisos de ${role.name}" title="Ver permisos">
+              <i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span>Permisos</span>
+            </button>
             <button type="button" class="row-action" data-action="edit" data-edit="${originalIndex}" aria-label="Editar ${role.name}" title="Editar">
               <i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span>
             </button>
@@ -65,8 +71,9 @@ export function applyFilters() {
   renderRoles();
 }
 
-export function handleRoleAction(event, onEdit) {
+export function handleRoleAction(event, onEdit, onViewPermissions) {
   const editButton = event.target.closest("[data-edit]");
+  const permissionsButton = event.target.closest("[data-permissions]");
   const menuButton = event.target.closest("[data-menu]");
 
   if (menuButton) {
@@ -87,6 +94,12 @@ export function handleRoleAction(event, onEdit) {
     closeActionMenus();
     onEdit(roles[index], index);
     return;
+  }
+
+  if (permissionsButton) {
+    const index = Number(permissionsButton.dataset.permissions);
+    closeActionMenus();
+    onViewPermissions(roles[index], index);
   }
 
 }

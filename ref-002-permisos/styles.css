@@ -1,4 +1,4 @@
-@import url("../design-system/app.css?v=20260827-form-controls");
+@import url("../design-system/app.css?v=20260916-detail-dialog");
 
 .permission-card { background: var(--ssee-surface); border: 1px solid var(--ssee-line); border-radius: .75rem; box-shadow: var(--ssee-shadow); padding: 1.25rem; }
 .permission-context { display: grid; grid-template-columns: minmax(15rem, 1fr) minmax(20rem, 1.5fr) auto; gap: 1rem; padding: .25rem 0 1.25rem; border-bottom: 1px solid var(--ssee-line); }

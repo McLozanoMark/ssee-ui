@@ -1,7 +1,7 @@
 import { roles } from "./data.js";
 import { state, resetEditingState, resetPermissionDraft } from "./state.js";
 import { refs, clearErrors, closeActionMenus, setFormStep, showForm, showList, showToast } from "./ui.js";
-import { renderPermissions, handlePermissionChange, hasSelectedPermission, selectedPermissionLabels } from "./permissions.js";
+import { renderPermissions, handlePermissionChange, hasSelectedPermission, selectedPermissionLabels, selectedPermissionPaths } from "./permissions.js";
 import { applyFilters, handleRoleAction, renderRoles, confirmStatus, handleEditStatusToggle } from "./roles.js";
 import { getMessage, getPrototypeMessage } from "../../design-system/messages.js";
 import { openConfirmModal, closeConfirmModal } from "../../design-system/interaction.js";
@@ -33,7 +33,7 @@ function validateInfo() {
   return valid;
 }
 
-function openRoleForm(role = null, index = null, sourceRequirement = "ALI-REF-001") {
+function openRoleForm(role = null, index = null, sourceRequirement = "REF-IDE-001") {
   state.editingIndex = index;
   state.dirty = false;
   state.pendingWizardStep = null;
@@ -42,14 +42,21 @@ function openRoleForm(role = null, index = null, sourceRequirement = "ALI-REF-00
   renderPermissions();
 }
 
+function openRolePermissions(role, index) {
+  openRoleForm(role, index, "REF-IDE-002");
+  setFormStep("permissions");
+}
+
 function commitRoleSave({ stay = false } = {}) {
   const selectedLabels = selectedPermissionLabels();
+  const selectedPaths = selectedPermissionPaths();
   const savedRole = {
     id: state.editingIndex === null ? `role-${Date.now()}` : roles[state.editingIndex].id,
     name: refs.roleName.value.trim(),
     description: refs.roleDescription.value.trim(),
     permissions: selectedLabels.length ? [...selectedLabels, "+1 adicional"] : ["Consulta"],
     permissionDetails: selectedLabels.length ? ["Permiso adicional de configuración inicial"] : [],
+    permissionPaths: selectedPaths.length ? selectedPaths : ["Administración"],
     users: state.editingIndex === null ? 0 : roles[state.editingIndex].users,
     status: state.editingIndex === null ? "Activo" : roles[state.editingIndex].status,
     updated: "18/08/2026 09:00"
@@ -182,7 +189,7 @@ document.getElementById("clearBtn").addEventListener("click", () => {
 });
 document.getElementById("newRoleBtn").addEventListener("click", () => openRoleForm());
 document.getElementById("exportBtn").addEventListener("click", () => showToast(getMessage("M67"), "success"));
-refs.rolesBody.addEventListener("click", (event) => handleRoleAction(event, openRoleForm));
+refs.rolesBody.addEventListener("click", (event) => handleRoleAction(event, openRoleForm, openRolePermissions));
 refs.permissionBody.addEventListener("change", (event) => {
   const checkbox = event.target.closest("input[data-row][data-operation]");
   if (!checkbox) return;
@@ -217,7 +224,7 @@ const deepLink = new URLSearchParams(window.location.search);
 if (deepLink.get("step") === "permissions" && deepLink.get("role")) {
   const roleIndex = roles.findIndex((role) => role.id === deepLink.get("role"));
   if (roleIndex >= 0) {
-    openRoleForm(roles[roleIndex], roleIndex, deepLink.get("source") || "ALI-REF-002");
+  openRoleForm(roles[roleIndex], roleIndex, deepLink.get("source") || "REF-IDE-002");
     setFormStep("permissions");
   }
 }
