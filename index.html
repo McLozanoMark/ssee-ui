@@ -7,36 +7,49 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body{margin:0;background:#f4f6fb;color:#102a56;font-family:"Inter"}.demo-index{max-width:68rem;margin:4rem auto;padding:0 1.25rem}.demo-index h1{font-size:2rem}.demo-index p{color:#64748b}.note{padding:1rem;background:#eef0ff;border-left:4px solid #3f35e8}.list{display:grid;grid-template-columns:repeat(auto-fit,minmax(17rem,1fr));gap:1rem;margin-top:2rem}.card{display:flex;flex-direction:column;gap:.6rem;min-height:9rem;padding:1.2rem;background:#fff;border:1px solid #dbe3f0;border-radius:.65rem;box-shadow:0 .5rem 1.5rem #0f172a0d;text-decoration:none}.card strong{color:#102a56}.card span{color:#64748b;font-size:.85rem}.card small{margin-top:auto;color:#3f35e8;font-weight:700}.group{margin-top:2rem;color:#3f35e8;font-size:.8rem;font-weight:700;text-transform:uppercase}
+    :root{color-scheme:light}*{box-sizing:border-box}body{margin:0;background:#f4f6fb;color:#102a56;font-family:"Inter",sans-serif}.demo-index{max-width:68rem;margin:3.5rem auto;padding:0 1.25rem}.index-header{position:relative;overflow:hidden;padding:2rem 2.1rem 1.6rem;background:#fff;border:1px solid #dbe3f0;border-top:4px solid #3f35e8;border-radius:.75rem;box-shadow:0 .75rem 2rem #0f172a12}.index-header::after{content:"";position:absolute;right:-3rem;top:-4rem;width:12rem;height:12rem;border:1px solid #dbe3f033;border-radius:50%;box-shadow:0 0 0 1.5rem #dbe3f01f,0 0 0 3rem #dbe3f012;pointer-events:none}.header-main{position:relative;z-index:1;display:flex;align-items:flex-start;gap:1rem}.brand-mark{display:grid;place-items:center;flex:0 0 3rem;width:3rem;height:3rem;border-radius:.65rem;background:#102a56;color:#fff;font-size:1.15rem;font-weight:800;box-shadow:0 .5rem 1rem #102a5626}.heading-copy{min-width:0}.eyebrow{margin:0 0 .55rem;color:#3f35e8!important;font-size:.75rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase}.demo-index h1{margin:0;color:#102a56;font-size:2.2rem;line-height:1.1}.lead{margin:.6rem 0 0;color:#64748b;font-size:1rem}.coverage{position:relative;z-index:1;margin-left:auto;min-width:10rem;padding:.75rem 1rem;border-left:1px solid #dbe3f0}.coverage-label{display:block;color:#64748b;font-size:.7rem;font-weight:700;text-transform:uppercase}.coverage strong{display:block;margin-top:.2rem;color:#102a56;font-size:.92rem}.objective{position:relative;z-index:1;display:flex;align-items:baseline;gap:.4rem;margin:1.5rem 0 0;padding:.85rem 1rem;background:#f5f6ff;border:1px solid #d9dcff;border-radius:.45rem;color:#263b68;font-size:.9rem}.objective strong{color:#102a56}.note{margin-top:1.5rem;padding:1rem 1.1rem;background:#eef0ff;border:1px solid #d9dcff;border-left:4px solid #3f35e8;border-radius:.45rem;color:#263b68}.list{display:grid;grid-template-columns:repeat(auto-fit,minmax(17rem,1fr));gap:1rem;margin-top:1.5rem}.card{display:flex;flex-direction:column;gap:.6rem;min-height:9rem;padding:1.2rem;background:#fff;border:1px solid #dbe3f0;border-radius:.65rem;box-shadow:0 .5rem 1.5rem #0f172a0d;text-decoration:none}.card strong{color:#102a56}.card span{color:#64748b;font-size:.85rem}.card small{margin-top:auto;color:#3f35e8;font-weight:700}.group{margin-top:2rem;color:#3f35e8;font-size:.8rem;font-weight:700;text-transform:uppercase}@media (max-width:640px){.demo-index{margin:1.25rem auto;padding:0 .85rem}.index-header{padding:1.35rem 1.1rem 1.1rem}.demo-index h1{font-size:1.7rem}.coverage{display:none}.objective{display:block;line-height:1.45}.note{margin-top:1rem}}
+    .index-header{padding-bottom:0}.index-header::after{display:none}.header-bottom{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:1.5rem;margin-top:1.6rem;padding:1rem 0;border-top:1px solid #dbe3f0}.objective{position:static;display:flex;align-items:baseline;gap:.4rem;margin:0;padding:0;background:none;border:0;border-radius:0;color:#263b68;font-size:.9rem;line-height:1.45}.status{display:flex;align-items:center;gap:.55rem;padding-left:1.5rem;border-left:1px solid #dbe3f0;white-space:nowrap}.status-dot{width:.5rem;height:.5rem;border-radius:50%;background:#16a085;box-shadow:0 0 0 .25rem #16a0851c}.status-label{color:#64748b;font-size:.7rem;font-weight:700;text-transform:uppercase}.status-copy{color:#263b68;font-size:.82rem}.note{display:none}@media (max-width:640px){.index-header{padding-bottom:0}.header-bottom{display:block;margin-top:1.25rem;padding:1rem 0}.objective{display:block;line-height:1.45}.status{margin-top:.9rem;padding:0;border-left:0;white-space:normal}}
   </style>
 </head>
 <body>
 <main class="demo-index">
-  <p>S.S.E.E. / Demos</p><h1>Índice de requerimientos</h1>
-  <p>Acceso centralizado a los prototipos locales. La versión oficial se integrará después en Figma.</p>
-  <div class="note"><strong>Estado:</strong> demos sintéticas de revisión.</div>
-  <div class="group">Ali</div><section class="list">
-    <a class="card" href="ref-001-roles/index.html"><strong>ALI-REF-001 · Gestión de roles</strong><span>CRUD de roles, permisos, filtros y estados.</span><small>Abrir demo →</small></a>
-    <a class="card" href="ref-001-roles/index.html?role=admin&amp;step=permissions&amp;source=ALI-REF-002"><strong>ALI-REF-002 · Permisos de roles</strong><span>Subflujo integrado en roles: matriz jerárquica y reglas de dependencia.</span><small>Abrir demo →</small></a>
-    <a class="card" href="ref-003-passport/index.html"><strong>ALI-REF-003 · Sincronización Passport</strong><span>Sincronización sintética y resultados.</span><small>Abrir demo →</small></a>
-    <a class="card" href="ref-004-admision/index.html"><strong>ALI-REF-004 · Admisión de usuarios</strong><span>Validación de DNI/CE y configuración de acceso.</span><small>Abrir demo →</small></a>
-    <a class="card" href="ref-005-configuracion-autoregistro/index.html"><strong>ALI-REF-005 · Configuración y habilitación del autoregistro</strong><span>Proyecto, rol predeterminado, periodo, código y enlace.</span><small>Abrir demo →</small></a>
-    <a class="card" href="ref-006-autoregistro/index.html"><strong>ALI-REF-006 · Admisión mediante autoregistro</strong><span>Registro de cuenta durante un periodo habilitado.</span><small>Abrir demo →</small></a>
-    <a class="card" href="ref-007-users/index.html"><strong>ALI-REF-007 · Administración de usuarios</strong><span>Búsqueda, roles, estado y detalle.</span><small>Abrir demo →</small></a>
-    <a class="card" href="auth-login/index.html?auth=passport"><strong>ALI-REF-008 · Autenticación mediante Passport</strong><span>Ingreso centralizado con credenciales Passport y validación de acceso S.S.E.E.</span><small>Abrir demo →</small></a>
-    <a class="card" href="auth-login/index.html?auth=document"><strong>ALI-REF-009 · Autenticación mediante Documento</strong><span>Ingreso centralizado con DNI/CE y validación de vigencia.</span><small>Abrir demo →</small></a>
-    <a class="card" href="auth-login/index.html?auth=autoregistro"><strong>ALI-REF-010 · Autenticación mediante Autoregistro</strong><span>Ingreso centralizado con correo y contraseña del registro.</span><small>Abrir demo →</small></a>
-    <a class="card" href="ref-011-validaciones/index.html"><strong>ALI-REF-011 · Validaciones generales</strong><span>Regla transversal aplicada en los tres flujos de autenticación.</span><small>Abrir demo →</small></a>
-    <a class="card" href="ref-012-auditoria/index.html"><strong>ALI-REF-012 · Auditoría de autenticación</strong><span>Trazabilidad del intento de autenticación y su resultado.</span><small>Abrir demo →</small></a>
-    <a class="card" href="ref-013-password-change/welcome.html?auth=passport&amp;v=20260915-ref013"><strong>ALI-REF-013 · Cambio de contraseña</strong><span>Acceso autenticado y cambio según modalidad.</span><small>Abrir demo →</small></a>
-    <a class="card" href="ref-014-password-recovery/login.html"><strong>ALI-REF-014 · Recuperación de contraseña</strong><span>Login clonado del requerimiento y recuperación por modalidad.</span><small>Abrir demo →</small></a>
-    <a class="card" href="ref-015-logout/index.html"><strong>ALI-REF-015 · Cierre de sesión</strong><span>Confirmación, invalidación de sesión y redirección.</span><small>Abrir demo →</small></a>
-    <a class="card" href="ref-016-sessions/index.html"><strong>ALI-REF-016 · Gestión de sesiones</strong><span>Sesión única, interacción, inactividad y acceso por rol.</span><small>Abrir demo →</small></a>
-    <a class="card" href="ref-017-welcome/index.html"><strong>ALI-REF-017 · Bienvenida y módulos</strong><span>Bienvenida contextual, módulos, proyectos, resumen y notificaciones.</span><small>Abrir demo →</small></a>
-    </section><div class="group">Gio</div><section class="list">
-    <a class="card" href="gio-ref-001-fuentes/index.html"><strong>GIO-REF-001 · Fuentes de datos</strong><span>Listado, filtros, registro inicial y estados de fuentes.</span><small>Abrir demo →</small></a>
-    <a class="card" href="gio-ref-002-muestras/index.html"><strong>GIO-REF-002 · Muestras</strong><span>Listado, filtros, alta inicial y configuración preliminar.</span><small>Abrir demo →</small></a>
-    <a class="card" href="gio-ref-003-asignaciones/index.html"><strong>GIO-REF-003 · Asignación de instrumentos</strong><span>Listado, filtros, acciones y modal de asignación individual.</span><small>Abrir demo →</small></a>
+  <header class="index-header">
+    <div class="header-main">
+      <div class="brand-mark" aria-hidden="true">S</div>
+      <div class="heading-copy">
+        <p class="eyebrow">S.S.E.E. - Presentación de prototipos funcionales</p>
+        <h1>Índice de requerimientos</h1>
+        <p class="lead">Demostración de módulos, flujos, y requerimientos.</p>
+      </div>
+      <div class="coverage"><span class="coverage-label">Cobertura</span><strong>21 prototipos</strong></div>
+    </div>
+    <div class="header-bottom">
+      <p class="objective"><strong>Objetivo:</strong> Validar la propuesta funcional y la experiencia de usuario.</p>
+      <div class="status"><span class="status-dot" aria-hidden="true"></span><span class="status-label">Estado</span><span class="status-copy">Demos sintéticas de revisión</span></div>
+    </div>
+  </header>
+  <section class="list">
+    <a class="card" href="ref-001-roles/index.html"><strong>REF-IDE-001 · Gestión de roles</strong><span>CRUD de roles, permisos, filtros y estados.</span><small>Abrir demo →</small></a>
+    <a class="card" href="ref-001-roles/index.html?role=admin&amp;step=permissions&amp;source=REF-IDE-002"><strong>REF-IDE-002 · Gestión de permisos de roles</strong><span>Subflujo integrado en roles: matriz jerárquica y reglas de dependencia.</span><small>Abrir demo →</small></a>
+    <a class="card" href="ref-003-passport/index.html"><strong>REF-IDE-003 · Sincronización de usuarios desde Passport</strong><span>Sincronización sintética y resultados.</span><small>Abrir demo →</small></a>
+    <a class="card" href="ref-004-admision/index.html"><strong>REF-IDE-004 · Admisión de usuarios mediante documento</strong><span>Validación de DNI/CE y configuración de acceso.</span><small>Abrir demo →</small></a>
+    <a class="card" href="ref-005-configuracion-autoregistro/index.html"><strong>REF-IDE-005 · Configuración y habilitación del autoregistro</strong><span>Proyecto, rol predeterminado, periodo, código y enlace.</span><small>Abrir demo →</small></a>
+    <a class="card" href="ref-006-autoregistro/index.html"><strong>REF-IDE-006 · Admisión de usuarios mediante autoregistro</strong><span>Registro de cuenta durante un periodo habilitado.</span><small>Abrir demo →</small></a>
+    <a class="card" href="ref-007-users/index.html"><strong>REF-IDE-007 · Administración de usuarios</strong><span>Búsqueda, roles, estado y detalle.</span><small>Abrir demo →</small></a>
+    <a class="card" href="auth-login/index.html?auth=passport"><strong>REF-IDE-008 · Autenticación mediante Passport</strong><span>Ingreso centralizado con credenciales Passport y validación de acceso S.S.E.E.</span><small>Abrir demo →</small></a>
+    <a class="card" href="auth-login/index.html?auth=document"><strong>REF-IDE-009 · Autenticación mediante documento de identidad</strong><span>Ingreso centralizado con DNI/CE y validación de vigencia.</span><small>Abrir demo →</small></a>
+    <a class="card" href="auth-login/index.html?auth=autoregistro"><strong>REF-IDE-010 · Autenticación mediante autoregistro</strong><span>Ingreso centralizado con correo y contraseña del registro.</span><small>Abrir demo →</small></a>
+    <a class="card" href="ref-011-validaciones/index.html"><strong>REF-IDE-011 · Validaciones generales de autenticación</strong><span>Regla transversal aplicada en los tres flujos de autenticación.</span><small>Abrir demo →</small></a>
+    <a class="card" href="ref-013-password-change/welcome.html?auth=passport&amp;v=20260915-ref013"><strong>REF-IDE-012 · Cambio de contraseña</strong><span>Acceso autenticado y cambio según modalidad.</span><small>Abrir demo →</small></a>
+    <a class="card" href="ref-014-password-recovery/login.html"><strong>REF-IDE-013 · Recuperación de contraseña</strong><span>Login clonado del requerimiento y recuperación por modalidad.</span><small>Abrir demo →</small></a>
+    <a class="card" href="ref-015-logout/index.html"><strong>REF-IDE-014 · Cierre de sesión</strong><span>Confirmación, invalidación de sesión y redirección.</span><small>Abrir demo →</small></a>
+    <a class="card" href="ref-016-sessions/index.html"><strong>REF-IDE-015 · Gestión de sesiones</strong><span>Sesión única, interacción, inactividad y acceso por rol.</span><small>Abrir demo →</small></a>
+    <a class="card" href="ref-012-auditoria/index.html"><strong>REF-IDE-016 · Auditoría de autenticación</strong><span>Trazabilidad de los intentos y resultados de autenticación.</span><small>Abrir demo →</small></a>
+    <article class="card"><strong>REF-IDE-017 · Auditoría de operaciones</strong><span>Regla transversal para registrar las operaciones realizadas en los módulos.</span><small>Sin demo independiente</small></article>
+    <a class="card" href="ref-017-welcome/index.html"><strong>REF-IDE-018 · Visualización de bienvenida y módulos</strong><span>Bienvenida contextual, módulos, proyectos, resumen y notificaciones.</span><small>Abrir demo →</small></a>
+    <a class="card" href="gio-ref-001-fuentes/index.html"><strong>RF-GFD-001 · Gestión de fuentes de datos</strong><span>Listado, filtros, registro inicial y estados de fuentes.</span><small>Abrir demo →</small></a>
+    <a class="card" href="gio-ref-002-muestras/index.html"><strong>RF-GMU-001 · Gestión de muestras</strong><span>Listado, filtros, alta inicial y configuración preliminar.</span><small>Abrir demo →</small></a>
+    <a class="card" href="gio-ref-003-asignaciones/index.html"><strong>RF-DIS-001 · Asignación de instrumentos a los usuarios</strong><span>Listado, filtros, acciones y modal de asignación individual.</span><small>Abrir demo →</small></a>
   </section>
 </main>
 </body>

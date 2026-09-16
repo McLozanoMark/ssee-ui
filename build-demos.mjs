@@ -91,6 +91,12 @@ await bundle("ref-008-auth-passport/dist/auth.js", [
   "ref-008-auth-passport/js/main.js"
 ]);
 
+await bundle("auth-login/dist/main.js", [
+  "ref-017-welcome/js/data.js",
+  "design-system/auth-welcome.js",
+  "auth-login/main.js"
+]);
+
 await bundle("ref-009-auth-document/dist/auth.js", [
   "ref-017-welcome/js/data.js",
   "design-system/auth-guide.js",
@@ -143,6 +149,15 @@ await bundle("ref-013-password-change/dist/password.js", [
   "ref-013-password-change/js/ui.js",
   "ref-013-password-change/js/password.js",
   "ref-013-password-change/js/main.js"
+]);
+
+await bundle("ref-013-password-change/welcome-dist/welcome.js", [
+  "design-system/messages.js",
+  "design-system/interaction.js",
+  "ref-017-welcome/js/data.js",
+  "ref-017-welcome/js/state.js",
+  "ref-017-welcome/js/ui.js",
+  "ref-017-welcome/js/main.js"
 ]);
 
 await bundle("ref-014-password-recovery/dist/recovery.js", [

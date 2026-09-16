@@ -6,13 +6,10 @@ export const welcomeProfiles = {
     site: "Unidad de Seguimiento y Evaluación",
     institution: "Ministerio de Educación",
     process: "",
-    modules: [
-      { name: "Seguimiento", description: "Consulta y supervisa avances.", icon: "fa-chart-line" },
-      { name: "Evaluación", description: "Revisa resultados e indicadores.", icon: "fa-clipboard-check" },
-      { name: "Instrumentos", description: "Atiende instrumentos asignados.", icon: "fa-file-lines" },
-      { name: "Reportes", description: "Consulta reportes disponibles.", icon: "fa-chart-column" }
+    quickAccess: [
+      { name: "Cambiar contraseña", icon: "fa-key" }
     ],
-    projects: [{ name: "Seguimiento 2026", period: "2026", assigned: 12, pending: 4, sent: 8, contact: "Equipo de Seguimiento" }],
+    projects: [{ name: "Seguimiento 2026", period: "2026", assigned: 12, pending: 4, sent: 8, contact: { name: "Equipo de Seguimiento", email: "seguimiento@ejemplo.gob.pe" } }],
     notifications: [
       { title: "Instrumentos pendientes", text: "Tienes 4 instrumentos pendientes de atención.", icon: "fa-clipboard-list" },
       { title: "Nuevo reporte disponible", text: "El reporte de avance del periodo 2026 está disponible.", icon: "fa-file-lines" },
@@ -26,13 +23,10 @@ export const welcomeProfiles = {
     site: "Unidad de Seguimiento y Evaluación",
     institution: "Ministerio de Educación",
     process: "",
-    modules: [
-      { name: "Seguimiento", description: "Consulta y supervisa avances.", icon: "fa-chart-line" },
-      { name: "Evaluación", description: "Revisa resultados e indicadores.", icon: "fa-clipboard-check" },
-      { name: "Instrumentos", description: "Atiende instrumentos asignados.", icon: "fa-file-lines" },
-      { name: "Reportes", description: "Consulta reportes disponibles.", icon: "fa-chart-column" }
+    quickAccess: [
+      { name: "Cambiar contraseña", icon: "fa-key" }
     ],
-    projects: [{ name: "Seguimiento 2026", period: "2026", assigned: 12, pending: 4, sent: 8, contact: "Equipo de Seguimiento" }],
+    projects: [{ name: "Seguimiento 2026", period: "2026", assigned: 12, pending: 4, sent: 8, contact: { name: "Equipo de Seguimiento", email: "seguimiento@ejemplo.gob.pe" } }],
     notifications: [
       { title: "Instrumentos pendientes", text: "Tienes 4 instrumentos pendientes de atención.", icon: "fa-clipboard-list" },
       { title: "Nuevo reporte disponible", text: "El reporte de avance del periodo 2026 está disponible.", icon: "fa-file-lines" },
@@ -46,12 +40,12 @@ export const welcomeProfiles = {
     site: "Unidad de Seguimiento y Evaluación",
     institution: "Ministerio de Educación",
     process: "Autoregistro 2026",
-    modules: [
-      { name: "Seguimiento", description: "Consulta el avance de tu proceso.", icon: "fa-chart-line" },
-      { name: "Instrumentos", description: "Revisa los instrumentos asignados.", icon: "fa-file-lines" },
-      { name: "Reportes", description: "Consulta reportes disponibles.", icon: "fa-chart-column" }
+    quickAccess: [
+      { name: "Registrar usuario", icon: "fa-user-plus" },
+      { name: "Cambiar contraseña", icon: "fa-key" },
+      { name: "Crear rol", icon: "fa-user-shield" }
     ],
-    projects: [{ name: "Seguimiento 2026", period: "2026", assigned: 8, pending: 2, sent: 6, contact: "Mesa de ayuda USE" }],
+    projects: [{ name: "Seguimiento 2026", period: "2026", assigned: 8, pending: 2, sent: 6, contact: { name: "Mesa de ayuda USE", email: "mesa.ayuda@ejemplo.gob.pe", phone: "(01) 615-5800" } }],
     notifications: [
       { title: "Instrumentos pendientes", text: "Tienes 2 instrumentos pendientes de atención.", icon: "fa-clipboard-list" },
       { title: "Registro habilitado", text: "Tu acceso al proceso Autoregistro 2026 está habilitado.", icon: "fa-circle-check" }

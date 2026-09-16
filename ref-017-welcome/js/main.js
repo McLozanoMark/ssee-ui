@@ -3,7 +3,7 @@ import { getWelcomeState } from "./state.js";
 import { renderNotifications, renderProfile, setNotificationPanel, showToast } from "./ui.js";
 
 const refs = {
-  accountName: document.getElementById("accountName"), accountRole: document.getElementById("accountRole"), accountInitial: document.getElementById("accountInitial"), welcomeTitle: document.getElementById("welcomeTitle"), welcomeSubtitle: document.getElementById("welcomeSubtitle"), processContext: document.getElementById("processContext"), processText: document.getElementById("processText"), moduleCount: document.getElementById("moduleCount"), projectCount: document.getElementById("projectCount"), moduleGrid: document.getElementById("moduleGrid"), projectList: document.getElementById("projectList"), userSummary: document.getElementById("userSummary"), notificationButton: document.getElementById("notificationButton"), notificationCount: document.getElementById("notificationCount"), notificationPanel: document.getElementById("notificationPanel"), notificationList: document.getElementById("notificationList"), closeNotifications: document.getElementById("closeNotifications"), toast: document.getElementById("toast")
+  accountName: document.getElementById("accountName"), accountRole: document.getElementById("accountRole"), accountInitial: document.getElementById("accountInitial"), welcomeTitle: document.getElementById("welcomeTitle"), projectCount: document.getElementById("projectCount"), projectList: document.getElementById("projectList"), quickAccessList: document.getElementById("quickAccessList"), userSummary: document.getElementById("userSummary"), notificationButton: document.getElementById("notificationButton"), notificationCount: document.getElementById("notificationCount"), notificationPanel: document.getElementById("notificationPanel"), notificationList: document.getElementById("notificationList"), closeNotifications: document.getElementById("closeNotifications"), toast: document.getElementById("toast")
 };
 
 const state = getWelcomeState(new URLSearchParams(window.location.search), welcomeProfiles);
@@ -23,10 +23,4 @@ document.addEventListener("click", (event) => {
     state.notificationsOpen = false;
     setNotificationPanel(refs, false);
   }
-});
-refs.moduleGrid.addEventListener("click", (event) => {
-  const module = event.target.closest("[data-module]");
-  if (!module) return;
-  event.preventDefault();
-  showToast(refs, `Acceso a ${module.dataset.module} disponible para revisión.`, "info");
 });

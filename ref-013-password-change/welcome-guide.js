@@ -7,11 +7,7 @@ const guideRefs = {
   accountTrigger: document.getElementById("accountMenuTrigger"),
   accountInitial: document.getElementById("accountInitial"),
   accountMenu: document.getElementById("accountMenu"),
-  changePassword: document.getElementById("changePasswordOption"),
-  accountRole: document.getElementById("accountRole"),
-  processContext: document.getElementById("processContext"),
-  processText: document.getElementById("processText"),
-  userSummary: document.getElementById("userSummary")
+  changePassword: document.getElementById("changePasswordOption")
 };
 
 let mode = "passport";
@@ -35,11 +31,9 @@ function setMode(nextMode) {
   mode = nextMode;
   guideRefs.guideOptions.forEach((option) => option.classList.toggle("is-active", option.dataset.guideAuth === mode));
   const isPassport = mode === "passport";
-  guideRefs.accountRole.textContent = isPassport ? "Supervisor de Seguimiento" : "Administrador USE";
-  guideRefs.processContext.hidden = isPassport;
-  guideRefs.processText.textContent = "Autoregistro 2026";
-  const authSummary = [...guideRefs.userSummary.querySelectorAll("div")].find((item) => item.querySelector("span")?.textContent.trim() === "Tipo de autenticación");
-  authSummary?.querySelector("strong")?.replaceChildren(document.createTextNode(isPassport ? "Passport" : "Autoregistro"));
+  const profile = welcomeProfiles[mode];
+  renderProfile(refs, profile);
+  renderNotifications(refs, profile.notifications);
   guideRefs.accountMenu.hidden = true;
   guideRefs.accountTrigger.setAttribute("aria-expanded", "false");
   setGuide(

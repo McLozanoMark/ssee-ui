@@ -24,7 +24,7 @@ const modes = {
     label: "Passport",
     example: "Documento: 12345678 · Contraseña: ClaveSegura1",
     success: "Las credenciales Passport fueron validadas y tu cuenta cumple las condiciones de acceso.",
-    fields: `<div class="field-grid"><label class="field-label" for="documentType">Tipo de documento <span>*</span><select class="form-select" id="documentType"><option>DNI</option><option>CE</option></select></label><label class="field-label" for="documentNumber">Número de documento <span>*</span><input class="form-control" id="documentNumber" autocomplete="username" placeholder="Ingresa tu número" required></label></div><label class="field-label password-field" for="password">Contraseña <span>*</span><span class="password-input"><input class="form-control" id="password" type="password" autocomplete="current-password" required><button class="password-toggle" type="button" aria-label="Mostrar contraseña"><i class="fa-regular fa-eye"></i></button></span></label><div class="auth-secondary-actions"><a class="auth-change-link" href="index.html?auth=passport">Olvidé mi contraseña</a><a class="auth-recovery-link" href="../ref-014-password-recovery/index.html?auth=passport">Recuperar contraseña</a></div>`
+    fields: `<div class="field-grid"><label class="field-label" for="documentType">Tipo de documento <span>*</span><select class="form-select" id="documentType"><option>DNI</option><option>CE</option></select></label><label class="field-label" for="documentNumber">Número de documento <span>*</span><input class="form-control" id="documentNumber" autocomplete="username" placeholder="Ingresa tu número" required></label></div><label class="field-label password-field" for="password">Contraseña <span>*</span><span class="password-input"><input class="form-control" id="password" type="password" autocomplete="current-password" required><button class="password-toggle" type="button" aria-label="Mostrar contraseña"><i class="fa-regular fa-eye"></i></button></span></label><div class="auth-secondary-actions"><a class="auth-recovery-link" href="../ref-014-password-recovery/index.html?auth=passport">Recuperar contraseña</a></div>`
   },
   document: {
     label: "Documento",
@@ -36,7 +36,7 @@ const modes = {
     label: "Autoregistro",
     example: "Correo: ana.paredes@ejemplo.gob.pe · Contraseña: ClaveSegura1",
     success: "La cuenta y el proceso asociado están habilitados para ingresar a S.S.E.E.",
-    fields: `<label class="field-label" for="email">Correo electrónico <span>*</span><input class="form-control" id="email" type="email" autocomplete="username" placeholder="usuario@ejemplo.gob.pe" required></label><label class="field-label password-field" for="password">Contraseña <span>*</span><span class="password-input"><input class="form-control" id="password" type="password" autocomplete="current-password" required><button class="password-toggle" type="button" aria-label="Mostrar contraseña"><i class="fa-regular fa-eye"></i></button></span></label><div class="auth-secondary-actions"><a class="auth-change-link" href="index.html?auth=autoregistro">Olvidé mi contraseña</a><a class="auth-recovery-link" href="../ref-014-password-recovery/index.html?auth=autoregistro">Recuperar contraseña</a></div>`
+    fields: `<label class="field-label" for="email">Correo electrónico <span>*</span><input class="form-control" id="email" type="email" autocomplete="username" placeholder="usuario@ejemplo.gob.pe" required></label><label class="field-label password-field" for="password">Contraseña <span>*</span><span class="password-input"><input class="form-control" id="password" type="password" autocomplete="current-password" required><button class="password-toggle" type="button" aria-label="Mostrar contraseña"><i class="fa-regular fa-eye"></i></button></span></label><div class="auth-secondary-actions"><a class="auth-recovery-link" href="../ref-014-password-recovery/index.html?auth=autoregistro">Recuperar contraseña</a></div>`
   }
 };
 
@@ -88,7 +88,7 @@ function renderMode() {
   refs.panel.querySelector("form").addEventListener("submit", (event) => {
     event.preventDefault();
     refs.feedback.hidden = false;
-    refs.feedback.textContent = "Usa Olvidé mi contraseña para probar este requerimiento.";
+    refs.feedback.textContent = "Usa Recuperar contraseña para probar este requerimiento.";
     showToast(messages.M27, "warning");
   });
 }

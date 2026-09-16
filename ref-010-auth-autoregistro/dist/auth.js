@@ -108,13 +108,10 @@ const welcomeProfiles = {
     site: "Unidad de Seguimiento y Evaluación",
     institution: "Ministerio de Educación",
     process: "",
-    modules: [
-      { name: "Seguimiento", description: "Consulta y supervisa avances.", icon: "fa-chart-line" },
-      { name: "Evaluación", description: "Revisa resultados e indicadores.", icon: "fa-clipboard-check" },
-      { name: "Instrumentos", description: "Atiende instrumentos asignados.", icon: "fa-file-lines" },
-      { name: "Reportes", description: "Consulta reportes disponibles.", icon: "fa-chart-column" }
+    quickAccess: [
+      { name: "Cambiar contraseña", icon: "fa-key" }
     ],
-    projects: [{ name: "Seguimiento 2026", period: "2026", assigned: 12, pending: 4, sent: 8, contact: "Equipo de Seguimiento" }],
+    projects: [{ name: "Seguimiento 2026", period: "2026", assigned: 12, pending: 4, sent: 8, contact: { name: "Equipo de Seguimiento", email: "seguimiento@ejemplo.gob.pe" } }],
     notifications: [
       { title: "Instrumentos pendientes", text: "Tienes 4 instrumentos pendientes de atención.", icon: "fa-clipboard-list" },
       { title: "Nuevo reporte disponible", text: "El reporte de avance del periodo 2026 está disponible.", icon: "fa-file-lines" },
@@ -128,13 +125,10 @@ const welcomeProfiles = {
     site: "Unidad de Seguimiento y Evaluación",
     institution: "Ministerio de Educación",
     process: "",
-    modules: [
-      { name: "Seguimiento", description: "Consulta y supervisa avances.", icon: "fa-chart-line" },
-      { name: "Evaluación", description: "Revisa resultados e indicadores.", icon: "fa-clipboard-check" },
-      { name: "Instrumentos", description: "Atiende instrumentos asignados.", icon: "fa-file-lines" },
-      { name: "Reportes", description: "Consulta reportes disponibles.", icon: "fa-chart-column" }
+    quickAccess: [
+      { name: "Cambiar contraseña", icon: "fa-key" }
     ],
-    projects: [{ name: "Seguimiento 2026", period: "2026", assigned: 12, pending: 4, sent: 8, contact: "Equipo de Seguimiento" }],
+    projects: [{ name: "Seguimiento 2026", period: "2026", assigned: 12, pending: 4, sent: 8, contact: { name: "Equipo de Seguimiento", email: "seguimiento@ejemplo.gob.pe" } }],
     notifications: [
       { title: "Instrumentos pendientes", text: "Tienes 4 instrumentos pendientes de atención.", icon: "fa-clipboard-list" },
       { title: "Nuevo reporte disponible", text: "El reporte de avance del periodo 2026 está disponible.", icon: "fa-file-lines" },
@@ -148,12 +142,12 @@ const welcomeProfiles = {
     site: "Unidad de Seguimiento y Evaluación",
     institution: "Ministerio de Educación",
     process: "Autoregistro 2026",
-    modules: [
-      { name: "Seguimiento", description: "Consulta el avance de tu proceso.", icon: "fa-chart-line" },
-      { name: "Instrumentos", description: "Revisa los instrumentos asignados.", icon: "fa-file-lines" },
-      { name: "Reportes", description: "Consulta reportes disponibles.", icon: "fa-chart-column" }
+    quickAccess: [
+      { name: "Registrar usuario", icon: "fa-user-plus" },
+      { name: "Cambiar contraseña", icon: "fa-key" },
+      { name: "Crear rol", icon: "fa-user-shield" }
     ],
-    projects: [{ name: "Seguimiento 2026", period: "2026", assigned: 8, pending: 2, sent: 6, contact: "Mesa de ayuda USE" }],
+    projects: [{ name: "Seguimiento 2026", period: "2026", assigned: 8, pending: 2, sent: 6, contact: { name: "Mesa de ayuda USE", email: "mesa.ayuda@ejemplo.gob.pe", phone: "(01) 615-5800" } }],
     notifications: [
       { title: "Instrumentos pendientes", text: "Tienes 2 instrumentos pendientes de atención.", icon: "fa-clipboard-list" },
       { title: "Registro habilitado", text: "Tu acceso al proceso Autoregistro 2026 está habilitado.", icon: "fa-circle-check" }
@@ -373,33 +367,28 @@ function mountAuthWelcome(container, authType) {
         <section class="view is-active" id="welcome" aria-labelledby="welcomeTitle">
           <div class="page-head welcome-head">
             <div>
-              <nav class="breadcrumb" aria-label="Ruta"><a href="../index.html">Índice de requerimientos</a> / ALI-REF-017 / Bienvenida y módulos</nav>
+              <nav class="breadcrumb" aria-label="Ruta"><a href="../index.html">Índice de requerimientos</a> / REF-IDE-018 / Bienvenida y módulos</nav>
               <div class="title-row">
                 <div class="title-icon" aria-hidden="true"><i class="fa-solid fa-house"></i></div>
-                <div><h1 id="welcomeTitle" tabindex="-1">Bienvenido, ${profile.name}</h1><p id="welcomeSubtitle">Consulta los módulos y proyectos disponibles para tu acceso.</p></div>
+                <div><h1 id="welcomeTitle" tabindex="-1">Bienvenido, ${profile.name}</h1></div>
               </div>
             </div>
           </div>
 
-          <div class="context-strip" id="welcomeProcessContext" ${profile.process ? "" : "hidden"}>
-            <span class="context-icon" aria-hidden="true"><i class="fa-solid fa-user-plus"></i></span>
-            <div><strong>Proceso asociado</strong><span id="welcomeProcessText">${profile.process || ""}</span></div>
-          </div>
-
           <div class="welcome-grid">
-            <section class="surface-card modules-card" aria-labelledby="welcomeModulesTitle">
-              <div class="section-heading"><div><p class="eyebrow">Acceso según rol y permisos</p><h2 id="welcomeModulesTitle">Módulos disponibles</h2></div><span class="count-label" id="welcomeModuleCount">0 módulos</span></div>
-              <div class="module-grid" id="welcomeModuleGrid"></div>
-            </section>
             <section class="surface-card project-card" aria-labelledby="welcomeProjectsTitle">
               <div class="section-heading"><div><p class="eyebrow">Asignaciones vigentes</p><h2 id="welcomeProjectsTitle">Mis proyectos</h2></div><span class="count-label" id="welcomeProjectCount">0 proyectos</span></div>
               <div id="welcomeProjectList" class="project-list"></div>
             </section>
+            <section class="surface-card quick-access-card" aria-labelledby="welcomeQuickAccessTitle">
+              <div class="section-heading"><div><p class="eyebrow">Accesos disponibles</p><h2 id="welcomeQuickAccessTitle">Accesos rápidos</h2></div></div>
+              <div id="welcomeQuickAccessList" class="quick-access-list" role="list"></div>
+            </section>
           </div>
-
-          <section class="surface-card summary-card" aria-labelledby="welcomeSummaryTitle">
-            <div class="section-heading"><div><p class="eyebrow">Información del acceso</p><h2 id="welcomeSummaryTitle">Resumen de usuario</h2></div><span class="status-chip"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Acceso habilitado</span></div>
+          <section class="welcome-status-strip" aria-labelledby="welcomeSummaryTitle">
+            <div class="status-strip-title"><p class="eyebrow">Información del acceso</p><h2 id="welcomeSummaryTitle">Estado de acceso</h2></div>
             <div class="user-summary" id="welcomeUserSummary"></div>
+            <span class="status-chip"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Acceso habilitado</span>
           </section>
         </section>
 
@@ -412,10 +401,9 @@ function mountAuthWelcome(container, authType) {
     </aside>`;
 
   const refs = {
-    moduleGrid: container.querySelector("#welcomeModuleGrid"),
     projectList: container.querySelector("#welcomeProjectList"),
+    quickAccessList: container.querySelector("#welcomeQuickAccessList"),
     userSummary: container.querySelector("#welcomeUserSummary"),
-    moduleCount: container.querySelector("#welcomeModuleCount"),
     projectCount: container.querySelector("#welcomeProjectCount"),
     notificationButton: container.querySelector("#welcomeNotificationButton"),
     notificationCount: container.querySelector("#welcomeNotificationCount"),
@@ -425,11 +413,21 @@ function mountAuthWelcome(container, authType) {
     toast: document.getElementById("toast")
   };
 
-  refs.moduleCount.textContent = `${profile.modules.length} módulos`;
   refs.projectCount.textContent = `${profile.projects.length} ${profile.projects.length === 1 ? "proyecto" : "proyectos"}`;
-  refs.moduleGrid.innerHTML = profile.modules.map((module) => `<a href="#" class="module-item" data-module="${module.name}"><span class="module-icon"><i class="fa-solid ${module.icon}" aria-hidden="true"></i></span><span><strong>${module.name}</strong><span>${module.description}</span></span><i class="fa-solid fa-chevron-right module-arrow" aria-hidden="true"></i></a>`).join("");
-  refs.projectList.innerHTML = profile.projects.map((project) => `<article class="project-item"><div class="project-item-head"><strong>${project.name}</strong><span class="count-label">Periodo ${project.period}</span></div><div class="project-meta"><span class="metric"><i class="fa-solid fa-layer-group" aria-hidden="true"></i>${project.assigned} asignados</span><span class="metric pending"><i class="fa-solid fa-clock" aria-hidden="true"></i>${project.pending} pendientes</span><span class="metric sent"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i>${project.sent} enviados</span></div><div class="project-contact"><i class="fa-regular fa-address-book" aria-hidden="true"></i><span>Contacto: ${project.contact}</span></div></article>`).join("");
-  refs.userSummary.innerHTML = `<div><span>Nombre completo</span><strong>${profile.name}</strong></div><div><span>Tipo de autenticación</span><strong>${profile.authType}</strong></div><div><span>Rol referencial</span><strong>${profile.role}</strong></div><div><span>Sede</span><strong>${profile.site}</strong></div>`;
+  const renderContact = (contact) => {
+    if (!contact) return "";
+    const details = typeof contact === "string"
+      ? [{ icon: "fa-address-book", text: `Contacto: ${contact}` }]
+      : [
+          contact.name && { icon: "fa-address-book", text: `Contacto: ${contact.name}` },
+          contact.email && { icon: "fa-envelope", text: contact.email },
+          contact.phone && { icon: "fa-phone", text: contact.phone }
+        ].filter(Boolean);
+    return details.length ? `<div class="project-contact">${details.map((detail) => `<span><i class="fa-solid ${detail.icon}" aria-hidden="true"></i>${detail.text}</span>`).join("")}</div>` : "";
+  };
+  refs.projectList.innerHTML = profile.projects.map((project) => `<article class="project-item"><div class="project-item-head"><strong>${project.name}</strong><span class="count-label">Periodo ${project.period}</span></div><div class="project-meta"><span class="metric"><i class="fa-solid fa-layer-group" aria-hidden="true"></i>${project.assigned} asignados</span><span class="metric pending"><i class="fa-solid fa-clock" aria-hidden="true"></i>${project.pending} pendientes</span><span class="metric sent"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i>${project.sent} enviados</span></div>${renderContact(project.contact)}</article>`).join("");
+  refs.quickAccessList.innerHTML = (profile.quickAccess || []).map((item) => `<div class="quick-access-item" role="listitem"><span class="quick-access-icon"><i class="fa-solid ${item.icon}" aria-hidden="true"></i></span><strong>${item.name}</strong></div>`).join("");
+  refs.userSummary.innerHTML = `<div><span>Tipo de autenticación</span><strong>${profile.authType}</strong></div><div><span>Estado</span><strong>Acceso habilitado</strong></div>`;
   refs.notificationCount.textContent = profile.notifications.length;
   refs.notificationList.innerHTML = profile.notifications.map((notification) => `<article class="notification-item"><span class="notification-icon"><i class="fa-solid ${notification.icon}" aria-hidden="true"></i></span><div><strong>${notification.title}</strong><span>${notification.text}</span></div></article>`).join("");
 
@@ -442,17 +440,11 @@ function mountAuthWelcome(container, authType) {
     refs.notificationPanel.hidden = true;
     refs.notificationButton.setAttribute("aria-expanded", "false");
   });
-  refs.moduleGrid.addEventListener("click", (event) => {
-    const module = event.target.closest("[data-module]");
-    if (!module) return;
-    event.preventDefault();
-    if (typeof renderToast === "function") renderToast(refs.toast, `Acceso a ${module.dataset.module} disponible para revisión.`, "info");
-  });
-
   container.hidden = false;
   container.querySelector("#welcomeTitle")?.focus({ preventScroll: true });
   window.dispatchEvent(new CustomEvent("auth:welcome-ready"));
 }
+
 
 
 /* source: design-system/auth-welcome-flow.js */

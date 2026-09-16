@@ -3,7 +3,7 @@
 .auth-tab i{color:var(--ssee-primary)}
 .auth-tab.is-active{background:#fff;border-color:#cfd2ff;color:var(--ssee-primary);box-shadow:0 .25rem .8rem rgba(45,43,232,.1)}
 .auth-secondary-actions{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
-.auth-secondary-actions .auth-recovery-link,.auth-secondary-actions .auth-change-link{white-space:nowrap}
+.auth-secondary-actions .auth-recovery-link{white-space:nowrap}
 .auth-panel-form{display:grid;gap:.9rem}
 .auth-panel-form .field-grid{margin-bottom:0}
 .auth-panel-form .form-actions{margin-top:.25rem}

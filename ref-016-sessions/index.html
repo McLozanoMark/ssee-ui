@@ -6,9 +6,9 @@
   <title>S.S.E.E. - Gestión de sesiones</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="../design-system/app.css?v=20260827-form-controls">
+        <link rel="stylesheet" href="../design-system/app.css?v=20260916-detail-dialog">
   <link rel="stylesheet" href="../design-system/auth.css?v=20260915-auth-family">
-  <link rel="stylesheet" href="../ref-017-welcome/styles.css">
+  <link rel="stylesheet" href="../design-system/welcome.css?v=20260915-welcome-layout">
   <link rel="stylesheet" href="../auth-login/styles.css?v=20260914-central-auth">
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -59,34 +59,28 @@
       <section class="view is-active" id="welcome" aria-labelledby="welcomeTitle">
         <div class="page-head welcome-head">
           <div>
-            <nav class="breadcrumb" aria-label="Ruta"><a href="../index.html">Índice de requerimientos</a> / ALI-REF-016 / Gestión de sesiones</nav>
+            <nav class="breadcrumb" aria-label="Ruta"><a href="../index.html">Índice de requerimientos</a> / REF-IDE-015 / Gestión de sesiones</nav>
             <div class="title-row">
               <div class="title-icon" aria-hidden="true"><i class="fa-solid fa-house"></i></div>
-              <div><h1 id="welcomeTitle">Bienvenido, Ana Paredes</h1><p id="welcomeSubtitle">Consulta los módulos y proyectos disponibles para tu acceso.</p></div>
+              <div><h1 id="welcomeTitle">Bienvenido, Ana Paredes</h1></div>
             </div>
           </div>
         </div>
 
-        <div class="context-strip" id="processContext" hidden>
-          <span class="context-icon" aria-hidden="true"><i class="fa-solid fa-user-plus"></i></span>
-          <div><strong>Proceso asociado</strong><span id="processText">Autoregistro 2026</span></div>
-        </div>
-
         <div class="welcome-grid">
-          <section class="surface-card modules-card" aria-labelledby="modulesTitle">
-            <div class="section-heading"><div><p class="eyebrow">Acceso según rol y permisos</p><h2 id="modulesTitle">Módulos disponibles</h2></div><span class="count-label" id="moduleCount">0 módulos</span></div>
-            <div class="module-grid" id="moduleGrid"></div>
-          </section>
-
           <section class="surface-card project-card" aria-labelledby="projectsTitle">
             <div class="section-heading"><div><p class="eyebrow">Asignaciones vigentes</p><h2 id="projectsTitle">Mis proyectos</h2></div><span class="count-label" id="projectCount">0 proyectos</span></div>
             <div id="projectList" class="project-list"></div>
           </section>
+          <section class="surface-card quick-access-card" aria-labelledby="quickAccessTitle">
+            <div class="section-heading"><div><p class="eyebrow">Accesos disponibles</p><h2 id="quickAccessTitle">Accesos rápidos</h2></div></div>
+            <div id="quickAccessList" class="quick-access-list" role="list"></div>
+          </section>
         </div>
-
-        <section class="surface-card summary-card" aria-labelledby="summaryTitle">
-          <div class="section-heading"><div><p class="eyebrow">Información del acceso</p><h2 id="summaryTitle">Resumen de usuario</h2></div><span class="status-chip"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Acceso habilitado</span></div>
+        <section class="welcome-status-strip" aria-labelledby="summaryTitle">
+          <div class="status-strip-title"><p class="eyebrow">Información del acceso</p><h2 id="summaryTitle">Estado de acceso</h2></div>
           <div class="user-summary" id="userSummary"></div>
+          <span class="status-chip"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Acceso habilitado</span>
         </section>
       </section>
 
@@ -121,7 +115,7 @@
                 <label class="field-label" for="sessionEmail">Correo electrónico <span>*</span><input class="form-control" id="sessionEmail" type="email" autocomplete="username" placeholder="usuario@ejemplo.gob.pe"></label>
               </div>
               <label class="field-label password-field" id="sessionPasswordField" for="sessionPassword">Contraseña <span>*</span><span class="password-input"><input class="form-control" id="sessionPassword" type="password" autocomplete="current-password"><button class="password-toggle" type="button" aria-label="Mostrar contraseña"><i class="fa-regular fa-eye"></i></button></span></label>
-              <div class="auth-secondary-actions" id="sessionAuthLinks"><a class="auth-change-link" href="#">Olvidé mi contraseña</a><a class="auth-recovery-link" href="#">Recuperar contraseña</a></div>
+              <div class="auth-secondary-actions" id="sessionAuthLinks"><a class="auth-recovery-link" href="#">Recuperar contraseña</a></div>
               <div class="form-actions"><button class="btn btn-ssee button button-primary" id="sessionLoginSubmit" type="submit"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>Ingresar</button></div>
             </form>
           </section>
@@ -131,7 +125,7 @@
     </main>
     <footer class="footer"><div class="minedu-mark"><img class="minedu-logo" src="../assets/minedu.jpg" alt="Ministerio de Educación"></div><div><p>2026. Todos los derechos reservados.</p><p>Ministerio de Educación - S.S.E.E. - Versión 0.1</p></div></footer>
   </section>
-  <div class="confirm-backdrop" id="inactivityAlert" role="alertdialog" aria-modal="true" aria-labelledby="inactivityAlertTitle" hidden><div class="confirm-modal"><div class="confirm-header"><span class="confirm-icon"><i class="fa-solid fa-clock" aria-hidden="true"></i></span><h2 id="inactivityAlertTitle">Sesión próxima a finalizar</h2></div><div class="confirm-body"><p id="inactivityMessage">La sesión se cerrará automáticamente en 00:05 por inactividad.<br>¿Deseas continuar en el sistema?</p></div><div class="confirm-actions"><button class="btn btn-outline-ssee" id="continueSession" type="button">Continuar trabajando</button><button class="btn btn-ssee" id="closeInactiveSession" type="button">Cerrar sesión</button></div></div></div>
+  <div class="confirm-backdrop" id="inactivityAlert" role="alertdialog" aria-modal="true" aria-labelledby="inactivityAlertTitle" hidden><div class="confirm-modal"><div class="confirm-header"><span class="confirm-icon"><i class="fa-solid fa-clock" aria-hidden="true"></i></span><h2 id="inactivityAlertTitle">Sesión próxima a finalizar</h2></div><div class="confirm-body"><p id="inactivityMessage">La sesión se cerrará automáticamente en 00:15 por inactividad.<br>¿Deseas continuar en el sistema?</p></div><div class="confirm-actions"><button class="btn btn-outline-ssee" id="continueSession" type="button">Continuar trabajando</button><button class="btn btn-ssee" id="closeInactiveSession" type="button">Cerrar sesión</button></div></div></div>
   <div class="confirm-backdrop" id="confirmDialog" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden><div class="confirm-modal"><div class="confirm-header"><span class="confirm-icon"><i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i></span><h2 id="confirmTitle">¿Está seguro que desea cerrar sesión?</h2><button class="confirm-close" id="closeConfirm" type="button" aria-label="Cerrar"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button></div><div class="confirm-body"><p id="confirmMessage">Se finalizará tu sesión actual. Tendrás que ingresar tus datos nuevamente para acceder.</p></div><div class="confirm-actions"><button class="btn btn-outline-ssee" id="cancelLogout" type="button">No</button><button class="btn btn-ssee" id="confirmLogout" type="button">Sí</button></div></div></div>
 
   <aside class="notification-panel" id="notificationPanel" aria-labelledby="notificationTitle" hidden>

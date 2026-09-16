@@ -5,7 +5,7 @@ import { recordAuditEvent } from "../../design-system/auth-audit.js";
 import { getPrototypeMessage } from "../../design-system/messages.js";
 
 const refs = {
-  accountName: document.getElementById("accountName"), accountRole: document.getElementById("accountRole"), accountInitial: document.getElementById("accountInitial"), welcomeTitle: document.getElementById("welcomeTitle"), welcomeSubtitle: document.getElementById("welcomeSubtitle"), processContext: document.getElementById("processContext"), processText: document.getElementById("processText"), moduleCount: document.getElementById("moduleCount"), projectCount: document.getElementById("projectCount"), moduleGrid: document.getElementById("moduleGrid"), projectList: document.getElementById("projectList"), userSummary: document.getElementById("userSummary"), notificationButton: document.getElementById("notificationButton"), notificationCount: document.getElementById("notificationCount"), notificationPanel: document.getElementById("notificationPanel"), notificationList: document.getElementById("notificationList"), closeNotifications: document.getElementById("closeNotifications"), accountMenuTrigger: document.getElementById("accountMenuTrigger"), accountMenu: document.getElementById("accountMenu"), logoutOption: document.getElementById("logoutOption"), welcomeShell: document.querySelector(".app-shell"), loginView: document.getElementById("loginView"), autoregisterLogin: document.getElementById("autoregisterLogin"), passportLogin: document.getElementById("passportLogin"), toast: document.getElementById("toast")
+  accountName: document.getElementById("accountName"), accountRole: document.getElementById("accountRole"), accountInitial: document.getElementById("accountInitial"), welcomeTitle: document.getElementById("welcomeTitle"), projectCount: document.getElementById("projectCount"), projectList: document.getElementById("projectList"), quickAccessList: document.getElementById("quickAccessList"), userSummary: document.getElementById("userSummary"), notificationButton: document.getElementById("notificationButton"), notificationCount: document.getElementById("notificationCount"), notificationPanel: document.getElementById("notificationPanel"), notificationList: document.getElementById("notificationList"), closeNotifications: document.getElementById("closeNotifications"), accountMenuTrigger: document.getElementById("accountMenuTrigger"), accountMenu: document.getElementById("accountMenu"), logoutOption: document.getElementById("logoutOption"), welcomeShell: document.querySelector(".app-shell"), loginView: document.getElementById("loginView"), autoregisterLogin: document.getElementById("autoregisterLogin"), passportLogin: document.getElementById("passportLogin"), toast: document.getElementById("toast")
 };
 
 const params = new URLSearchParams(window.location.search);
@@ -36,12 +36,6 @@ document.addEventListener("click", (event) => {
     setNotificationPanel(refs, false);
   }
   if (!refs.accountMenu.contains(event.target) && !refs.accountMenuTrigger.contains(event.target)) setAccountMenu(false);
-});
-refs.moduleGrid.addEventListener("click", (event) => {
-  const module = event.target.closest("[data-module]");
-  if (!module) return;
-  event.preventDefault();
-  showToast(refs, `Acceso a ${module.dataset.module} disponible para revisión.`, "info");
 });
 refs.logoutOption.addEventListener("click", () => {
   recordAuditEvent({ user: profile.name, authType: profile.authType, operation: "Cierre de sesión", closureType: "Voluntario", result: "Exitosa" });
