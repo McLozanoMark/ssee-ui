@@ -1,4 +1,4 @@
-@import url("../design-system/app.css?v=20260911-status-switch");
+@import url("../design-system/app.css?v=20260916-detail-dialog");
 
 .breadcrumb { display: flex; align-items: center; flex-wrap: wrap; gap: 0.45rem; }
 .breadcrumb a { text-decoration: none; }
@@ -73,24 +73,9 @@
 .structure-note i { color: var(--ssee-primary); }
 .form-control:disabled, .form-select:disabled { background: var(--ssee-surface-soft); color: var(--ssee-muted); opacity: 1; }
 .row-action:disabled, .table-icon-button:disabled { cursor: not-allowed; opacity: 0.45; }
-.detail-trace-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.65rem; }
-.detail-trace-grid div { display: grid; gap: 0.25rem; padding: 0.65rem 0.75rem; border: 1px solid var(--ssee-line); border-radius: 0.45rem; background: var(--ssee-surface-soft); }
-.detail-trace-grid span { color: var(--ssee-muted); font-size: 0.74rem; }
-.detail-trace-grid strong { color: var(--ssee-text); font-size: 0.8rem; font-weight: 650; }
-.detail-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.65rem; }
-.detail-summary div { display: grid; gap: 0.25rem; padding: 0.65rem 0.75rem; border: 1px solid var(--ssee-line); border-radius: 0.45rem; background: var(--ssee-surface-soft); }
-.detail-summary span, .detail-trace { color: var(--ssee-muted); font-size: 0.76rem; }
-.detail-summary span, .detail-summary strong, .detail-trace-grid span, .detail-trace-grid strong { display: block; min-width: 0; }
-.detail-summary strong { font-size: 0.84rem; overflow-wrap: anywhere; }
-.detail-description { margin: 1rem 0; color: #33456f; line-height: 1.5; }
-.detail-section-title { margin: 1rem 0 0.55rem; font-size: 0.9rem; }
-.detail-table-wrap { overflow-x: auto; border: 1px solid var(--ssee-line); border-radius: 0.45rem; }
-.detail-trace { margin: 0; }
-.detail-dialog .modal-body { max-height: 70vh; overflow-y: auto; }
 .manual-record-input { min-width: 9rem; }
 .manual-validation-message { margin: 0.55rem 0 0; min-height: 1rem; }
 @media (max-width: 54rem) { .detail-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 54rem) { .detail-trace-grid { grid-template-columns: 1fr; } }
 .compact-table { min-width: 54rem; }
 
 @media (max-width: 72rem) {

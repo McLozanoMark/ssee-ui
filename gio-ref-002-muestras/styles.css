@@ -1,4 +1,4 @@
-@import url("../design-system/app.css?v=20260911-status-switch");
+@import url("../design-system/app.css?v=20260916-detail-dialog");
 
 .breadcrumb { display: flex; align-items: center; flex-wrap: wrap; gap: 0.45rem; }
 .breadcrumb a { text-decoration: none; }
@@ -10,18 +10,15 @@
 .panel-heading h2 { margin: 0.2rem 0 0.25rem; font-size: 1.2rem; }
 .panel-heading p:not(.eyebrow) { margin: 0; color: var(--ssee-muted); font-size: 0.86rem; }
 .eyebrow { margin: 0; color: var(--ssee-primary); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
-.source-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
-.source-form-grid label, .instrument-options label { display: grid; gap: 0.4rem; color: var(--ssee-text); font-size: 0.83rem; font-weight: 700; }
-.source-form-grid input, .source-form-grid select { height: var(--ssee-control-height); min-height: var(--ssee-control-height); }
-.source-description-field { grid-column: 1 / -1; }
+.source-form-grid { display: grid; gap: 1.25rem; }
+.sample-data-fields { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 1rem 1.25rem; align-items: start; }
+.source-form-grid label { display: grid; gap: 0.4rem; color: var(--ssee-text); font-size: 0.83rem; font-weight: 700; }
+.source-form-grid input:not([type="checkbox"]):not([type="radio"]), .source-form-grid select { height: var(--ssee-control-height); min-height: var(--ssee-control-height); }
 .field-error { display: block; min-height: 1rem; color: var(--ssee-danger); font-size: 0.74rem; font-weight: 500; }
 .population-card, .wizard-summary > div { display: grid; gap: 0.25rem; align-content: center; min-height: 5.3rem; padding: 0.85rem 1rem; border: 1px solid var(--ssee-line); border-radius: 0.5rem; background: var(--ssee-surface-soft); }
 .population-card span, .wizard-summary span, .selection-summary span { color: var(--ssee-muted); font-size: 0.76rem; }
 .population-card strong, .wizard-summary strong, .selection-summary strong { color: var(--ssee-text); font-size: 1rem; }
 .population-card small { color: var(--ssee-muted); font-size: 0.74rem; }
-.instrument-options { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin: 0; padding: 0; border: 0; }
-.instrument-options legend { grid-column: 1 / -1; margin-bottom: 0; color: var(--ssee-text); font-size: 0.83rem; font-weight: 700; }
-.instrument-options label { display: flex; align-items: center; gap: 0.55rem; min-height: var(--ssee-control-height); padding: 0.65rem 0.75rem; border: 1px solid var(--ssee-line); border-radius: 0.45rem; font-weight: 500; }
 .wizard-stepper { display: flex; align-items: center; gap: 0.55rem; margin: 1rem 0; }
 .wizard-step { display: inline-flex; align-items: center; gap: 0.45rem; border: 0; background: transparent; color: var(--ssee-muted); font-size: 0.78rem; font-weight: 700; }
 .wizard-step span { display: grid; width: 1.8rem; height: 1.8rem; place-items: center; border: 1px solid var(--ssee-line); border-radius: 50%; background: #fff; }
@@ -62,16 +59,8 @@
 .inner-table .table-wrap { max-height: 16rem; overflow: auto; }
 .table-caption { margin: 0.6rem 0 0; color: var(--ssee-muted); font-size: 0.78rem; }
 .unit-table { margin-top: 0; }
-.detail-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.65rem; }
-.detail-summary div { display: grid; gap: 0.25rem; padding: 0.65rem 0.75rem; border: 1px solid var(--ssee-line); border-radius: 0.45rem; background: var(--ssee-surface-soft); }
-.detail-summary span, .detail-trace { color: var(--ssee-muted); font-size: 0.76rem; }
-.detail-summary strong { font-size: 0.84rem; }
-.detail-description { margin: 1rem 0; color: #33456f; line-height: 1.5; }
-.detail-section-title { margin: 1rem 0 0.55rem; font-size: 0.9rem; }
-.detail-table-wrap { overflow-x: auto; border: 1px solid var(--ssee-line); border-radius: 0.45rem; }
-.detail-trace { margin: 0.45rem 0 0; }
-@media (max-width: 64rem) { .source-form-grid, .structure-layout, .method-config { grid-template-columns: 1fr; } .source-description-field, .instrument-options { grid-column: auto; } .instrument-options { grid-template-columns: 1fr; } .instrument-options legend { grid-column: auto; } .wizard-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 54rem) { .wizard-step strong { display: none; } .wizard-step { margin: 0 auto; } .unit-toolbar, .wizard-footer { align-items: stretch; flex-direction: column; } .toolbar-actions, .footer-actions { flex-wrap: wrap; margin-left: 0; } .detail-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 64rem) { .sample-data-fields, .structure-layout, .method-config { grid-template-columns: 1fr; } .sample-data-fields > *, .source-description-field { grid-column: auto; } .wizard-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 54rem) { .wizard-step strong { display: none; } .wizard-step { margin: 0 auto; } .unit-toolbar, .wizard-footer { align-items: stretch; flex-direction: column; } .toolbar-actions, .footer-actions { flex-wrap: wrap; margin-left: 0; } }
 
 .unit-table .table-wrap { max-height: 20rem; }
 .unit-table table { min-width: 66rem; }
@@ -95,33 +84,55 @@
 .replacement-table-wrap tbody tr:hover { background: var(--ssee-surface-soft); }
 .replacement-table-wrap tbody tr:has(input:checked) { background: var(--ssee-primary-soft); }
 
-/* Keep the tray dense: actions remain on one row and data columns do not absorb unused width. */
+/* Keep the tray dense while giving each visible column enough room to wrap safely. */
 #listView .ssee-table { min-width: 0; table-layout: fixed; }
-#listView .ssee-table th, #listView .ssee-table td { padding: 0.55rem 0.65rem; }
-#listView .ssee-table th:nth-child(1), #listView .ssee-table td:nth-child(1) { width: 11%; }
-#listView .ssee-table th:nth-child(2), #listView .ssee-table td:nth-child(2) { width: 28%; }
-#listView .ssee-table th:nth-child(3), #listView .ssee-table td:nth-child(3) { width: 16%; }
-#listView .ssee-table th:nth-child(4), #listView .ssee-table td:nth-child(4) { width: 14%; }
+#listView .ssee-table th, #listView .ssee-table td {
+  padding: 0.55rem 0.65rem;
+  vertical-align: middle;
+}
+#listView .ssee-table th {
+  white-space: normal;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+#listView .ssee-table th .sort-button {
+  max-width: 100%;
+  white-space: normal;
+  line-height: inherit;
+}
+#listView .ssee-table td { overflow-wrap: anywhere; }
+#listView .ssee-table th:nth-child(1), #listView .ssee-table td:nth-child(1) { width: 6%; text-align: center; }
+#listView .ssee-table th:nth-child(2), #listView .ssee-table td:nth-child(2) { width: 31%; }
+#listView .ssee-table th:nth-child(3), #listView .ssee-table td:nth-child(3) { width: 18%; }
+#listView .ssee-table th:nth-child(4), #listView .ssee-table td:nth-child(4) { width: 19%; }
 #listView .ssee-table th:nth-child(5), #listView .ssee-table td:nth-child(5) { width: 11%; }
-#listView .ssee-table th:nth-child(6), #listView .ssee-table td:nth-child(6) { width: 20%; }
+#listView .ssee-table th:nth-child(6), #listView .ssee-table td:nth-child(6) { width: 15%; }
+#listView .ssee-table td:nth-child(4), #listView .ssee-table td:nth-child(5) { white-space: nowrap; }
 #listView .row-actions { min-width: 0; flex-wrap: nowrap; gap: 0.15rem; }
 #listView .row-action { min-width: 3.3rem; min-height: 2.35rem; padding: 0.2rem 0.2rem; }
 #listView .row-action i { font-size: 0.82rem; }
-#listView .ssee-table th:nth-child(4) .sort-button { white-space: normal; line-height: 1.1; }
 
-/* Step 1 keeps general data left and access setup right. */
-.source-form-grid { grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.8fr); gap: 0.9rem 1.25rem; align-items: start; }
-.source-form-grid > label:first-child { grid-column: 1; grid-row: 1; }
-.source-form-grid > label:nth-child(2) { grid-column: 1; grid-row: 2; }
-.source-description-field { grid-column: 1; grid-row: 3; }
-.source-form-grid > .population-card { grid-column: 1; grid-row: 4; }
-.instrument-options { grid-column: 2; grid-row: 1 / span 3; grid-template-columns: 1fr; align-content: start; }
-.source-form-grid > label:last-child { grid-column: 2; grid-row: 4; align-self: start; }
+/* Step 1 follows the dependency order and keeps source metrics on one row. */
+.sample-data-fields > .sample-name-field { grid-column: span 7; grid-row: 1; }
+.sample-data-fields > .sample-project-field { grid-column: span 5; grid-row: 1; }
+.sample-data-fields > .instrument-field { grid-column: 1 / -1; grid-row: 2; }
+.sample-data-fields > .sample-source-field { grid-column: span 5; grid-row: 3; }
+.sample-data-fields > .sample-size-field { grid-column: span 3; grid-row: 3; }
+.sample-data-fields > .population-card { grid-column: span 4; grid-row: 3; align-self: stretch; }
+.sample-data-fields > .source-description-field { grid-column: 1 / -1; grid-row: 4; }
+.instrument-field { display: grid; gap: 0.4rem; min-width: 0; }
+.instrument-field .form-field-label { color: var(--ssee-text); font-size: 0.83rem; font-weight: 700; }
+.instrument-field .assignment-select { margin-top: 0; }
+.instrument-field .assignment-control { min-height: var(--ssee-control-height); }
+.instrument-field .assignment-placeholder { color: var(--ssee-muted); font-size: 0.8rem; font-weight: 500; }
+.instrument-field .assignment-control[aria-disabled="true"] { border-color: var(--ssee-line); background: var(--ssee-surface-soft); }
+.instrument-field .assignment-toggle:disabled { color: var(--ssee-muted); cursor: not-allowed; opacity: 1; }
+.instrument-field .project-picker { height: auto; max-height: 12rem; }
+.instrument-field .field-error { margin-top: 0; }
 
 @media (max-width: 64rem) {
-  .source-form-grid { grid-template-columns: 1fr; }
-  .source-form-grid > label:first-child, .source-form-grid > label:nth-child(2), .source-description-field, .source-form-grid > .population-card, .instrument-options, .source-form-grid > label:last-child { grid-column: auto; }
-  .instrument-options { grid-template-columns: 1fr; }
+  .sample-data-fields { grid-template-columns: 1fr; }
+  .sample-data-fields > .sample-name-field, .sample-data-fields > .sample-project-field, .sample-data-fields > .sample-source-field, .sample-data-fields > .source-description-field, .sample-data-fields > .population-card, .sample-data-fields > .sample-size-field, .sample-data-fields > .instrument-field { grid-column: auto; grid-row: auto; }
   .replacement-current-info { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 

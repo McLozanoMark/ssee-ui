@@ -1,4 +1,4 @@
-import { samples, sourceCatalog } from "./data.js";
+import { samples, sourceCatalog, projectCatalog } from "./data.js";
 
 const defaultFields = [
   { name: "Código modular", unique: true, preload: true, informant: false, user: true },
@@ -12,11 +12,16 @@ export function getSourceConfig(name) {
   return sourceCatalog.find((source) => source.name === name) || null;
 }
 
+export function getProjectConfig(name) {
+  return projectCatalog.find((project) => project.name === name) || null;
+}
+
 export function createDraft(sample = null) {
   state.draft = {
     id: sample?.id || null,
     name: sample?.name || "",
     description: sample?.description || "",
+    project: sample?.project || "",
     source: sample?.source || "",
     sampleSize: sample?.sampleSize || "",
     population: sample?.population || "0",

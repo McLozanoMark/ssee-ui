@@ -92,7 +92,7 @@ for the two-zone login and password surfaces, and `auth-guide.js` is the
 canonical external presentation guide. A requirement-specific flow may change
 its fields, state or branch, but it may not fork the shell or guide styling.
 After a valid authentication, the shared flow exposes `Continuar` and renders
-the current REF-017 welcome surface inside the same demo document. Passport and
+the current REF-IDE-018 welcome surface inside the same demo document. Passport and
 identity-service steps are represented by guide copy; external login screens
 and CAPTCHA are never recreated. The welcome structure and interaction are
 shared, while the synthetic profile is selected by authentication type.
@@ -139,7 +139,7 @@ other dates keep their requirement-specific control.
 
 The Gestión de usuarios tray applies the same shared range control to
 `Último acceso`; it uses the same selection, validation, clear and reset
-behavior across REF-003, REF-004 and REF-007.
+behavior across REF-IDE-003, REF-IDE-004 and REF-IDE-007.
 
 The user-management tray is a shared presentation surface. `ref-007-users`,
 `ref-003-passport`, and `ref-004-admision` load the same

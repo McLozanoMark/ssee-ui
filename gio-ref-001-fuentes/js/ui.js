@@ -51,7 +51,6 @@ export const refs = {
 export function showToast(message, type = "info") {
   renderToast(refs.toast, message, type);
 }
-
 export function initTooltips() {
   enableTooltips();
 }
@@ -82,7 +81,7 @@ export function showForm(source = null) {
   refs.listView.classList.remove("is-active");
   refs.formView.classList.add("is-active");
   refs.formTitle.textContent = source ? "Editar" : "Registrar";
-  refs.formBreadcrumb.innerHTML = `<a href="../index.html">Índice de requerimientos</a> / GIO-REF-001 / Fuentes de datos / ${source ? "Editar" : "Registrar"}`;
+  refs.formBreadcrumb.innerHTML = `<a href="../index.html">Índice de requerimientos</a> / RF-GFD-001 / Fuentes de datos / ${source ? "Editar" : "Registrar"}`;
   refs.sourceForm.reset();
   syncGeneralFields();
   setWizardStep(1);
@@ -173,7 +172,6 @@ export function renderManualRecords() {
   }).join("");
   refs.manualValidationMessage.textContent = state.manualValidation?.status === "error" ? "Corrige los registros observados antes de guardar." : "";
 }
-
 export function updateLoadMode() {
   refs.loadCards.forEach((card) => card.classList.toggle("is-selected", card.dataset.loadMode === state.loadMode));
   refs.manualPanel.hidden = state.loadMode !== "manual";
