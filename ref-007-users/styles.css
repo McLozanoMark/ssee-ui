@@ -1,0 +1,10 @@
+#advancedFilters {
+  align-items: stretch;
+}
+
+#advancedFilters .filter-field {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-self: stretch;
+}

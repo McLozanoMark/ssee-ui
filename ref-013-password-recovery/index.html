@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>S.S.E.E. - Recuperación de contraseña</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="../design-system/app.css?v=20260921-toast-modern">
+  <link rel="stylesheet" href="../design-system/auth.css?v=20260914-auth-family">
+  <link rel="stylesheet" href="styles.css?v=20260918-passport-visibility-toast-modern">
+</head>
+<body data-auth-guide="recovery">
+  <div class="auth-page">
+    <main class="auth-main">
+      <section class="auth-shell">
+        <div class="auth-form-panel">
+          <div class="auth-brand" aria-label="S.S.E.E."><span class="logo-symbol">S</span><span><strong>S.S.E.E.</strong><small>Seguimiento y Evaluación Estratégica</small></span></div>
+          <div class="auth-heading"><h1>Recuperar contraseña</h1></div>
+          <header class="passport-site-header" aria-label="Passport"><div class="passport-wordmark">passport<small>SISTEMA DE SEGURIDAD</small></div><div class="passport-minedu-mark"><b>🇵🇪 PERÚ</b><span>Ministerio<br>de Educación</span></div></header>
+          <section class="passport-panel" id="passportPanel" hidden>
+            <div class="passport-recovery-page">
+              <div class="passport-red-line"></div>
+              <h2>Recuperar contraseña</h2>
+              <form id="passportRecoveryForm" novalidate>
+                <label class="passport-field" for="passportRecoveryDocumentType"><span>Tipo de documento:</span><select id="passportRecoveryDocumentType"><option value="" disabled>Seleccionar</option><option value="DNI" selected>DNI</option><option value="CE">CARNET EXT.</option><option value="PASAPORTE">PASAPORTE</option><option value="PTP">PTP</option></select></label>
+                <label class="passport-field" for="passportRecoveryDocumentNumber"><span>Número de documento:</span><input id="passportRecoveryDocumentNumber" value="12345678" placeholder="Número de documento" inputmode="numeric" maxlength="12"></label>
+                <div class="passport-captcha-row"><label class="passport-field" for="passportRecoveryCaptcha"><span>Captcha:</span><input id="passportRecoveryCaptcha" value="WXY7MZ" placeholder="CAPTCHA" autocomplete="off"></label><div class="passport-captcha-art" aria-label="Captcha de ejemplo"><strong id="passportCaptchaText">WXY7MZ</strong><button id="passportCaptchaRefresh" type="button" aria-label="Cambiar captcha"><i class="fa-solid fa-rotate"></i></button></div></div>
+                <div class="passport-feedback" id="passportFeedback" role="alert" hidden></div>
+                <div class="passport-actions"><button class="passport-button passport-button-secondary" id="passportCancel" type="button">Cancelar</button><button class="passport-button passport-button-primary" type="submit">Enviar correo</button></div>
+              </form>
+              <div class="passport-support"><p><i class="fa-solid fa-phone" aria-hidden="true"></i> Línea de atención (01) 615-5800</p><p>de lunes a viernes de 9:00 am a 6:00 pm.</p><p>mesadeservicios@minedu.gob.pe</p><p class="passport-browser-note">Se recomienda usar los navegadores</p><p>🌐 Chrome v63 o Superior</p><p>🦊 FireFox v58 o Superior</p></div>
+              <div class="passport-sent" id="passportSent" role="status" hidden><i class="fa-solid fa-circle-check"></i><strong>Solicitud enviada</strong><span>Si los datos son válidos, recibirás instrucciones en tu correo.</span><button class="passport-button passport-button-secondary" id="passportBackLogin" type="button">Volver al inicio de sesión</button></div>
+            </div>
+          </section>
+          <section id="documentPanel" hidden><div class="source-notice" role="status"><i class="fa-solid fa-id-card" aria-hidden="true"></i><div><strong>Acceso mediante documento</strong><span>Este tipo de acceso no requiere recuperación de contraseña local.</span><button class="btn btn-outline-ssee btn-sm mt-3" id="documentRedirect" type="button"><i class="fa-solid fa-arrow-left"></i> Volver</button></div></div></section>
+          <section id="requestView">
+            <form id="requestForm" novalidate>
+              <label class="field-label" for="email"><span class="field-caption">Correo electrónico <b>*</b></span><input class="form-control" id="email" type="email" autocomplete="email" placeholder="usuario@ejemplo.gob.pe" required></label>
+              <div class="auth-feedback" id="requestFeedback" hidden></div>
+              <div class="form-actions"><button class="btn btn-outline-ssee" type="button" id="backToLogin"><i class="fa-solid fa-arrow-left"></i> Volver</button><button class="btn btn-ssee" type="submit"><i class="fa-solid fa-paper-plane"></i> Solicitar enlace</button></div>
+            </form>
+          </section>
+          <section class="recovery-state" id="sentView" hidden><span class="auth-icon"><i class="fa-solid fa-envelope-circle-check"></i></span><div><h2>Solicitud recibida</h2><p>Si existe una cuenta asociada al correo ingresado, recibirás un enlace para recuperar tu contraseña.</p><button class="btn btn-outline-ssee mt-3" type="button" id="sentBackToLogin"><i class="fa-solid fa-arrow-left"></i> Ir al login</button></div></section>
+          <section id="resetView" hidden>
+            <div class="token-note" id="tokenNote"><i class="fa-solid fa-clock" aria-hidden="true"></i><span>El enlace es válido para un solo uso.</span></div>
+            <form id="resetForm" novalidate>
+              <label class="field-label password-field" for="newPassword"><span class="field-caption">Nueva contraseña <b>*</b></span><span class="password-input"><input class="form-control" id="newPassword" type="password" autocomplete="new-password" required><button class="password-toggle" type="button" aria-label="Mostrar contraseña"><i class="fa-regular fa-eye"></i></button></span></label>
+              <label class="field-label password-field" for="confirmPassword"><span class="field-caption">Confirmar nueva contraseña <b>*</b></span><span class="password-input"><input class="form-control" id="confirmPassword" type="password" autocomplete="new-password" required><button class="password-toggle" type="button" aria-label="Mostrar contraseña"><i class="fa-regular fa-eye"></i></button></span></label>
+              <div class="policy-panel" aria-label="Política de seguridad"><strong>Política de seguridad</strong><ul><li id="policyLength">Mínimo de 8 caracteres</li><li id="policyUpper">Al menos una letra mayúscula</li><li id="policyLower">Al menos una letra minúscula</li><li id="policyNumber">Al menos un número</li></ul></div>
+              <div class="auth-feedback" id="resetFeedback" hidden></div>
+              <div class="form-actions"><button class="btn btn-outline-ssee" type="button" id="cancelReset">Cancelar</button><button class="btn btn-ssee" type="submit"><i class="fa-solid fa-check"></i> Restablecer contraseña</button></div>
+            </form>
+          </section>
+          <section class="recovery-state" id="expiredView" hidden><span class="auth-icon"><i class="fa-solid fa-clock-rotate-left"></i></span><div><h2>Enlace expirado</h2><p>El enlace de recuperación ha expirado. Solicita uno nuevo para continuar.</p><button class="btn btn-outline-ssee mt-3" type="button" id="requestNew"><i class="fa-solid fa-rotate-right"></i> Solicitar nuevo enlace</button></div></section>
+          <section class="auth-success" id="successView" hidden><span><i class="fa-solid fa-circle-check"></i></span><div><h2>Contraseña restablecida</h2><p id="successMessage">La contraseña se ha restablecido correctamente.</p></div></section>
+        </div>
+        <aside class="auth-visual-panel" aria-hidden="true"></aside>
+      </section>
+    </main>
+    <footer class="footer"><div class="minedu-mark"><img class="minedu-logo" src="../assets/minedu.jpg" alt="Ministerio de Educación"></div><div><p>2026. Todos los derechos reservados.</p><p>Ministerio de Educación - S.S.E.E. - Versión 0.1</p></div></footer>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <aside class="demo-guide" id="authGuide" aria-label="Guía de demo"><span class="demo-guide-label">Guía de demo</span><strong id="authGuideTitle">Sigue el recorrido</strong><p id="authGuideCopy">La guía externa te indicará el siguiente clic.</p></aside>
+  <div class="demo-cursor" id="authCursor" aria-hidden="true"><span>➤</span></div>
+  <script src="dist/recovery.js"></script>
+</body>
+</html>
