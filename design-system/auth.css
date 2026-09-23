@@ -1,0 +1,39 @@
+body{min-width:64rem;background:var(--ssee-bg)}
+.auth-page{min-height:100vh;display:flex;flex-direction:column}
+.auth-main{width:min(76rem,calc(100% - 4rem));margin:0 auto;padding:2.5rem 0 2rem;flex:1;display:flex;align-items:center;justify-content:center}
+.auth-shell{width:100%;min-height:42rem;display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);background:#fff;border:1px solid var(--ssee-line);border-radius:.75rem;box-shadow:var(--ssee-shadow);overflow:hidden}
+.auth-form-panel{min-width:0;padding:3.25rem 4rem;display:flex;flex-direction:column;justify-content:center;background:#fff}
+.auth-visual-panel{min-width:0;background:#f7f8ff url("../assets/login-visual-v2.png?v=20260914-education-monitoring") center / cover no-repeat;border-left:1px solid var(--ssee-line)}
+.auth-brand{display:inline-flex;align-items:center;gap:.75rem;width:max-content;margin-bottom:3.5rem;color:var(--ssee-text);text-decoration:none}
+.auth-brand .logo-symbol{width:2.75rem;height:2.75rem}
+.auth-brand strong{display:block;font-size:1.35rem;line-height:1.1}
+.auth-brand small{display:block;margin-top:.25rem;color:var(--ssee-muted);font-size:.72rem;line-height:1.25}
+.auth-heading{margin-bottom:1.75rem}
+.auth-heading h1{margin:0;color:var(--ssee-text);font-size:2rem;line-height:1.15}
+.auth-form-panel form{display:grid}
+.field-grid,.document-grid{display:grid;grid-template-columns:10rem minmax(0,1fr);gap:.9rem .75rem;margin-bottom:.9rem}
+.document-grid .field-label:nth-child(3),.document-grid .field-label:nth-child(4){grid-column:span 1}
+.field-label{display:grid;gap:.35rem;color:var(--ssee-text);font-size:.78rem;font-weight:700}
+.field-label>span:first-of-type{color:var(--ssee-danger)}
+.form-control,.form-select{border-color:var(--ssee-line-strong);font-size:.85rem}
+.form-control:focus,.form-select:focus{border-color:var(--ssee-primary);box-shadow:0 0 0 .2rem rgba(45,43,232,.12)}
+.password-field{margin-top:.9rem}
+.password-input{position:relative}
+.password-input .form-control{padding-right:2.5rem}
+.password-toggle{position:absolute;right:.5rem;top:50%;width:1.8rem;height:1.8rem;transform:translateY(-50%);border:0;background:transparent;color:var(--ssee-muted);cursor:pointer}
+.password-toggle:focus-visible{outline:2px solid var(--ssee-primary);outline-offset:2px}
+.form-actions{display:flex;justify-content:flex-end;margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--ssee-line)}
+.auth-feedback{margin-top:1rem;padding:.7rem .8rem;border:1px solid #f1b5bb;border-radius:.45rem;background:var(--ssee-danger-bg);color:var(--ssee-danger);font-size:.78rem}
+.auth-success{display:flex;align-items:center;gap:.85rem;margin-top:1.25rem;padding:1rem;background:#effaf5;border:1px solid #b7e4d0;border-radius:.55rem;color:var(--ssee-success)}
+.auth-success>span{font-size:1.5rem;flex:0 0 auto}
+.auth-success-content{min-width:0;flex:1}
+.auth-success h2{margin:0;color:var(--ssee-text);font-size:1.1rem}
+.auth-success p{margin:.3rem 0 0;color:#456d63;font-size:.8rem}
+.auth-success-actions{display:flex;justify-content:flex-end;flex:0 0 auto}
+.auth-success-actions .button{white-space:nowrap}
+.auth-page .footer{margin-top:auto}
+@media(min-width:601px){.document-grid{grid-template-columns:10rem minmax(0,1fr)}.document-grid .field-label:nth-child(3){grid-column:1}.document-grid .field-label:nth-child(4){grid-column:2}}
+.source-notice{display:flex;gap:.75rem;align-items:flex-start;margin-bottom:1.25rem;padding:.85rem 1rem;color:#1e40af;background:#eff6ff;border:1px solid #bfdbfe;border-radius:.55rem}.source-notice>i{flex:0 0 auto;margin-top:.15rem}.source-notice>div{min-width:0}.source-notice strong,.source-notice span{display:block;font-size:.78rem}.source-notice span{margin-top:.2rem;color:#475569}
+.auth-secondary-actions{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;margin-top:.8rem}.auth-secondary-actions .auth-recovery-link{white-space:nowrap}.auth-recovery-link{color:var(--ssee-primary);font-size:.78rem;font-weight:700;text-decoration:none}.auth-recovery-link:hover,.auth-recovery-link:focus-visible{text-decoration:underline}.demo-guide{position:fixed;right:1.25rem;bottom:1.25rem;z-index:1070;width:min(22rem,calc(100vw - 2.5rem));padding:1rem 1.1rem;color:#fff;background:#111827;border:1px solid #374151;border-radius:.5rem;box-shadow:0 10px 28px rgba(15,23,42,.22)}.demo-guide[hidden]{display:none}.demo-guide-label{display:block;margin-bottom:.45rem;color:#cbd5e1;font-size:.68rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}.demo-guide strong{display:block;font-size:.9rem}.demo-guide p{margin:.35rem 0 0;color:#cbd5e1;font-size:.78rem}.demo-cursor{position:fixed;z-index:1080;color:#111827;font-size:2rem;line-height:1;pointer-events:none;opacity:0;filter:drop-shadow(0 2px 2px rgba(255,255,255,.9));transition:left .25s ease,top .25s ease}.demo-cursor span{display:block;color:#111827;font-size:2rem;line-height:1}.demo-cursor.is-visible{opacity:1;animation:demo-cursor-pulse 1.4s ease-in-out infinite}@keyframes demo-cursor-pulse{50%{transform:scale(1.12)}}
+@media(max-width:600px){.demo-guide{right:.75rem;bottom:.75rem}.auth-secondary-actions{justify-content:flex-start}.auth-success{align-items:flex-start;flex-wrap:wrap}.auth-success-actions{width:100%;justify-content:flex-end}}
+.demo-cursor span{transform:rotate(-135deg);transform-origin:center}

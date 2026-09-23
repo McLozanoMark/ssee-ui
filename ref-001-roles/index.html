@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SSEE - Gestión de roles</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="styles.css?v=20260825-wizard-toast-modern">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Navegación principal">
+      <div class="side-brand">
+        <div class="logo-symbol" aria-hidden="true">S</div>
+        <div>
+          <strong>S.S.E.E.</strong>
+          <span>Seguimiento y Evaluación Estratégica</span>
+        </div>
+      </div>
+      <nav class="side-nav" aria-label="Menú lateral">
+        <a href="#" class="nav-item is-open">Administración</a>
+        <a href="#" class="nav-item is-active">Roles</a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-button top-menu" aria-label="Abrir menú">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="top-divider" aria-hidden="true"></div>
+        <div class="top-info">
+          <div class="info-card">
+            <span class="info-icon" aria-hidden="true"><i class="fa-regular fa-clock"></i></span>
+            <div>
+              <strong>Último acceso</strong>
+              <span>5:00 PM - 25/12/2024</span>
+            </div>
+          </div>
+          <div class="info-card location-card">
+            <span class="info-icon" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></span>
+            <div>
+              <strong>Sede</strong>
+              <span>Unidad de Seguimiento y Evaluación</span>
+            </div>
+            <i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="top-divider" aria-hidden="true"></div>
+        <div class="account">
+          <button class="bell" aria-label="Notificaciones"><i class="fa-regular fa-bell"></i></button>
+          <div class="account-separator" aria-hidden="true"></div>
+          <div class="account-copy">
+            <strong>Administrador</strong>
+            <span>Superadministrador</span>
+          </div>
+          <div class="avatar" aria-hidden="true">A</div>
+          <i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>
+        </div>
+      </header>
+
+      <section class="view is-active" id="listView" aria-labelledby="listTitle">
+        <div class="page-head">
+          <div class="title-cluster">
+            <nav class="breadcrumb" aria-label="Ruta"><a href="../index.html">Índice de requerimientos</a> / REF-IDE-001 / Gestión de roles</nav>
+            <div class="title-row">
+              <div class="title-icon" aria-hidden="true"><i class="fa-solid fa-user-shield"></i></div>
+              <div>
+                <h1 id="listTitle">Gestión de roles</h1>
+                <p id="roleCount">5 roles registrados</p>
+              </div>
+            </div>
+          </div>
+          <div class="head-actions">
+            <button class="btn btn-outline-ssee button button-secondary" id="exportBtn">
+              <i class="fa-solid fa-arrow-up-from-bracket icon"></i>
+              Exportar
+            </button>
+            <button class="btn btn-ssee button button-primary" id="newRoleBtn">
+              <i class="fa-solid fa-plus icon"></i>
+              Nuevo
+            </button>
+          </div>
+        </div>
+
+        <form class="filter-panel" id="filterForm">
+          <label class="global-search">
+            <i class="fa-solid fa-magnifying-glass icon"></i>
+            <input class="form-control" id="filterName" type="search" placeholder="Buscar por nombre, descripción, permiso o estado">
+          </label>
+          <button class="filter-toggle" type="button" id="filterToggle" aria-label="Abrir filtros" title="Filtro Personalizado" data-bs-title="Filtro Personalizado" data-bs-toggle="tooltip" aria-expanded="false">
+            <span></span><span></span><span></span>
+          </button>
+          <div class="advanced-filters" id="advancedFilters">
+            <label class="filter-field"><span>Nombre</span><select class="form-select" id="filterNameAdvanced" aria-label="Nombre del rol">
+              <option value="Todos">Todos</option>
+              <option value="Administrador USE">Administrador USE</option>
+              <option value="Supervisor de Seguimiento">Supervisor de Seguimiento</option>
+              <option value="Evaluador">Evaluador</option>
+              <option value="Registrador">Registrador</option>
+              <option value="Consulta Estratégica">Consulta Estratégica</option>
+            </select></label>
+            <label class="filter-field"><span>Permisos</span><select class="form-select" id="filterPermission" aria-label="Permisos del rol">
+              <option value="Todos">Todos</option>
+              <option value="Usuarios">Usuarios</option>
+              <option value="Configuración">Configuración</option>
+              <option value="Seguimiento">Seguimiento</option>
+              <option value="Reportes">Reportes</option>
+              <option value="Evaluación">Evaluación</option>
+              <option value="Instrumentos">Instrumentos</option>
+              <option value="Registro">Registro</option>
+              <option value="Consulta">Consulta</option>
+              <option value="Visualización">Visualización</option>
+            </select></label>
+            <fieldset class="filter-field date-range-field" id="filterUpdated" data-date-range>
+              <legend>Última actualización</legend>
+              <div class="date-range-picker">
+                <button class="date-range-trigger" type="button" data-date-range-trigger aria-haspopup="dialog" aria-expanded="false">
+                  <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                  <span data-date-range-label>Seleccionar rango</span>
+                  <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                </button>
+                <button class="date-range-clear" type="button" data-date-range-clear aria-label="Limpiar selección" title="Limpiar selección" hidden>
+                  <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                </button>
+                <div class="date-range-popover" data-date-range-popover role="dialog" aria-label="Seleccionar rango de fechas" hidden>
+                  <div class="date-range-summary">
+                    <span>Rango seleccionado</span>
+                    <strong data-date-range-summary>Selecciona una fecha inicial y final</strong>
+                  </div>
+                  <div class="date-range-calendar-nav">
+                    <button class="date-range-nav" type="button" data-date-range-prev aria-label="Mes anterior">
+                      <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+                    </button>
+                    <div class="date-range-month-labels" data-date-range-month-labels></div>
+                    <button class="date-range-nav" type="button" data-date-range-next aria-label="Mes siguiente">
+                      <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                  <div class="date-range-months" data-date-range-months></div>
+                  <div class="date-range-footer">
+                    <button class="btn btn-outline-ssee button button-secondary" type="button" data-date-range-cancel>Cancelar</button>
+                    <button class="btn btn-ssee button button-primary" type="button" data-date-range-apply>Aplicar</button>
+                  </div>
+                </div>
+                <input id="filterUpdatedStart" type="hidden" data-date-range-start>
+                <input id="filterUpdatedEnd" type="hidden" data-date-range-end>
+              </div>
+              <small class="field-error" data-date-range-error hidden></small>
+            </fieldset>
+            <label class="filter-field"><span>Estado</span><select class="form-select" id="filterStatus" aria-label="Estado">
+              <option value="Todos">Todos</option>
+              <option value="Activo">Activo</option>
+              <option value="Inactivo">Inactivo</option>
+            </select></label>
+            <div class="filter-actions" aria-label="Acciones de filtro">
+              <button class="btn filter-action btn-ssee button button-primary" type="submit"><i class="fa-solid fa-magnifying-glass icon"></i>Buscar</button>
+              <button class="btn filter-action btn-outline-ssee button button-secondary" type="button" id="clearBtn">
+                <i class="fa-solid fa-rotate-left icon"></i>
+
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <section class="table-panel" aria-label="Resultados de roles">
+          <div class="table-wrap">
+            <table class="table align-middle mb-0 ssee-table">
+              <thead>
+                <tr>
+                  <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="number" data-sort-type="number">N.° <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                  <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="name" data-sort-type="text">Nombre <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                  <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="description" data-sort-type="text">Descripción <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                  <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="permissions" data-sort-type="text">Permisos <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                  <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="users" data-sort-type="number">Usuarios <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                  <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="status" data-sort-type="text">Estado <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                  <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="updated" data-sort-type="date">Última actualización <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="rolesBody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="emptyState" hidden>No se encontraron roles con los criterios seleccionados.</div>
+          <div class="pagination">
+            <p id="pageSummary">Mostrando 1 a 5 de 5 registros</p>
+            <div class="page-buttons" aria-label="Paginación">
+              <button class="page-btn" type="button" disabled>&laquo;</button>
+              <button class="page-btn" type="button" disabled>&lsaquo;</button>
+              <button class="page-btn is-current" type="button">1</button>
+              <button class="page-btn" type="button" disabled>&rsaquo;</button>
+              <button class="page-btn" type="button" disabled>&raquo;</button>
+            </div>
+            <label class="page-size">
+              <select class="form-select" id="pageSize">
+                <option value="5">5 por página</option>
+                <option value="10" selected>10 por página</option>
+              </select>
+            </label>
+          </div>
+        </section>
+      </section>
+
+      <section class="view" id="formView" aria-labelledby="formTitle">
+        <div class="page-head compact">
+          <div>
+            <nav class="breadcrumb" id="formBreadcrumb" aria-label="Ruta"><a href="../index.html">Índice de requerimientos</a> / REF-IDE-001 / Gestión de roles / Registrar</nav>
+            <h1 id="formTitle">Registrar</h1>
+          </div>
+          <div class="wizard-form-status edit-status-control" data-edit-status-control hidden>
+            <span>Estado</span>
+            <label class="form-check form-switch switch" data-on-label="Activo" data-off-label="Inactivo">
+              <input class="form-check-input" type="checkbox" data-edit-status-toggle aria-label="Activar o inactivar rol">
+            </label>
+          </div>
+        </div>
+
+        <div class="wizard-stepper" aria-label="Progreso del registro">
+          <button class="wizard-step is-current" type="button" id="stepInfo"><span>1</span><strong>Información del rol</strong></button>
+          <span class="wizard-line" aria-hidden="true"></span>
+          <button class="wizard-step" type="button" id="stepPerms"><span>2</span><strong>Permisos del rol</strong></button>
+        </div>
+
+        <form class="wizard-card role-form" id="roleForm" novalidate>
+          <div class="form-step is-active" id="infoStep">
+            <div class="alert" id="formAlert" hidden>
+              <span>Complete los datos del rol para activar esta sección.</span>
+            </div>
+            <p class="form-note">* Campos obligatorios</p>
+
+            <label>
+              <span>Nombre del rol *</span>
+              <input class="form-control" id="roleName" type="text" placeholder="Ingresa el nombre del rol" autocomplete="off">
+              <small class="field-error" id="nameError"></small>
+            </label>
+
+            <label>
+              <span>Descripción *</span>
+              <textarea class="form-control" id="roleDescription" rows="4" placeholder="Ingresa la descripción del rol"></textarea>
+              <small class="field-error" id="descriptionError"></small>
+            </label>
+
+          </div>
+
+          <div class="form-step" id="permissionStep">
+            <div class="summary-card">
+              <div>
+                <span>Nombre del rol</span>
+                <strong id="summaryName">Editor de contenido</strong>
+              </div>
+              <div>
+                <span>Descripción</span>
+                <strong id="summaryDescription">Puede crear, editar y publicar contenido.</strong>
+              </div>
+            </div>
+
+            <h2>Permisos del rol</h2>
+            <div class="permission-panel">
+              <table class="permission-table">
+                <thead>
+                  <tr>
+                    <th>Módulo / Submódulo / Funcionalidad</th>
+                    <th>Consultar</th>
+                    <th>Registrar</th>
+                    <th>Modificar</th>
+                    <th>Eliminar</th>
+                    <th>Exportar</th>
+                    <th>Validar</th>
+                  </tr>
+                </thead>
+                <tbody id="permissionBody"></tbody>
+              </table>
+            </div>
+            <p class="hint" id="permissionHint">
+              <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+              <span>El rol debe tener al menos un permiso asociado.</span>
+            </p>
+
+          </div>
+
+          <div class="wizard-footer">
+            <div class="footer-left">
+              <button class="btn btn-outline-ssee button button-secondary" type="button" id="backBtn" hidden><i class="fa-solid fa-arrow-left icon" aria-hidden="true"></i>Atrás</button>
+              <button class="btn btn-outline-ssee button button-secondary" type="button" id="cancelInfoBtn"><i class="fa-solid fa-xmark icon" aria-hidden="true"></i>Cancelar</button>
+            </div>
+            <div class="footer-actions">
+              <button class="btn btn-outline-ssee button button-secondary" type="button" data-save-step="info" hidden><i class="fa-solid fa-floppy-disk icon" aria-hidden="true"></i>Guardar</button>
+              <button class="btn btn-outline-ssee button button-secondary" type="button" data-save-step="permissions" hidden><i class="fa-solid fa-floppy-disk icon" aria-hidden="true"></i>Guardar</button>
+              <button class="btn btn-ssee button button-primary" type="button" id="continueBtn"><i class="fa-solid fa-arrow-right icon" aria-hidden="true"></i>Siguiente</button>
+          <button class="btn btn-ssee button button-primary" type="button" id="saveRoleBtn" hidden><i class="fa-solid fa-floppy-disk icon" aria-hidden="true"></i>Guardar</button>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <footer class="footer">
+        <div class="minedu-mark">
+          <img class="minedu-logo" src="../assets/minedu.jpg" alt="Ministerio de Educación">
+        </div>
+        <div>
+          <p>2026. Todos los derechos reservados.</p>
+          <p>Ministerio de Educación - S.S.E.E. - Versión 0.1</p>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <span class="modal-title-icon" aria-hidden="true"><i class="fa-solid fa-circle-question"></i></span>
+          <h2 class="modal-title h5">Confirmar acción</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <p data-confirm-message></p>
+          <label class="confirm-reason-field" data-confirm-reason-wrap hidden>
+            <span>Motivo de inactivación *</span>
+            <textarea class="form-control" data-confirm-reason rows="3" maxlength="240" aria-describedby="confirmReasonError"></textarea>
+            <small class="field-error" data-confirm-reason-error id="confirmReasonError" hidden></small>
+          </label>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-ssee button button-secondary" data-bs-dismiss="modal">No</button>
+          <button type="button" class="btn btn-ssee button button-primary" id="confirmBtn">Sí</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="dist/roles.js?v=20260914-edit-return"></script>
+</body>
+</html>

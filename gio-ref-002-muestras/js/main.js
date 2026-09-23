@@ -1,0 +1,48 @@
+import { state, createDraft } from "./state.js";
+import { refs, showForm, showToast, setFormStep, updateDraft, renderAvailableFields, renderFields, renderUnits, renderSourceOptions, renderInstruments, renderInstrumentSelections, filterInstrumentOptions, updateSelectionSummary, initializeDescriptionField, initializeStructureTable, initializeInformantConfig, renderInformantConfig } from "./ui.js";
+import { applyFilters, renderSamples, handleAction, validateStep, requestSaveStep, requestComplete, requestCancel, confirmPendingAction, updateField, prepareUnits, exportRows, renderReplacementCandidates, confirmReplacement } from "./samples.js";
+import { getMessage, getPrototypeMessage } from "../../design-system/messages.js";
+import { openConfirmModal } from "../../design-system/interaction.js";
+import { attachTableSorting } from "../../design-system/table-sort.js";
+const $ = (id) => document.getElementById(id);
+
+initializeDescriptionField();
+initializeStructureTable();
+initializeInformantConfig();
+
+function requestWizardStep(step) { if (step === state.step) return; if (state.editingIndex !== null && state.dirty) { updateDraft(); state.pendingWizardStep = step; openConfirmModal("confirmModal", getMessage("M70")); return; } if (step > state.step) { for (let currentStep = state.step; currentStep < step; currentStep += 1) { updateDraft(); if (!validateStep(currentStep)) { showToast(getMessage("M12"), "warning"); return; } } } if (step === 3) prepareUnits(); setFormStep(step); }
+refs.filterForm.addEventListener("submit", (event) => { event.preventDefault(); applyFilters(); showToast(getPrototypeMessage("filtersApplied"), "info"); });
+$("filterToggle").addEventListener("click", () => { const expanded = refs.filterForm.classList.toggle("is-expanded"); $("filterToggle").setAttribute("aria-expanded", String(expanded)); });
+$("clearBtn").addEventListener("click", () => { refs.filterQuery.value = ""; refs.filterName.value = ""; refs.filterRecords.value = ""; refs.filterSource.value = "Todos"; refs.filterStatus.value = "Todos"; applyFilters(); showToast(getPrototypeMessage("filtersCleared"), "info"); });
+$("newSampleBtn").addEventListener("click", () => { state.editingIndex = null; createDraft(); showForm(); });
+$("cancelBtn").addEventListener("click", requestCancel);
+$("backBtn").addEventListener("click", () => requestWizardStep(state.step - 1));
+$("saveStepBtn").addEventListener("click", requestSaveStep);
+$("continueBtn").addEventListener("click", () => { updateDraft(); if (!validateStep(state.step)) { showToast(getMessage("M12"), "warning"); return; } if (state.step === 2) prepareUnits(); setFormStep(state.step + 1); });
+$("completeBtn").addEventListener("click", requestComplete);
+refs.sampleForm.addEventListener("input", (event) => { if (event.target === refs.fieldSearch) { renderAvailableFields(); return; } if (event.target === refs.unitSearch) { renderUnits(); return; } if (event.target === refs.instrumentSearch) { filterInstrumentOptions(); return; } updateDraft(); });
+refs.sampleForm.addEventListener("change", (event) => { const field = event.target.closest("[data-field-key]"); if (field) updateField(Number(field.dataset.fieldIndex), field.dataset.fieldKey, field.checked); if (event.target === refs.sampleProject) { state.draft.project = refs.sampleProject.value; state.draft.instruments = []; renderInstruments(); } if (event.target === refs.sampleSource) { state.draft.fields = []; state.draft.units = []; state.draft.unitTotal = 0; prepareUnits(); } if (event.target.matches("[data-instrument]")) renderInstrumentSelections(); if (event.target.matches("[name='informantMode']")) { state.draft.informantMode = event.target.value; renderInformantConfig(); } updateDraft(); renderAvailableFields(); renderFields(); renderUnits(); updateSelectionSummary(); });
+refs.selectedInstruments.addEventListener("click", (event) => { const button = event.target.closest("[data-remove-instrument]"); if (!button) return; const input = [...refs.instrumentOptions.querySelectorAll("[data-instrument]")].find((item) => item.value === button.dataset.value); if (!input) return; input.checked = false; updateDraft(); renderInstrumentSelections(); });
+refs.instrumentControl.addEventListener("click", (event) => { if (event.target.closest("[data-remove-instrument]") || refs.instrumentToggle.disabled) return; refs.instrumentToggle.click(); });
+refs.instrumentControl.addEventListener("keydown", (event) => { if ((event.key === "Enter" || event.key === " ") && !refs.instrumentToggle.disabled) { event.preventDefault(); refs.instrumentToggle.click(); } });
+refs.instrumentControl.setAttribute("role", "button");
+refs.instrumentControl.setAttribute("tabindex", "0");
+refs.availableFields.addEventListener("change", (event) => { const input = event.target.closest("[data-available-field]"); if (!input) return; const name = input.dataset.availableField; const index = state.draft.fields.findIndex((field) => field.name === name); if (input.checked && index < 0) state.draft.fields.push({ name, unique: false, preload: false, informant: false, user: state.draft.fields.length === 0 }); if (!input.checked && index >= 0) state.draft.fields.splice(index, 1); state.dirty = true; renderAvailableFields(); renderFields(); });
+refs.samplesBody.addEventListener("click", handleAction);
+refs.fieldsBody.addEventListener("click", handleAction);
+refs.unitsBody.addEventListener("click", handleAction);
+refs.wizardSteps.forEach((button) => button.addEventListener("click", () => requestWizardStep(Number(button.dataset.wizardStep))));
+$("unitExportBtn").addEventListener("click", () => exportRows(state.draft?.units || [], "unidades-muestrales.csv"));
+refs.replacementSearch?.addEventListener("input", renderReplacementCandidates);
+refs.replacementBody?.addEventListener("change", (event) => { const candidate = event.target.closest("input[name='replacementUnit']"); if (candidate) state.replacementCandidate = candidate.value; });
+refs.replacementSave?.addEventListener("click", confirmReplacement);
+refs.replacementModal?.addEventListener("hidden.bs.modal", () => { state.replacementSelection = null; state.replacementCandidate = null; });
+$("exportBtn").addEventListener("click", () => exportRows(state.filteredSamples, "muestras.csv", [{ key: "id", label: "Identificador" }, { key: "name", label: "Nombre de muestra" }, { key: "source", label: "Fuente de datos" }, { key: "units", label: "Registros" }, { key: "status", label: "Estado" }]));
+$("confirmBtn").addEventListener("click", confirmPendingAction);
+refs.confirmModal.querySelector(".modal-footer [data-bs-dismiss='modal']").addEventListener("click", () => { state.pendingWizardStep = null; });
+$("confirmModal").addEventListener("hidden.bs.modal", () => { state.pendingAction = null; state.pendingCancel = false; state.pendingStatus = null; state.pendingWizardStep = null; });
+refs.sampleStatusSwitch?.addEventListener("change", (event) => { if (state.editingIndex === null) return; state.pendingStatus = { index: state.editingIndex, next: event.target.checked ? "Activo" : "Inactivo" }; event.target.checked = !event.target.checked; openConfirmModal("confirmModal", `${getMessage(state.pendingStatus.next === "Activo" ? "M5" : "M6")} ${state.draft.name}?`, { requireReason: state.pendingStatus.next === "Inactivo" }); });
+document.addEventListener("click", (event) => { if (!event.target.closest(".action-menu")) document.querySelectorAll("[data-menu-panel]").forEach((panel) => { panel.hidden = true; }); });
+renderSourceOptions();
+renderSamples();
+attachTableSorting(document.querySelector(".ssee-table"));

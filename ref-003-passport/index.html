@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SSEE - Gestión de usuarios</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../design-system/app.css?v=20260921-toast-modern" />
+    <link rel="stylesheet" href="../design-system/user-management.css?v=20260910-user-tray" />
+    <link rel="stylesheet" href="styles.css?v=20260910-ref003-cursor-toast-modern" />
+  </head>
+  <body data-user-demo="ref-003-passport">
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Navegación principal">
+        <div class="side-brand">
+          <div class="logo-symbol" aria-hidden="true">S</div>
+          <div>
+            <strong>S.S.E.E.</strong
+            ><span>Seguimiento y Evaluación Estratégica</span>
+          </div>
+        </div>
+        <nav class="side-nav" aria-label="Menú lateral">
+          <a href="#" class="nav-item is-open">Administración</a
+          ><a href="#" class="nav-item is-active">Usuarios</a>
+        </nav>
+      </aside>
+      <main class="main">
+        <header class="topbar">
+          <button
+            class="icon-button top-menu"
+            type="button"
+            aria-label="Abrir menú"
+          >
+            <span></span><span></span><span></span>
+          </button>
+          <div class="top-divider" aria-hidden="true"></div>
+          <div class="top-info">
+            <div class="info-card">
+              <span class="info-icon" aria-hidden="true"
+                ><i class="fa-regular fa-clock"></i
+              ></span>
+              <div>
+                <strong>Último acceso</strong><span>5:00 PM - 25/12/2024</span>
+              </div>
+            </div>
+            <div class="info-card location-card">
+              <span class="info-icon" aria-hidden="true"
+                ><i class="fa-solid fa-location-dot"></i
+              ></span>
+              <div>
+                <strong>Sede</strong
+                ><span>Unidad de Seguimiento y Evaluación</span>
+              </div>
+              <i
+                class="fa-solid fa-chevron-down chevron"
+                aria-hidden="true"
+              ></i>
+            </div>
+          </div>
+          <div class="top-divider" aria-hidden="true"></div>
+          <div class="account">
+            <button class="bell" aria-label="Notificaciones">
+              <i class="fa-regular fa-bell"></i>
+            </button>
+            <div class="account-separator" aria-hidden="true"></div>
+            <div class="account-copy">
+              <strong>Administrador</strong><span>Superadministrador</span>
+            </div>
+            <div class="avatar" aria-hidden="true">A</div>
+            <i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>
+          </div>
+        </header>
+        <section
+          class="view is-active"
+          id="listView"
+          aria-labelledby="listTitle"
+        >
+          <div class="page-head">
+            <div class="title-cluster">
+              <nav class="breadcrumb" aria-label="Ruta">
+                <a href="../index.html">Índice de requerimientos</a> / REF-IDE-003 / Sincronización de usuarios desde Passport
+              </nav>
+              <div class="title-row">
+                <div class="title-icon" aria-hidden="true">
+                  <i class="fa-solid fa-users"></i>
+                </div>
+                <div>
+                  <h1 id="listTitle">Gestión de usuarios</h1>
+                  <p id="userCount">5 usuarios registrados</p>
+                </div>
+              </div>
+            </div>
+            <div class="head-actions">
+              <a class="btn btn-ssee button button-primary" id="newUserBtn" href="../ref-004-admision/index.html?return=ref-003-passport"><i class="fa-solid fa-user-plus icon" aria-hidden="true"></i>Nuevo</a>
+              <button
+                class="btn btn-ssee button button-primary"
+                id="syncBtn"
+                type="button"
+                aria-describedby="syncHint"
+              >
+                <i class="fa-solid fa-rotate icon" aria-hidden="true"></i>Sincronizar Passport
+              </button>
+              <button
+                class="btn btn-outline-ssee button button-secondary"
+                id="exportBtn"
+              >
+                <i class="fa-solid fa-arrow-up-from-bracket icon"></i>Exportar
+              </button>
+            </div>
+          </div>
+          <p id="syncHint" class="visually-hidden">Fuerza una sincronización inmediata con Passport.</p>
+          <div class="user-counters" aria-label="Indicadores de atención">
+            <div><span>Accesos próximos a vencer</span><strong id="expiringCount">0</strong></div>
+            <div><span>Sin proyecto</span><strong id="noProjectCount">0</strong></div>
+          </div>
+          <form class="filter-panel" id="filterForm">
+            <label class="global-search"
+              ><i class="fa-solid fa-magnifying-glass icon"></i
+              ><input
+                class="form-control"
+                id="filterName"
+                type="search"
+                placeholder="Buscar por usuario, nombre, correo o rol" /></label
+            ><button
+              class="filter-toggle"
+              type="button"
+              id="filterToggle"
+              aria-label="Abrir filtros"
+              aria-expanded="false"
+            >
+              <span></span><span></span><span></span>
+            </button>
+            <div class="advanced-filters" id="advancedFilters">
+              <label class="filter-field">
+                <span>Rol</span>
+                <select class="form-select" id="filterRole" aria-label="Rol">
+                  <option>Todos</option>
+                  <option>Administrador USE</option>
+                  <option>Supervisor de Seguimiento</option>
+                  <option>Evaluador</option>
+                </select>
+              </label>
+              <label class="filter-field">
+                <span>Estado</span>
+                <select class="form-select" id="filterStatus" aria-label="Estado">
+                  <option>Todos</option>
+                  <option>Activo</option>
+                  <option>Inactivo</option>
+                </select>
+              </label>
+              <label class="filter-field">
+                <span>Tipo de autenticación</span>
+                <select class="form-select" id="filterAuth" aria-label="Autenticación">
+                  <option>Todos</option>
+                  <option>Passport</option>
+                  <option>Documento</option>
+                  <option>Autoregistro</option>
+                </select>
+              </label>
+              <label class="filter-field">
+                <span>Proyectos</span>
+                <input class="form-control" id="filterProject" type="search" placeholder="Buscar por proyecto" />
+              </label>
+              <label class="filter-field">
+                <span>Vigencia</span>
+                <select class="form-select" id="filterValidity" aria-label="Vigencia">
+                  <option>Todos</option>
+                  <option>Sin vencimiento</option>
+                  <option>Por vencer</option>
+                </select>
+              </label>
+              <fieldset class="filter-field date-range-field" id="filterLastAccess" data-date-range>
+                <legend>Último acceso</legend>
+                <div class="date-range-picker">
+                  <button class="date-range-trigger" type="button" data-date-range-trigger aria-haspopup="dialog" aria-expanded="false">
+                    <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                    <span data-date-range-label>Seleccionar rango</span>
+                    <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                  </button>
+                  <button class="date-range-clear" type="button" data-date-range-clear aria-label="Limpiar selección" title="Limpiar selección" hidden>
+                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                  </button>
+                  <div class="date-range-popover" data-date-range-popover role="dialog" aria-label="Seleccionar rango de fechas" hidden>
+                    <div class="date-range-summary"><span>Rango seleccionado</span><strong data-date-range-summary>Selecciona una fecha inicial y final</strong></div>
+                    <div class="date-range-calendar-nav">
+                      <button class="date-range-nav" type="button" data-date-range-prev aria-label="Mes anterior"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button>
+                      <div class="date-range-month-labels" data-date-range-month-labels></div>
+                      <button class="date-range-nav" type="button" data-date-range-next aria-label="Mes siguiente"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>
+                    </div>
+                    <div class="date-range-months" data-date-range-months></div>
+                    <div class="date-range-footer"><button class="btn btn-outline-ssee button button-secondary" type="button" data-date-range-cancel>Cancelar</button><button class="btn btn-ssee button button-primary" type="button" data-date-range-apply>Aplicar</button></div>
+                  </div>
+                  <input id="filterLastAccessStart" type="hidden" data-date-range-start>
+                  <input id="filterLastAccessEnd" type="hidden" data-date-range-end>
+                </div>
+                <small class="field-error" data-date-range-error hidden></small>
+              </fieldset>
+              <div class="filter-actions" aria-label="Acciones de filtro">
+                <button class="btn filter-action btn-ssee button button-primary" type="submit">
+                  <i class="fa-solid fa-magnifying-glass icon"></i>Buscar
+                </button>
+                <button class="btn filter-action btn-outline-ssee button button-secondary" type="button" id="clearBtn">
+                  <i class="fa-solid fa-xmark icon" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+          </form>
+          <section class="table-panel" aria-label="Resultados de usuarios">
+            <div class="table-wrap">
+              <table class="table align-middle mb-0 ssee-table">
+                <thead>
+<tr>
+<th data-column="row-number">N.°</th>
+<th aria-sort="none"><button class="sort-button" type="button" data-sort-key="username" data-sort-type="text">Usuario <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="name" data-sort-type="text">Nombres y apellidos <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="email" data-sort-type="text">Correo <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="auth" data-sort-type="text">Tipo de autenticación <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="roles" data-sort-type="text">Roles <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="projects" data-sort-type="text">Proyectos <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="validity" data-sort-type="text">Vigencia <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="status" data-sort-type="text">Estado <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                    <th aria-sort="none"><button class="sort-button" type="button" data-sort-key="lastAccess" data-sort-type="date">Último acceso <i class="fa-solid fa-arrow-down-up" aria-hidden="true"></i></button></th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="usersBody"></tbody>
+              </table>
+            </div>
+            <div class="empty-state" id="emptyState" hidden>
+              No se encontraron usuarios con los criterios seleccionados.
+            </div>
+            <div class="pagination">
+              <p id="pageSummary"></p>
+              <div class="page-buttons" aria-label="Paginación">
+                <button class="page-btn" type="button" disabled>&laquo;</button
+                ><button class="page-btn" type="button" disabled>
+                  &lsaquo;</button
+                ><button class="page-btn is-current" type="button">1</button
+                ><button class="page-btn" type="button" disabled>
+                  &rsaquo;</button
+                ><button class="page-btn" type="button" disabled>
+                  &raquo;
+                </button>
+              </div>
+              <label class="page-size"
+                ><select class="form-select" id="pageSize">
+                  <option value="5">5 por página</option>
+                  <option value="10" selected>10 por página</option>
+                </select></label
+              >
+            </div>
+          </section>
+        </section>
+        <section class="view" id="detailView" aria-labelledby="detailTitle">
+          <div class="page-head compact">
+            <div>
+              <nav class="breadcrumb" aria-label="Ruta">
+                <a href="../index.html">Índice de requerimientos</a> / REF-IDE-007 / Gestión de usuarios / Detalle
+              </nav>
+              <h1 id="detailTitle">Detalle del usuario</h1>
+            </div>
+            <button
+              class="btn btn-outline-ssee button button-secondary"
+              id="backBtn"
+            >
+              <i class="fa-solid fa-arrow-left icon"></i>Volver
+            </button>
+          </div>
+          <div class="detail-card" id="detailCard"></div>
+        </section>
+        <footer class="footer">
+          <div class="minedu-mark">
+            <img class="minedu-logo" src="../assets/minedu.jpg" alt="Ministerio de Educación">
+          </div>
+          <div>
+            <p>2026. Todos los derechos reservados.</p>
+            <p>Ministerio de Educación - S.S.E.E. - Versión 0.1</p>
+          </div>
+        </footer>
+      </main>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <aside class="demo-guide" id="demoGuide" aria-label="Guía de demo">
+      <span class="demo-guide-label">Guía de demo</span>
+      <strong id="guideTitle">¿Qué escenario deseas probar?</strong>
+      <p id="guideCopy">Selecciona un resultado para iniciar el recorrido.</p>
+      <div class="demo-guide-actions" id="guideOptions">
+        <button type="button" class="demo-guide-option" data-demo-scenario="success">Sincronización exitosa</button>
+        <button type="button" class="demo-guide-option" data-demo-scenario="error">Caso de error</button>
+      </div>
+    </aside>
+    <div class="demo-cursor" id="demoCursor" aria-hidden="true"><i class="fa-solid fa-arrow-pointer"></i><span>➤</span></div>
+    <div class="modal fade" id="reniecModal" tabindex="-1" aria-labelledby="reniecModalTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content role-modal reniec-modal">
+          <div class="modal-header">
+            <span class="modal-title-icon" aria-hidden="true"><i class="fa-solid fa-id-card"></i></span><h2 class="modal-title" id="reniecModalTitle">Actualizar datos RENIEC</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <p class="modal-context" id="reniecModalContext"></p>
+            <label class="modal-label" for="reniecDocument">Número de documento<input class="form-control" id="reniecDocument" type="text" readonly></label>
+            <button class="btn btn-outline-ssee button button-secondary reniec-consult" type="button" id="consultReniecBtn"><i class="fa-solid fa-magnifying-glass icon" aria-hidden="true"></i>Consultar</button>
+            <div class="reniec-result" id="reniecResult" hidden>
+              <div><span>Nombres y apellidos</span><strong id="reniecName"></strong></div>
+              <div><span>Fecha de nacimiento</span><strong id="reniecBirth"></strong></div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-ssee button button-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-ssee button button-primary" id="saveReniecBtn" disabled>Guardar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="confirmRolesModal" tabindex="-1" aria-labelledby="confirmRolesTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content role-modal"><div class="modal-header"><span class="modal-title-icon" aria-hidden="true"><i class="fa-solid fa-circle-question"></i></span><h2 class="modal-title" id="confirmRolesTitle">Confirmar acción</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div><div class="modal-body"><p class="modal-context" id="confirmRolesMessage" data-confirm-message></p><label class="confirm-reason-field" data-confirm-reason-wrap hidden><span>Motivo de inactivación *</span><textarea class="form-control" data-confirm-reason rows="3" maxlength="240" aria-describedby="confirmRolesReasonError"></textarea><small class="field-error" data-confirm-reason-error id="confirmRolesReasonError" hidden></small></label></div><div class="modal-footer"><button type="button" class="btn btn-outline-ssee button button-secondary" data-bs-dismiss="modal">No</button><button type="button" class="btn btn-ssee button button-primary" id="confirmRolesBtn">Sí</button></div></div></div>
+    </div>
+    <script src="dist/users.js?v=20260914-admission-persist"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/passport-flow.js?v=20260904-ref003-cursor"></script>
+    <script src="js/demo-guide.js?v=20260904-ref003-cursor"></script>
+    <script>
+      const resultParam = new URLSearchParams(window.location.search);
+      if (resultParam.has("admitted") || resultParam.has("updated") || resultParam.has("mass")) {
+        renderToast(document.getElementById("toast"), getMessage(resultParam.has("updated") ? "M3" : "M2"), "success");
+      }
+    </script>
+  </body>
+</html>

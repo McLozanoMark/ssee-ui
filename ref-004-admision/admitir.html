@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SSEE - Admisión de usuarios</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="../design-system/app.css?v=20260921-toast-modern">
+  <link rel="stylesheet" href="../design-system/user-management.css?v=20260910-user-assignment">
+  <link rel="stylesheet" href="admitir.css?v=20260911-admission-modes">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Navegación principal">
+      <div class="side-brand"><div class="logo-symbol">S</div><div><strong>S.S.E.E.</strong><span>Seguimiento y Evaluación Estratégica</span></div></div>
+      <nav class="side-nav"><a class="nav-item is-open" href="#">Administración</a><a class="nav-item is-active" href="#">Usuarios</a></nav>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-button top-menu" aria-label="Abrir menú"><span></span><span></span><span></span></button>
+        <div class="top-divider"></div>
+        <div class="top-info">
+          <div class="info-card"><span class="info-icon"><i class="fa-regular fa-clock"></i></span><div><strong>Último acceso</strong><span>5:00 PM - 25/12/2024</span></div></div>
+          <div class="info-card location-card"><span class="info-icon"><i class="fa-solid fa-location-dot"></i></span><div><strong>Sede</strong><span>Unidad de Seguimiento y Evaluación</span></div><i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i></div>
+        </div>
+        <div class="top-divider"></div>
+        <div class="account"><button class="bell" type="button" aria-label="Notificaciones"><i class="fa-regular fa-bell"></i></button><div class="account-separator" aria-hidden="true"></div><div class="account-copy"><strong>Administrador</strong><span>Superadministrador</span></div><div class="avatar" aria-hidden="true">A</div><i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i></div>
+      </header>
+      <section class="view is-active" id="admissionView">
+        <div class="page-head compact">
+          <div>
+            <nav class="breadcrumb" aria-label="Ruta"><a href="../index.html">Índice de requerimientos</a> / REF-IDE-004 / Admisión de usuarios</nav>
+            <h1 id="admissionTitle">Registrar usuario</h1>
+          </div>
+          <div class="wizard-form-status edit-status-control" id="editStatusField" hidden>
+            <span>Estado</span>
+            <label class="form-check form-switch switch" data-on-label="Activo" data-off-label="Inactivo">
+              <input class="form-check-input" type="checkbox" id="editStatusToggle" aria-label="Activar o inactivar usuario">
+            </label>
+          </div>
+        </div>
+
+        <div class="mode-tabs" id="admissionModeTabs" role="tablist" aria-label="Modalidad de registro">
+          <button class="mode-tab is-selected" type="button" role="tab" id="individualModeTab" aria-selected="true" aria-controls="individualAdmission" data-admission-mode="individual">
+            <i class="fa-solid fa-user-plus" aria-hidden="true"></i><span>Registro individual</span>
+          </button>
+          <button class="mode-tab" type="button" role="tab" id="massModeTab" aria-selected="false" aria-controls="massAdmission" data-admission-mode="mass">
+            <i class="fa-solid fa-file-arrow-up" aria-hidden="true"></i><span>Carga masiva</span>
+          </button>
+        </div>
+
+         <div class="wizard-stepper" id="individualStepper" aria-label="Progreso del registro individual">
+          <button class="wizard-step is-current" type="button" id="stepIdentity"><span>1</span><strong>Información de identidad</strong></button>
+          <span class="wizard-line" aria-hidden="true"></span>
+          <button class="wizard-step" type="button" id="stepAccess"><span>2</span><strong>Configuración de acceso</strong></button>
+        </div>
+
+        <div class="wizard-card role-form admission-wizard" id="individualAdmission">
+          <div class="form-step is-active admission-step" id="identityStep">
+            <div class="admission-section-heading"><div><span class="eyebrow">Paso 1</span><h2>Datos personales</h2></div></div>
+            <p class="form-note">* Campos obligatorios</p>
+            <div class="identity-lookup-layout">
+              <form id="identityForm" novalidate>
+                <div class="input-row identity-query-row">
+                  <label>Tipo de documento<select class="form-select" id="documentType"><option>DNI</option><option>CE</option></select></label>
+                  <label>Número de documento<span class="clearable-field"><input class="form-control" id="documentNumber" data-clearable-input inputmode="numeric" placeholder="Ingresa el número" required><button class="field-clear" type="button" id="clearBtn" aria-label="Borrar contenido" title="Borrar contenido" hidden><i class="fa-solid fa-xmark" aria-hidden="true"></i></button></span></label>
+                  <label>Tipo de autenticación<input class="form-control" id="authenticationType" value="Documento" readonly aria-readonly="true"></label>
+                </div>
+                <div class="lookup-actions"><button class="btn btn-ssee button button-primary validate-btn" id="consultButton" type="submit"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>Consultar</button></div>
+              </form>
+              <div class="identity-lookup-divider" aria-hidden="true"></div>
+              <div class="identity-lookup-result-area">
+                <p class="identity-lookup-prompt" id="identityPrompt">Llena tus datos y consulta para verificar el DNI.</p>
+                <div class="identity-result" id="identityResult" hidden>
+                  <div class="identity-card-header"><span class="identity-card-flag" aria-hidden="true"><i></i><i></i><i></i></span><span><strong>República del Perú</strong><span>Documento Nacional de Identidad</span></span><b id="identityCardType">DNI</b></div>
+                  <div class="identity-card-body"><div class="identity-card-photo" aria-hidden="true"><i class="fa-solid fa-user"></i></div><div class="identity-card-chip" aria-hidden="true"><i></i><i></i><i></i></div><div class="identity-card-data"><div><span>Apellido paterno</span><strong id="identityPaternal"></strong></div><div><span>Apellido materno</span><strong id="identityMaternal"></strong></div><div><span>Nombres</span><strong id="identityGivenNames"></strong></div><div><span>Fecha de nacimiento</span><strong id="identityBirth"></strong></div></div></div>
+                  <div class="identity-card-footer"><span>Identidad consultada</span><span>S.S.E.E.</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-step admission-step" id="accessStep">
+            <div class="admission-section-heading"><div><span class="eyebrow">Paso 2</span><h2>Configuración de acceso</h2></div></div>
+            <p class="form-note">* Campos obligatorios</p>
+            <div class="local-grid"><label>Correo electrónico<input class="form-control" id="email" type="email" placeholder="usuario@ejemplo.gob.pe"></label><label>Tipo de sede<select class="form-select" id="siteType"><option>DRE</option><option>UGEL</option><option>Institución Educativa</option><option>Oficina</option><option>Municipalidad</option><option>Sede COAR</option><option>Distrito</option><option>Universidad e Instituto</option><option>SIN SEDE</option><option>Región SUP</option><option>Ugel SUP</option><option>Régimen Laboral</option><option>Servicio Educativo Hospitalario</option></select></label><label>Sede<select class="form-select" id="site"><option>Unidad de Seguimiento y Evaluación</option><option>Oficina de Operaciones</option></select></label><label>Vigencia<input class="form-control" id="validity" type="date" aria-describedby="validityHelp"><small class="field-help" id="validityHelp">Selecciona la fecha de vencimiento del acceso.</small></label></div>
+            <div class="access-assignments admission-access-assignments">
+              <div class="assignment-field"><div class="modal-label-text">Proyectos *</div><div class="assignment-select dropdown"><div class="assignment-control"><div class="assignment-selected" id="selectedProjects" aria-label="Proyectos seleccionados"></div></div><button class="assignment-toggle dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-display="static" data-bs-auto-close="outside" aria-expanded="false" aria-label="Proyectos"><span>Proyectos</span></button><div class="dropdown-menu assignment-dropdown-menu"><label class="assignment-search" for="projectSearch"><i class="fa-solid fa-magnifying-glass icon" aria-hidden="true"></i><input class="form-control" id="projectSearch" type="search" placeholder="Buscar proyecto" autocomplete="off"></label><div class="project-picker" id="projectPicker"></div></div></div></div>
+              <div class="assignment-field"><div class="modal-label-text">Roles *</div><div class="assignment-select dropdown"><div class="assignment-control"><div class="assignment-selected" id="selectedRoles" aria-label="Roles seleccionados"></div></div><button class="assignment-toggle dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-display="static" data-bs-auto-close="outside" aria-expanded="false" aria-label="Roles"><span>Roles</span></button><div class="dropdown-menu assignment-dropdown-menu"><label class="assignment-search" for="roleSearch"><i class="fa-solid fa-magnifying-glass icon" aria-hidden="true"></i><input class="form-control" id="roleSearch" type="search" placeholder="Buscar rol" autocomplete="off"></label><div class="role-picker" id="rolePicker"></div></div></div></div>
+            </div>
+          </div>
+
+          <div class="wizard-footer">
+            <div class="footer-left"><button class="btn btn-outline-ssee button button-secondary" type="button" id="backBtn" hidden><i class="fa-solid fa-arrow-left icon" aria-hidden="true"></i>Atrás</button><button class="btn btn-outline-ssee button button-secondary" type="button" id="cancelBtn"><i class="fa-solid fa-xmark icon" aria-hidden="true"></i>Cancelar</button></div>
+            <div class="footer-actions"><button class="btn btn-ssee button button-primary" type="button" id="continueBtn"><i class="fa-solid fa-arrow-right icon" aria-hidden="true"></i>Siguiente</button><span class="save-tooltip-host" tabindex="0" title="Selecciona al menos un proyecto y un rol para habilitar el acceso." data-bs-title="Selecciona al menos un proyecto y un rol para habilitar el acceso." data-bs-toggle="tooltip" data-bs-placement="top"><button class="btn btn-ssee button button-primary" type="button" id="admitBtn" hidden disabled aria-label="Guardar"><i class="fa-solid fa-floppy-disk icon" aria-hidden="true"></i>Guardar</button></span></div>
+           </div>
+         </div>
+
+         <div class="wizard-stepper mass-stepper" id="massStepper" aria-label="Progreso de la carga masiva" hidden>
+           <div class="wizard-step mass-step is-current" id="massStepUpload"><span>1</span><strong>Cargar archivo</strong></div>
+           <span class="wizard-line" aria-hidden="true"></span>
+           <div class="wizard-step mass-step" id="massStepReview"><span>2</span><strong>Resultado de carga</strong></div>
+         </div>
+
+          <section class="mass-admission form-panel" id="massAdmission" aria-label="Carga masiva" hidden>
+           <section class="mass-stage" id="massStageUpload" aria-labelledby="massUploadTitle"><div class="mass-stage-heading"><div><h3 id="massUploadTitle">Cargar archivo</h3><p>La plantilla contiene los datos requeridos para registrar usuarios.</p></div><button class="btn btn-outline-ssee button button-secondary" type="button" id="downloadTemplateBtn"><i class="fa-solid fa-download" aria-hidden="true"></i>Descargar</button></div><div class="upload-box"><i class="fa-solid fa-file-excel upload-icon" aria-hidden="true"></i><div><strong>Selecciona un archivo Excel</strong><span>Formatos permitidos: XLSX o XLS. Tamaño máximo: 10 MB.</span></div><input type="file" id="massFileInput" accept=".xlsx,.xls"><label class="btn btn-outline-ssee button button-secondary" for="massFileInput">Seleccionar</label></div><p class="file-name" id="massFileName">Ningún archivo seleccionado</p><div class="mass-stage-actions"><button class="btn btn-ssee button button-primary" type="button" id="validateMassBtn" disabled><i class="fa-solid fa-cloud-arrow-up icon" aria-hidden="true"></i>Subir y procesar</button></div></section>
+           <section class="mass-stage" id="massStageReview" aria-labelledby="massReviewTitle" hidden><div class="mass-stage-heading"><div><h3 id="massReviewTitle">Resultado de carga</h3><p>Consulta el resumen del procesamiento y las observaciones detectadas.</p></div><button class="btn btn-outline-ssee button button-secondary" type="button" id="downloadErrorsBtn" hidden><i class="fa-solid fa-download" aria-hidden="true"></i>Descargar errores</button></div><div class="validation-summary" id="massValidationSummary" hidden><div><strong id="massValidationTitle">Resultado de carga</strong><span id="massValidationText"></span></div></div><div class="mass-results" id="massResults" hidden><div class="table-wrap"><table class="table align-middle mb-0 ssee-table compact-table"><thead><tr><th>N.°</th><th>Número de documento</th><th>Nombres y apellidos</th><th>Estado</th><th>Observación</th></tr></thead><tbody id="massResultsBody"></tbody></table></div></div></section>
+           <section class="mass-history" id="massHistorySection" aria-labelledby="massHistoryTitle">
+            <div class="mass-stage-heading">
+              <div><h3 id="massHistoryTitle">Historial de cargas</h3><p>Consulta los registros de procesamiento realizados.</p></div>
+            </div>
+            <form class="filter-panel mass-history-filter" id="massHistoryFilterForm">
+              <label class="global-search">
+                <i class="fa-solid fa-magnifying-glass icon" aria-hidden="true"></i>
+                <input class="form-control" id="massHistoryQuery" type="search" placeholder="Buscar por archivo o estado" aria-label="Buscar en el historial">
+              </label>
+              <button class="filter-toggle" type="button" id="massHistoryFilterToggle" aria-label="Abrir filtros" title="Filtro Personalizado" data-bs-title="Filtro Personalizado" data-bs-toggle="tooltip" aria-expanded="false">
+                <span></span><span></span><span></span>
+              </button>
+              <div class="advanced-filters" id="massHistoryFilters">
+                <label class="filter-field"><span>Archivo</span><input class="form-control" id="massHistoryFile" type="search" placeholder="Buscar por archivo" aria-label="Archivo"></label>
+                <fieldset class="filter-field date-range-field" id="massHistoryDate" data-date-range>
+                  <legend>Fecha</legend>
+                  <div class="date-range-picker">
+                    <button class="date-range-trigger" type="button" data-date-range-trigger aria-haspopup="dialog" aria-expanded="false"><i class="fa-regular fa-calendar" aria-hidden="true"></i><span data-date-range-label>Seleccionar rango</span><i class="fa-solid fa-chevron-down" aria-hidden="true"></i></button>
+                    <button class="date-range-clear" type="button" data-date-range-clear aria-label="Limpiar selección" title="Limpiar selección" hidden><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+                    <div class="date-range-popover" data-date-range-popover role="dialog" aria-label="Seleccionar rango de fechas" hidden><div class="date-range-summary"><span>Rango seleccionado</span><strong data-date-range-summary>Selecciona una fecha inicial y final</strong></div><div class="date-range-calendar-nav"><button class="date-range-nav" type="button" data-date-range-prev aria-label="Mes anterior"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button><div class="date-range-month-labels" data-date-range-month-labels></div><button class="date-range-nav" type="button" data-date-range-next aria-label="Mes siguiente"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button></div><div class="date-range-months" data-date-range-months></div><div class="date-range-footer"><button class="btn btn-outline-ssee button button-secondary" type="button" data-date-range-cancel>Cancelar</button><button class="btn btn-ssee button button-primary" type="button" data-date-range-apply>Aplicar</button></div></div>
+                    <input id="massHistoryDateStart" type="hidden" data-date-range-start><input id="massHistoryDateEnd" type="hidden" data-date-range-end>
+                  </div>
+                  <small class="field-error" data-date-range-error hidden></small>
+                </fieldset>
+                <label class="filter-field"><span>Estado</span><select class="form-select" id="massHistoryStatus" aria-label="Estado"><option value="Todos">Todos</option><option value="Completada">Completada</option><option value="Con observaciones">Con observaciones</option></select></label>
+                <div class="filter-actions" aria-label="Acciones de filtro">
+                  <button class="btn filter-action btn-ssee button button-primary" type="submit"><i class="fa-solid fa-magnifying-glass icon" aria-hidden="true"></i>Buscar</button>
+                  <button class="btn filter-action btn-outline-ssee button button-secondary" type="button" id="massHistoryClear"><i class="fa-solid fa-xmark icon" aria-hidden="true"></i></button>
+                </div>
+              </div>
+            </form>
+            <div class="table-wrap"><table class="table align-middle mb-0 ssee-table compact-table"><thead><tr><th>N.°</th><th>Archivo</th><th>Fecha</th><th>Estado</th><th>Procesados</th><th>Aceptados</th><th>Observados</th><th>Acciones</th></tr></thead><tbody id="massHistoryBody"></tbody></table></div>
+          </section>
+           <div class="mass-actions"><button class="btn btn-outline-ssee button button-secondary" type="button" id="cancelMassBtn">Cancelar</button><button class="btn btn-outline-ssee button button-secondary" type="button" id="uploadAnotherBtn" hidden><i class="fa-solid fa-file-arrow-up" aria-hidden="true"></i>Subir otro archivo</button><button class="btn btn-ssee button button-primary" type="button" id="saveMassBtn" disabled><i class="fa-solid fa-arrow-right" aria-hidden="true"></i>Ir a bandeja general</button></div>
+        </section>
+      </section>
+      <footer class="footer"><div class="minedu-mark"><img class="minedu-logo" src="../assets/minedu.jpg" alt="Ministerio de Educación"></div><div><p>2026. Todos los derechos reservados.</p><p>Ministerio de Educación - S.S.E.E. - Versión 0.1</p></div></footer>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+      <script src="dist/admission.js?v=20260911-admission-modes"></script>
+</body>
+</html>
