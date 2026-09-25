@@ -1,8 +1,28 @@
 import { createDateRangeFilter } from "../../design-system/date-range.js";
 
 const configs = [
-  { project: "Operativo 2026", role: "Registrador", start: "01/09/2026", startIso: "2026-09-01", end: "30/09/2026", endIso: "2026-09-30", accountExpiry: "", status: "Activo", code: "K7P4X2M9" },
-  { project: "Evaluación 2026", role: "Supervisor de Seguimiento", start: "15/09/2026", startIso: "2026-09-15", end: "15/10/2026", endIso: "2026-10-15", accountExpiry: "", status: "Inactivo", code: "R3N8C5Q1" }
+  {
+    project: "Operativo 2026",
+    role: "Registrador",
+    start: "01/09/2026",
+    startIso: "2026-09-01",
+    end: "30/09/2026",
+    endIso: "2026-09-30",
+    accountExpiry: "",
+    status: "Activo",
+    code: "K7P4X2M9",
+  },
+  {
+    project: "Evaluación 2026",
+    role: "Supervisor de Seguimiento",
+    start: "15/09/2026",
+    startIso: "2026-09-15",
+    end: "15/10/2026",
+    endIso: "2026-10-15",
+    accountExpiry: "",
+    status: "Inactivo",
+    code: "R3N8C5Q1",
+  },
 ];
 
 const refs = {
@@ -36,7 +56,7 @@ const refs = {
   toast: document.getElementById("toast"),
   confirmModal: document.getElementById("confirmModal"),
   confirmMessage: document.getElementById("confirmMessage"),
-  confirmAction: document.getElementById("confirmAction")
+  confirmAction: document.getElementById("confirmAction"),
 };
 
 let filteredConfigs = [...configs];
@@ -61,23 +81,36 @@ function randomCode() {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let code = "";
   do {
-    code = Array.from({ length: 8 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
+    code = Array.from(
+      { length: 8 },
+      () => alphabet[Math.floor(Math.random() * alphabet.length)],
+    ).join("");
   } while (configs.some((config) => config.code === code));
   return code;
 }
 
 function renderConfigs() {
   const header = refs.body.closest("table")?.querySelector("thead tr");
-  if (header && !header.querySelector("[data-column='row-number']")) header.insertAdjacentHTML("afterbegin", '<th data-column="row-number">N.°</th>');
-  refs.body.innerHTML = filteredConfigs.length ? filteredConfigs.map((config) => {
-    const index = configs.indexOf(config);
-    const inactive = config.status === "Inactivo";
-    return `<tr><td>${index + 1}</td><td><strong>${config.project}</strong></td><td>${config.role}</td><td><div class="period"><strong>${config.start}</strong><span>hasta ${config.end}</span></div></td><td><span class="status ${inactive ? "inactive" : "active"}">${config.status}</span></td><td class="code-cell">${config.code}</td><td><div class="row-actions"><button class="row-action" type="button" data-action="edit" data-edit="${index}" data-config-action="edit" data-config-index="${index}" aria-label="Editar ${config.project}" title="Editar"><i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span></button></div></td></tr>`;
-  }).join("") : "";
+  if (header && !header.querySelector("[data-column='row-number']"))
+    header.insertAdjacentHTML(
+      "afterbegin",
+      '<th data-column="row-number">N.°</th>',
+    );
+  refs.body.innerHTML = filteredConfigs.length
+    ? filteredConfigs
+        .map((config) => {
+          const index = configs.indexOf(config);
+          const inactive = config.status === "Inactivo";
+          return `<tr><td>${index + 1}</td><td><strong>${config.project}</strong></td><td>${config.role}</td><td><div class="period"><strong>${config.start}</strong><span>hasta ${config.end}</span></div></td><td><span class="status ${inactive ? "inactive" : "active"}">${config.status}</span></td><td class="code-cell">${config.code}</td><td><div class="row-actions"><button class="row-action" type="button" data-action="edit" data-edit="${index}" data-config-action="edit" data-config-index="${index}" aria-label="Editar ${config.project}" title="Editar"><i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span></button></div></td></tr>`;
+        })
+        .join("")
+    : "";
   refs.emptyState.hidden = filteredConfigs.length > 0;
   const total = filteredConfigs.length;
   refs.count.textContent = `${total} ${total === 1 ? "configuración" : "configuraciones"} registradas`;
-  refs.summary.textContent = total ? `Mostrando 1 a ${total} de ${total} configuraciones` : "Mostrando 0 configuraciones";
+  refs.summary.textContent = total
+    ? `Mostrando 1 a ${total} de ${total} configuraciones`
+    : "Mostrando 0 configuraciones";
 }
 
 function applyFilters(showMessage = false) {
@@ -88,16 +121,25 @@ function applyFilters(showMessage = false) {
   const start = refs.startFilter.value;
   const end = refs.endFilter.value;
   filteredConfigs = configs.filter((config) => {
-    const searchable = `${config.project} ${config.role} ${config.code}`.toLowerCase();
-    return (!query || searchable.includes(query)) &&
+    const searchable =
+      `${config.project} ${config.role} ${config.code}`.toLowerCase();
+    return (
+      (!query || searchable.includes(query)) &&
       (project === "Todos" || config.project === project) &&
       (role === "Todos" || config.role === role) &&
       (status === "Todos" || config.status === status) &&
       (!start || config.startIso >= start) &&
-      (!end || config.endIso <= end);
+      (!end || config.endIso <= end)
+    );
   });
   renderConfigs();
-  if (showMessage) showToast(filteredConfigs.length ? getPrototypeMessage("filtersApplied") : getMessage("M9"), filteredConfigs.length ? "info" : "warning");
+  if (showMessage)
+    showToast(
+      filteredConfigs.length
+        ? getPrototypeMessage("filtersApplied")
+        : getMessage("M9"),
+      filteredConfigs.length ? "info" : "warning",
+    );
 }
 
 function resetFilters() {
@@ -120,7 +162,8 @@ function openConfigModal(index = null) {
   refs.editNote.hidden = index === null;
   refs.generatedResult.hidden = true;
   refs.resultActions.hidden = true;
-  refs.modalTitle.textContent = index === null ? "Configurar autoregistro" : "Editar configuración";
+  refs.modalTitle.textContent =
+    index === null ? "Registrar configuración" : "Editar configuración";
   refs.configStatusControl.hidden = index === null;
   refs.configStatusToggle.checked = config?.status !== "Inactivo";
   setFormValue("project", config?.project);
@@ -154,29 +197,53 @@ function sortConfigs(key, type) {
   filteredConfigs.sort((left, right) => {
     const a = type === "date" ? left.startIso : left[key];
     const b = type === "date" ? right.startIso : right[key];
-    return String(a).localeCompare(String(b), "es", { numeric: true }) * sortDirection;
+    return (
+      String(a).localeCompare(String(b), "es", { numeric: true }) *
+      sortDirection
+    );
   });
-  document.querySelectorAll(".ssee-table th[aria-sort]").forEach((header) => header.setAttribute("aria-sort", "none"));
-  const header = document.querySelector(`[data-sort-key="${key}"]`)?.closest("th");
-  header?.setAttribute("aria-sort", sortDirection === 1 ? "ascending" : "descending");
+  document
+    .querySelectorAll(".ssee-table th[aria-sort]")
+    .forEach((header) => header.setAttribute("aria-sort", "none"));
+  const header = document
+    .querySelector(`[data-sort-key="${key}"]`)
+    ?.closest("th");
+  header?.setAttribute(
+    "aria-sort",
+    sortDirection === 1 ? "ascending" : "descending",
+  );
   renderConfigs();
 }
 
 refs.filterToggle.addEventListener("click", () => {
   const isOpen = refs.filterForm.classList.toggle("is-expanded");
   refs.filterToggle.setAttribute("aria-expanded", String(isOpen));
-  refs.filterToggle.setAttribute("aria-label", isOpen ? "Cerrar filtros" : "Abrir filtros");
+  refs.filterToggle.setAttribute(
+    "aria-label",
+    isOpen ? "Cerrar filtros" : "Abrir filtros",
+  );
 });
-refs.filterForm.addEventListener("submit", (event) => { event.preventDefault(); applyFilters(true); });
+refs.filterForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  applyFilters(true);
+});
 document.getElementById("clearFilters").addEventListener("click", resetFilters);
-document.getElementById("newConfigBtn").addEventListener("click", () => openConfigModal());
+document
+  .getElementById("newConfigBtn")
+  .addEventListener("click", () => openConfigModal());
 
 refs.body.addEventListener("click", (event) => {
   const editButton = event.target.closest('[data-config-action="edit"]');
   if (editButton) openConfigModal(Number(editButton.dataset.configIndex));
 });
 
-document.querySelectorAll(".sort-button").forEach((button) => button.addEventListener("click", () => sortConfigs(button.dataset.sortKey, button.dataset.sortType)));
+document
+  .querySelectorAll(".sort-button")
+  .forEach((button) =>
+    button.addEventListener("click", () =>
+      sortConfigs(button.dataset.sortKey, button.dataset.sortType),
+    ),
+  );
 
 refs.form.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -184,25 +251,43 @@ refs.form.addEventListener("submit", (event) => {
   const role = document.getElementById("defaultRole").value;
   const startIso = document.getElementById("startDate").value;
   const endIso = document.getElementById("endDate").value;
-  if (!project || !role || (editingIndex === null && (!startIso || !endIso))) return showToast(getMessage("M11"), "warning");
-  if (startIso && endIso && startIso > endIso) return showToast(getMessage("M12"), "warning");
+  if (!project || !role || (editingIndex === null && (!startIso || !endIso)))
+    return showToast(getMessage("M11"), "warning");
+  if (startIso && endIso && startIso > endIso)
+    return showToast(getMessage("M12"), "warning");
   if (editingIndex !== null) {
     const config = configs[editingIndex];
     const nextStatus = refs.configStatusToggle.checked ? "Activo" : "Inactivo";
-    const requiresReason = config.status === "Activo" && nextStatus === "Inactivo";
-    showConfirm(getMessage("M1"), () => {
-      config.project = project;
-      config.role = role;
-      config.status = nextStatus;
-      if (requiresReason) config.inactivationReason = getConfirmReason("confirmModal");
-      bootstrap.Modal.getOrCreateInstance(refs.configModal).hide();
-      applyFilters(false);
-      showToast(getMessage("M3"));
-    }, requiresReason);
+    const requiresReason =
+      config.status === "Activo" && nextStatus === "Inactivo";
+    showConfirm(
+      getMessage("M1"),
+      () => {
+        config.project = project;
+        config.role = role;
+        config.status = nextStatus;
+        if (requiresReason)
+          config.inactivationReason = getConfirmReason("confirmModal");
+        bootstrap.Modal.getOrCreateInstance(refs.configModal).hide();
+        applyFilters(false);
+        showToast(getMessage("M3"));
+      },
+      requiresReason,
+    );
     return;
   }
   const code = randomCode();
-  const config = { project, role, start: formatDate(startIso), startIso, end: formatDate(endIso), endIso, accountExpiry: document.getElementById("accountExpiry").value, status: "Activo", code };
+  const config = {
+    project,
+    role,
+    start: formatDate(startIso),
+    startIso,
+    end: formatDate(endIso),
+    endIso,
+    accountExpiry: document.getElementById("accountExpiry").value,
+    status: "Activo",
+    code,
+  };
   showConfirm(getMessage("M1"), () => {
     configs.unshift(config);
     applyFilters(false);
@@ -212,17 +297,30 @@ refs.form.addEventListener("submit", (event) => {
 });
 
 refs.confirmAction.addEventListener("click", () => {
-  if (refs.confirmModal.dataset.requireReason === "true" && !validateConfirmReason("confirmModal", getMessage("M11"))) return;
+  if (
+    refs.confirmModal.dataset.requireReason === "true" &&
+    !validateConfirmReason("confirmModal", getMessage("M11"))
+  )
+    return;
   const action = pendingAction;
   pendingAction = null;
   bootstrap.Modal.getOrCreateInstance(refs.confirmModal).hide();
   if (action) action();
 });
 
-document.querySelectorAll("[data-copy]").forEach((button) => button.addEventListener("click", async () => {
-  const value = button.dataset.copy === "code" ? refs.generatedCode.textContent : refs.generatedLink.textContent;
-  try { await navigator.clipboard.writeText(value); } catch { /* Copiar puede estar restringido al abrir el archivo local. */ }
-}));
+document.querySelectorAll("[data-copy]").forEach((button) =>
+  button.addEventListener("click", async () => {
+    const value =
+      button.dataset.copy === "code"
+        ? refs.generatedCode.textContent
+        : refs.generatedLink.textContent;
+    try {
+      await navigator.clipboard.writeText(value);
+    } catch {
+      /* Copiar puede estar restringido al abrir el archivo local. */
+    }
+  }),
+);
 
 if (typeof enableTooltips === "function") enableTooltips();
 renderConfigs();
