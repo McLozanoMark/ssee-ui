@@ -236,13 +236,18 @@ await bundle("gio-ref-002-muestras/dist/gio.js", [
   "gio-ref-002-muestras/js/main.js"
 ]);
 
-await bundle("gio-ref-003-asignaciones/dist/gio.js", [
-  "design-system/interaction.js",
+const assignmentsShared = [
   "design-system/messages.js",
+  "design-system/interaction.js",
+  "design-system/date-range.js",
   "design-system/table-sort.js",
   "gio-ref-003-asignaciones/js/data.js",
-  "gio-ref-003-asignaciones/js/state.js",
-  "gio-ref-003-asignaciones/js/ui.js",
-  "gio-ref-003-asignaciones/js/assignments.js",
-  "gio-ref-003-asignaciones/js/main.js"
-]);
+  "gio-ref-003-asignaciones/js/common.js"
+];
+
+await bundle("gio-ref-003-asignaciones/dist/list.js", [...assignmentsShared, "gio-ref-003-asignaciones/js/list.js"]);
+await bundle("gio-ref-003-asignaciones/dist/create.js", [...assignmentsShared, "gio-ref-003-asignaciones/js/create.js"]);
+await bundle("gio-ref-003-asignaciones/dist/detail.js", [...assignmentsShared, "gio-ref-003-asignaciones/js/detail.js"]);
+await bundle("gio-ref-003-asignaciones/dist/edit.js", [...assignmentsShared, "gio-ref-003-asignaciones/js/edit.js"]);
+await bundle("gio-ref-003-asignaciones/dist/reassign.js", [...assignmentsShared, "gio-ref-003-asignaciones/js/reassign.js"]);
+await bundle("gio-ref-003-asignaciones/dist/variables.js", [...assignmentsShared, "gio-ref-003-asignaciones/js/variables.js"]);
