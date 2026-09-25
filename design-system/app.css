@@ -441,6 +441,20 @@ h2 {
   line-height: 1;
 }
 
+.btn-ssee,
+.btn-outline-ssee,
+.button,
+.row-action {
+  text-decoration: none !important;
+}
+
+.btn-ssee:hover,
+.btn-outline-ssee:hover,
+.button:hover,
+.row-action:hover {
+  text-decoration: none !important;
+}
+
 .btn-ssee.btn-sm,
 .btn-outline-ssee.btn-sm {
   height: var(--ssee-control-height);

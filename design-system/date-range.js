@@ -35,6 +35,7 @@ function isSameMonth(left, right) {
 
 export function createDateRangeFilter(root) {
   if (!root) return null;
+  const singleDate = root.dataset.singleDate === "true";
   const picker = root.querySelector(".date-range-picker");
   const start = root.querySelector("[data-date-range-start]");
   const end = root.querySelector("[data-date-range-end]");
@@ -67,16 +68,18 @@ export function createDateRangeFilter(root) {
   }
 
   function updateSummary() {
-    if (draftStart && draftEnd) summary.textContent = `${formatDisplayDate(draftStart)} a ${formatDisplayDate(draftEnd)}`;
+    if (singleDate && draftStart) summary.textContent = formatDisplayDate(draftStart);
+    else if (draftStart && draftEnd) summary.textContent = `${formatDisplayDate(draftStart)} a ${formatDisplayDate(draftEnd)}`;
     else if (draftStart) summary.textContent = `${formatDisplayDate(draftStart)} a ...`;
-    else summary.textContent = "Selecciona una fecha inicial y final";
+    else summary.textContent = singleDate ? "Selecciona una fecha" : "Selecciona una fecha inicial y final";
   }
 
   function updateTrigger() {
-    if (start.value && end.value) label.textContent = `${formatDisplayDate(start.value)} - ${formatDisplayDate(end.value)}`;
+    if (singleDate && start.value) label.textContent = formatDisplayDate(start.value);
+    else if (start.value && end.value) label.textContent = `${formatDisplayDate(start.value)} - ${formatDisplayDate(end.value)}`;
     else if (start.value) label.textContent = `Desde ${formatDisplayDate(start.value)}`;
     else if (end.value) label.textContent = `Hasta ${formatDisplayDate(end.value)}`;
-    else label.textContent = "Seleccionar rango";
+    else label.textContent = singleDate ? "Seleccionar fecha" : "Seleccionar rango";
     clearButton.hidden = !(start.value || end.value);
   }
 
@@ -165,7 +168,10 @@ export function createDateRangeFilter(root) {
     const day = event.target.closest("[data-date-range-day]");
     if (!day) return;
     const value = day.dataset.dateRangeDay;
-    if (!draftStart || (draftStart && draftEnd)) {
+    if (singleDate) {
+      draftStart = value;
+      draftEnd = value;
+    } else if (!draftStart || (draftStart && draftEnd)) {
       draftStart = value;
       draftEnd = "";
     } else if (value < draftStart) {
@@ -179,7 +185,7 @@ export function createDateRangeFilter(root) {
   root.querySelector("[data-date-range-cancel]")?.addEventListener("click", () => { draftStart = start.value; draftEnd = end.value; close(); });
   root.querySelector("[data-date-range-apply]")?.addEventListener("click", () => {
     start.value = draftStart;
-    end.value = draftEnd;
+    end.value = singleDate ? draftStart : draftEnd;
     updateTrigger();
     validate();
     close();
@@ -203,7 +209,7 @@ export function createDateRangeFilter(root) {
 
   function setValues(startValue = "", endValue = "") {
     start.value = startValue || "";
-    end.value = endValue || "";
+    end.value = singleDate ? start.value : endValue || "";
     draftStart = start.value;
     draftEnd = end.value;
     const anchor = parseDate(draftStart) || parseDate(draftEnd);
@@ -213,10 +219,19 @@ export function createDateRangeFilter(root) {
     validate();
   }
 
+  function setDisabled(disabled) {
+    root.toggleAttribute("data-disabled", Boolean(disabled));
+    trigger.disabled = Boolean(disabled);
+    clearButton.disabled = Boolean(disabled);
+    root.querySelectorAll("button").forEach((button) => { button.disabled = Boolean(disabled); });
+    if (disabled) close();
+    trigger.setAttribute("aria-disabled", String(Boolean(disabled)));
+  }
+
   updateTrigger();
   renderCalendar();
   validate();
-  return { start, end, validate, reset, setValues, open };
+  return { start, end, validate, reset, setValues, setDisabled, open };
 }
 
 export function toDateInputValue(value) {
